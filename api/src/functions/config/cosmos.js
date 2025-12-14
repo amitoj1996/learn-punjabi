@@ -15,8 +15,8 @@ async function getContainer(containerName) {
         client = new CosmosClient(connectionString);
     }
 
-    // Database name: 'punjabi-db' (we will need to create this)
-    const database = client.database("punjabi-db");
+    // Database name: 'fieldops' (we will need to create this)
+    const database = client.database("fieldops");
     const container = database.container(containerName);
 
     return container;
