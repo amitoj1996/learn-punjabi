@@ -9,3 +9,13 @@ export interface Tutor {
     role: string;
     bio: string;
 }
+
+export interface User {
+    id: string;
+    userId: string;
+    userDetails: string;
+    identityProvider: string;
+    userRoles: string[];
+    role: 'student' | 'teacher' | 'admin';
+    createdAt: string;
+}

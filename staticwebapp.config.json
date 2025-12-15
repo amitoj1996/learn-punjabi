@@ -4,9 +4,25 @@
   },
   "routes": [
     {
+      "route": "/login",
+      "rewrite": "/.auth/login/aad"
+    },
+    {
+      "route": "/logout",
+      "rewrite": "/.auth/logout"
+    },
+    {
       "route": "/api/*",
-      "methods": ["GET", "POST", "PUT", "DELETE"],
-      "allowedRoles": ["anonymous", "authenticated"]
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "allowedRoles": [
+        "anonymous",
+        "authenticated"
+      ]
     }
   ]
 }
