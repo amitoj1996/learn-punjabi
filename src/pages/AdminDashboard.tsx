@@ -25,18 +25,13 @@ export const AdminDashboard: React.FC = () => {
 
     const fetchApplications = async () => {
         try {
-            const response = await fetch('/api/admin/apps-v2');
+            const response = await fetch('/api/admin-test');
             if (response.ok) {
-                const json = await response.json();
-                // Check if response has wrapped structure with debug
-                if (json.data && json.debug) {
-                    setApplications(json.data);
-                    // @ts-ignore
-                    setError(`DEBUG MODE: Connected to ${json.debug.databaseId}/${json.debug.containerId}. Total Items: ${json.debug.totalItemsInContainer}. Pending: ${json.data.length}`);
-                } else {
-                    // Fallback for old API
-                    setApplications(json);
-                }
+                // Testing plain text response first
+                const text = await response.text();
+                // @ts-ignore
+                setError(`SUCCESS: API is reachable! Response: ${text}`);
+                setApplications([]);
             } else {
                 console.error("Failed to fetch applications");
                 // @ts-ignore
