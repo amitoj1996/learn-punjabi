@@ -13,12 +13,13 @@ app.http('getUserProfile', {
         }
         const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
         const userId = clientPrincipal.userId;
+        const userEmail = clientPrincipal.userDetails;
 
         try {
-            const container = await getContainer("users");
+            const usersContainer = await getContainer("users");
 
             // 2. Check if user exists in Cosmos DB
-            const { resources: users } = await container.items
+            const { resources: users } = await usersContainer.items
                 .query({
                     query: "SELECT * FROM c WHERE c.userId = @userId",
                     parameters: [{ name: "@userId", value: userId }]
@@ -27,23 +28,47 @@ app.http('getUserProfile', {
 
             let user = users[0];
 
-            // 3. If not, create them (Default Role: Student)
+            // 3. Check if user is an approved teacher (has tutor profile)
+            let isApprovedTeacher = false;
+            try {
+                const tutorsContainer = await getContainer("tutors");
+                const { resources: tutors } = await tutorsContainer.items
+                    .query({
+                        query: "SELECT * FROM c WHERE c.email = @email",
+                        parameters: [{ name: "@email", value: userEmail }]
+                    })
+                    .fetchAll();
+                isApprovedTeacher = tutors.length > 0;
+            } catch (e) {
+                context.log('Could not check tutors container:', e.message);
+            }
+
+            // 4. Determine role (priority: admin > teacher > student)
+            let role = 'student';
+            if (userEmail === 'amitojsingh9896@gmail.com') {
+                role = 'admin';
+            } else if (isApprovedTeacher) {
+                role = 'teacher';
+            }
+
+            // 5. If user doesn't exist, create them
             if (!user) {
                 const newUser = {
-                    id: userId, // Use SWA userId as Doc ID
+                    id: userId,
                     userId: userId,
-                    userDetails: clientPrincipal.userDetails,
+                    userDetails: userEmail,
                     identityProvider: clientPrincipal.identityProvider,
-                    role: clientPrincipal.userDetails === 'amitojsingh9896@gmail.com' ? 'admin' : "student",
+                    role: role,
                     createdAt: new Date().toISOString()
                 };
-                const { resource: createdUser } = await container.items.create(newUser);
+                const { resource: createdUser } = await usersContainer.items.create(newUser);
                 user = createdUser;
             } else {
-                // Auto-promote if existing user matches admin email (Self-healing for existing doc)
-                if (clientPrincipal.userDetails === 'amitojsingh9896@gmail.com' && user.role !== 'admin') {
-                    user.role = 'admin';
-                    await container.item(user.id).replace(user);
+                // 6. Update role if changed (e.g., just became approved teacher)
+                if (user.role !== role && role !== 'student') {
+                    user.role = role;
+                    user.updatedAt = new Date().toISOString();
+                    await usersContainer.item(user.id, user.userId).replace(user);
                 }
             }
 
