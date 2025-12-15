@@ -1,33 +1,10 @@
 const { app } = require('@azure/functions');
 
-// TEMPORARY DEBUG: Removed DB dependency to see if function loads
-app.http('adminAppsV2', {
+app.http('adminAppsProbe', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'admin/apps-v2',
+    route: 'admin-test',
     handler: async (request, context) => {
-        context.log('Using Mock Admin Handler for Debugging');
-
-        return {
-            status: 200,
-            body: JSON.stringify({
-                data: [
-                    {
-                        id: "mock-1",
-                        userId: "mock-user",
-                        fullName: "Debug Candidate",
-                        email: "debug@example.com",
-                        hourlyRate: 50,
-                        experienceLevel: "professional",
-                        bio: "This is a mock application to test connectivity.",
-                        status: "pending",
-                        submittedAt: new Date().toISOString()
-                    }
-                ],
-                debug: {
-                    message: "If you see this, the API Route is WORKING. The DB connection was the problem."
-                }
-            })
-        };
+        return { body: "Admin File Loaded Successfully" };
     }
 });
