@@ -32,16 +32,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const { clientPrincipal } = payload;
 
                 if (clientPrincipal) {
-                    // 2. Hydrate with DB Profile (Mock for now, will implement API next)
-                    // const dbProfile = await fetch('/api/users/me').then(res => res.json());
+                    // 2. Hydrate with DB Profile
+                    let dbRole = 'student';
+                    let dbId = 'temp-id';
+
+                    try {
+                        const dbProfileRes = await fetch('/api/users/me');
+                        if (dbProfileRes.ok) {
+                            const dbProfile = await dbProfileRes.json();
+                            dbRole = dbProfile.role;
+                            dbId = dbProfile.id;
+                        }
+                    } catch (err) {
+                        console.error("Failed to fetch DB profile", err);
+                    }
 
                     setUser({
-                        id: 'temp-id',
+                        id: dbId,
                         userId: clientPrincipal.userId,
                         userDetails: clientPrincipal.userDetails,
                         identityProvider: clientPrincipal.identityProvider,
                         userRoles: clientPrincipal.userRoles,
-                        role: 'student', // Default
+                        role: dbRole as 'student' | 'teacher' | 'admin',
                         createdAt: new Date().toISOString()
                     });
                 } else {
