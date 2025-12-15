@@ -8,14 +8,21 @@ app.http('getManagerApps', {
     handler: async (request, context) => {
         context.log('HTTP trigger function processing manager/applications.');
 
-        // 1. Verify Admin/Manager Role
-        const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
-        if (!clientPrincipalHeader) {
-            return { status: 401, body: "Unauthorized" };
-        }
-        const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
-
         try {
+            // 1. Verify Admin/Manager Role
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, body: JSON.stringify({ error: "Unauthorized: Missing Client Principal" }) };
+            }
+
+            let clientPrincipal;
+            try {
+                clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+            } catch (e) {
+                throw new Error(`Failed to parse client principal: ${e.message}`);
+            }
+
+            // 2. Security Check
             const usersContainer = await getContainer("users");
             const { resources: users } = await usersContainer.items
                 .query({
@@ -25,10 +32,17 @@ app.http('getManagerApps', {
                 .fetchAll();
 
             if (!users[0] || users[0].role !== 'admin') {
-                return { status: 403, body: "Forbidden: Manager Access Required" };
+                return {
+                    status: 403,
+                    body: JSON.stringify({
+                        error: "Forbidden",
+                        message: "Manager/Admin Access Required",
+                        userRole: users[0] ? users[0].role : "unknown"
+                    })
+                };
             }
 
-            // 2. Fetch Pending Applications
+            // 3. Fetch Pending Applications
             const appsContainer = await getContainer("applications");
             const { resources: pendingItems } = await appsContainer.items
                 .query("SELECT * FROM c WHERE c.status = 'pending'")
@@ -38,6 +52,7 @@ app.http('getManagerApps', {
                 status: 200,
                 body: JSON.stringify(pendingItems)
             };
+
         } catch (error) {
             context.log.error("Error in getManagerApps:", error);
             // DEBUG: Return error details to client
@@ -45,8 +60,7 @@ app.http('getManagerApps', {
                 status: 500,
                 body: JSON.stringify({
                     error: "Internal Server Error",
-                    details: error.message,
-                    target: "punjabi-db/applications",
+                    message: error.message,
                     stack: error.stack
                 })
             };
