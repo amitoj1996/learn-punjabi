@@ -32,8 +32,9 @@ export const AdminDashboard: React.FC = () => {
                 setError(null);
             } else {
                 console.error("Failed to fetch applications");
-                // @ts-ignore
-                setError(`Failed to load: ${response.status} ${response.statusText}`);
+                // Try to read the error body for details
+                const errorBody = await response.text();
+                setError(`Failed (${response.status}): ${errorBody || response.statusText}`);
             }
         } catch (error) {
             console.error("Error fetching applications:", error);
