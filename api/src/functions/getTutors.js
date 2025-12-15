@@ -28,7 +28,14 @@ app.http('getTutors', {
                 };
             }
 
-            return { status: 500, body: JSON.stringify({ error: "Internal Server Error" }) };
+            return {
+                status: 500,
+                body: JSON.stringify({
+                    error: "Internal Server Error",
+                    details: error.message,
+                    stack: error.stack
+                })
+            };
         }
     }
 });
