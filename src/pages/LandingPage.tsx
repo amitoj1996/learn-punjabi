@@ -43,9 +43,9 @@ const CursorGlow: React.FC = () => {
 
     return (
         <motion.div
-            animate={{ x: mousePosition.x - 200, y: mousePosition.y - 200 }}
-            transition={{ type: "spring", damping: 30, stiffness: 200 }}
-            className="fixed w-[400px] h-[400px] bg-gradient-to-br from-orange-400/40 via-accent-500/30 to-yellow-400/20 rounded-full blur-3xl pointer-events-none z-0"
+            animate={{ x: mousePosition.x - 150, y: mousePosition.y - 150 }}
+            transition={{ type: "spring", damping: 50, stiffness: 400, mass: 0.5 }}
+            className="fixed w-[300px] h-[300px] bg-gradient-to-br from-orange-300/20 via-accent-400/15 to-yellow-300/10 rounded-full blur-3xl pointer-events-none z-0"
             style={{ top: 0, left: 0 }}
         />
     );
