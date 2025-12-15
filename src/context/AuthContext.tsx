@@ -6,6 +6,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: () => void;
     logout: () => void;
+    debugToggleRole: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -13,6 +14,7 @@ const AuthContext = createContext<AuthContextType>({
     isLoading: true,
     login: () => { },
     logout: () => { },
+    debugToggleRole: () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -64,8 +66,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.href = '/logout';
     };
 
+    const debugToggleRole = () => {
+        if (!user) return;
+        const roles: ('student' | 'teacher' | 'admin')[] = ['student', 'teacher', 'admin'];
+        const currentIndex = roles.indexOf(user.role);
+        const nextRole = roles[(currentIndex + 1) % roles.length];
+        setUser({ ...user, role: nextRole });
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, logout, debugToggleRole }}>
             {children}
         </AuthContext.Provider>
     );
