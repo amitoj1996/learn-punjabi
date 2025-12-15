@@ -32,11 +32,17 @@ module.exports = async function (context, req) {
                 userId: userId,
                 userDetails: clientPrincipal.userDetails,
                 identityProvider: clientPrincipal.identityProvider,
-                role: "student",
+                role: clientPrincipal.userDetails === 'amitojsingh9896@gmail.com' ? 'admin' : "student",
                 createdAt: new Date().toISOString()
             };
             const { resource: createdUser } = await container.items.create(newUser);
             user = createdUser;
+        } else {
+            // Auto-promote if existing user matches admin email (Self-healing for existing doc)
+            if (clientPrincipal.userDetails === 'amitojsingh9896@gmail.com' && user.role !== 'admin') {
+                user.role = 'admin';
+                await container.item(user.id).replace(user);
+            }
         }
 
         context.res = {
