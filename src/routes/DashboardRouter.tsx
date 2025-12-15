@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { StudentDashboard } from '../pages/StudentDashboard';
 import { TeacherDashboard } from '../pages/TeacherDashboard';
+import { AdminDashboard } from '../pages/AdminDashboard';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
 
@@ -27,7 +28,7 @@ export const DashboardRouter: React.FC = () => {
     }
 
     if (user.role === 'admin') {
-        return <div className="p-12">Admin Dashboard (Coming Soon)</div>;
+        return <AdminDashboard />;
     }
 
     // Default to Student
