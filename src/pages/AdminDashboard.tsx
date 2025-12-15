@@ -1,45 +1,76 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 
-// Mock Data for Applications
-const MOCK_APPLICATIONS = [
-    {
-        id: '1',
-        name: 'Harpreet Singh',
-        email: 'harpreet@example.com',
-        bio: 'Experienced Punjabi teacher with 5 years of experience teaching kids.',
-        hourlyRate: 25,
-        status: 'pending',
-        submittedAt: '2025-10-14T10:00:00Z'
-    },
-    {
-        id: '2',
-        name: 'Simran Kaur',
-        email: 'simran@example.com',
-        bio: 'Native Punjabi speaker and university student offering conversational practice.',
-        hourlyRate: 15,
-        status: 'pending',
-        submittedAt: '2025-10-15T09:30:00Z'
-    }
-];
+// Define Interface for Application
+interface Application {
+    id: string;
+    userId: string;
+    name: string;
+    email: string;
+    bio: string;
+    hourlyRate: number;
+    status: 'pending' | 'approved' | 'rejected';
+    submittedAt: string; // ISO Date
+}
 
 export const AdminDashboard: React.FC = () => {
-    const [applications, setApplications] = useState(MOCK_APPLICATIONS);
+    const [applications, setApplications] = useState<Application[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleApprove = (id: string) => {
-        alert(`Approved application ${id}`);
-        // In real app: API call to approve
-        setApplications(prev => prev.filter(app => app.id !== id));
+    useEffect(() => {
+        fetchApplications();
+    }, []);
+
+    const fetchApplications = async () => {
+        try {
+            const response = await fetch('/api/admin/applications');
+            if (response.ok) {
+                const data = await response.json();
+                setApplications(data);
+            } else {
+                console.error("Failed to fetch applications");
+            }
+        } catch (error) {
+            console.error("Error fetching applications:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleApprove = async (id: string) => {
+        if (!confirm('Are you sure you want to approve this teacher?')) return;
+
+        try {
+            const response = await fetch('/api/admin/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ applicationId: id })
+            });
+
+            if (response.ok) {
+                alert("Teacher Approved Successfully! 🎉");
+                // Remove from local list
+                setApplications(prev => prev.filter(app => app.id !== id));
+            } else {
+                alert("Failed to approve teacher.");
+            }
+        } catch (error) {
+            console.error("Error approving teacher:", error);
+            alert("An error occurred.");
+        }
     };
 
     const handleReject = (id: string) => {
-        if (confirm('Are you sure you want to reject this application?')) {
-            alert(`Rejected application ${id}`);
-            // In real app: API call to reject
+        // TODO: Implement Reject API
+        if (confirm('Are you sure you want to reject this application? (Note: API not implemented yet, just removing from view)')) {
             setApplications(prev => prev.filter(app => app.id !== id));
         }
     };
+
+    if (isLoading) {
+        return <div className="p-12 text-center">Loading applications...</div>;
+    }
 
     return (
         <div className="container mx-auto px-4 py-12">
