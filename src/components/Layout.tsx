@@ -17,16 +17,16 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Link to="/" className="text-2xl font-display font-bold text-primary-600">
                         Learn Punjabi
                     </Link>
-                    <div className="hidden md:flex items-center gap-8">
-                        <Link to="/tutors" className="text-sm font-medium hover:text-primary-600 transition-colors">Find Tutors</Link>
-                        <Link to="/teach" className="text-sm font-medium hover:text-primary-600 transition-colors">Become a Teacher</Link>
-                    </div>
+                    <div className="flex-grow"></div>
                     <div className="flex items-center gap-4">
                         {isLoading ? (
                             <span className="text-sm text-secondary-400">Loading...</span>
                         ) : user ? (
                             <div className="flex items-center gap-4">
                                 <span className="text-sm hidden sm:block">Hi, {user.userDetails}</span>
+                                <Link to="/dashboard" className="text-sm font-medium text-primary-600 hover:text-primary-700">
+                                    Dashboard
+                                </Link>
                                 <Button variant="ghost" size="sm" onClick={logout}>Log Out</Button>
                             </div>
                         ) : (
