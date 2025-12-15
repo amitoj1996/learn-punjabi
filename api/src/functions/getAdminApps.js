@@ -1,8 +1,4 @@
-const { CosmosClient } = require("@azure/cosmos");
-
-const client = new CosmosClient(process.env.COSMOS_DB_CONNECTION_STRING);
-const database = client.database("punjabilearn");
-const container = database.container("applications");
+const { getContainer } = require('./config/cosmos');
 
 module.exports = async function (context, req) {
     // 1. Verify Admin Role
@@ -13,31 +9,24 @@ module.exports = async function (context, req) {
     }
     const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
 
-    if (!clientPrincipal.userRoles.includes('admin') && clientPrincipal.userId !== 'admin_override_id') {
-        // Note: Real admin check should ideally query the DB user role, 
-        // but for SWA we can also check the SWA role if managed there. 
-        // For now, we rely on the DB role which getUserProfile syncs, 
-        // essentially we trust the request if the FE sends the right signals? 
-        // NO, we must Query the DB to be sure this user is an admin.
-    }
-
     // Better Security: Fetch user from DB to verify role
-    const usersContainer = database.container("users");
-    const { resources: users } = await usersContainer.items
-        .query({
-            query: "SELECT * FROM c WHERE c.userId = @userId",
-            parameters: [{ name: "@userId", value: clientPrincipal.userId }]
-        })
-        .fetchAll();
-
-    if (!users[0] || users[0].role !== 'admin') {
-        context.res = { status: 403, body: "Forbidden: Admin Access Required" };
-        return;
-    }
-
     try {
+        const usersContainer = await getContainer("users");
+        const { resources: users } = await usersContainer.items
+            .query({
+                query: "SELECT * FROM c WHERE c.userId = @userId",
+                parameters: [{ name: "@userId", value: clientPrincipal.userId }]
+            })
+            .fetchAll();
+
+        if (!users[0] || users[0].role !== 'admin') {
+            context.res = { status: 403, body: "Forbidden: Admin Access Required" };
+            return;
+        }
+
         // 2. Fetch Pending Applications
-        const { resources: applications } = await container.items
+        const appsContainer = await getContainer("applications");
+        const { resources: applications } = await appsContainer.items
             .query("SELECT * FROM c WHERE c.status = 'pending'")
             .fetchAll();
 

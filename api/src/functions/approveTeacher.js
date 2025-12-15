@@ -1,10 +1,4 @@
-const { CosmosClient } = require("@azure/cosmos");
-
-const client = new CosmosClient(process.env.COSMOS_DB_CONNECTION_STRING);
-const database = client.database("punjabilearn");
-const appsContainer = database.container("applications");
-const tutorsContainer = database.container("tutors");
-const usersContainer = database.container("users");
+const { getContainer } = require('./config/cosmos');
 
 module.exports = async function (context, req) {
     // 1. Verify Admin Role (Reuse logic or keep simple for MVP)
@@ -15,29 +9,29 @@ module.exports = async function (context, req) {
     }
     const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
 
-    const { resources: users } = await usersContainer.items
-        .query({
-            query: "SELECT * FROM c WHERE c.userId = @userId",
-            parameters: [{ name: "@userId", value: clientPrincipal.userId }]
-        })
-        .fetchAll();
-
-    if (!users[0] || users[0].role !== 'admin') {
-        context.res = { status: 403, body: "Forbidden" };
-        return;
-    }
-
-    const { applicationId } = req.body;
-    if (!applicationId) {
-        context.res = { status: 400, body: "Missing Application ID" };
-        return;
-    }
-
     try {
+        const usersContainer = await getContainer("users");
+        const { resources: users } = await usersContainer.items
+            .query({
+                query: "SELECT * FROM c WHERE c.userId = @userId",
+                parameters: [{ name: "@userId", value: clientPrincipal.userId }]
+            })
+            .fetchAll();
+
+        if (!users[0] || users[0].role !== 'admin') {
+            context.res = { status: 403, body: "Forbidden" };
+            return;
+        }
+
+        const { applicationId } = req.body;
+        if (!applicationId) {
+            context.res = { status: 400, body: "Missing Application ID" };
+            return;
+        }
+
+        const appsContainer = await getContainer("applications");
         // 2. Get the Application
         console.log(`Searching for application: ${applicationId}`);
-        // Note: We need the partition key. Assuming 'id' is partition key or similar. 
-        // Queries are safer if we don't know partition key.
         const { resources: appResults } = await appsContainer.items
             .query({
                 query: "SELECT * FROM c WHERE c.id = @id",
@@ -53,6 +47,7 @@ module.exports = async function (context, req) {
         }
 
         // 3. Create Tutor Profile
+        const tutorsContainer = await getContainer("tutors");
         const newTutor = {
             id: application.userId, // Use userId as Tutor ID
             userId: application.userId,
