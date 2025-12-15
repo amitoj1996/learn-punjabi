@@ -1,8 +1,4 @@
-const { CosmosClient } = require("@azure/cosmos");
-
-const client = new CosmosClient(process.env.COSMOS_DB_CONNECTION_STRING);
-const database = client.database("punjabilearn");
-const container = database.container("users");
+const { getContainer } = require('./config/cosmos');
 
 module.exports = async function (context, req) {
     // 1. Get User Identity from SWA Header
@@ -15,6 +11,8 @@ module.exports = async function (context, req) {
     const userId = clientPrincipal.userId;
 
     try {
+        const container = await getContainer("users");
+
         // 2. Check if user exists in Cosmos DB
         const { resources: users } = await container.items
             .query({
