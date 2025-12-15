@@ -8,7 +8,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const { user, login, logout, isLoading, debugToggleRole } = useAuth();
+    const { user, login, logout, isLoading } = useAuth();
 
     return (
         <div className="min-h-screen flex flex-col font-sans text-secondary-900">
@@ -23,8 +23,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <span className="text-sm text-secondary-400">Loading...</span>
                         ) : user ? (
                             <div className="flex items-center gap-4">
-                                <span className="text-sm hidden sm:block">Hi, {user.userDetails} <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-500">{(user.role).toUpperCase()}</span></span>
-                                <Button size="sm" variant="outline" onClick={debugToggleRole} className="hidden lg:flex">Switch Role</Button>
+                                <span className="text-sm hidden sm:block">
+                                    Hi, {user.userDetails?.split('@')[0]}
+                                    <span className={`ml-2 text-xs px-2 py-1 rounded-full ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                        user.role === 'teacher' ? 'bg-green-100 text-green-700' :
+                                            'bg-gray-100 text-gray-600'
+                                        }`}>
+                                        {user.role.toUpperCase()}
+                                    </span>
+                                </span>
                                 <Link to="/dashboard" className="text-sm font-medium text-primary-600 hover:text-primary-700">
                                     Dashboard
                                 </Link>

@@ -6,7 +6,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: () => void;
     logout: () => void;
-    debugToggleRole: () => void;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -14,7 +14,7 @@ const AuthContext = createContext<AuthContextType>({
     isLoading: true,
     login: () => { },
     logout: () => { },
-    debugToggleRole: () => { },
+    refreshUser: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -78,16 +78,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.href = '/logout';
     };
 
-    const debugToggleRole = () => {
-        if (!user) return;
-        const roles: ('student' | 'teacher' | 'admin')[] = ['student', 'teacher', 'admin'];
-        const currentIndex = roles.indexOf(user.role);
-        const nextRole = roles[(currentIndex + 1) % roles.length];
-        setUser({ ...user, role: nextRole });
+    const refreshUser = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch('/.auth/me');
+            const payload = await response.json();
+            const { clientPrincipal } = payload;
+
+            if (clientPrincipal) {
+                let dbRole = 'student';
+                let dbId = 'temp-id';
+
+                try {
+                    const dbProfileRes = await fetch('/api/users/me');
+                    if (dbProfileRes.ok) {
+                        const dbProfile = await dbProfileRes.json();
+                        dbRole = dbProfile.role;
+                        dbId = dbProfile.id;
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch DB profile", err);
+                }
+
+                setUser({
+                    id: dbId,
+                    userId: clientPrincipal.userId,
+                    userDetails: clientPrincipal.userDetails,
+                    identityProvider: clientPrincipal.identityProvider,
+                    userRoles: clientPrincipal.userRoles,
+                    role: dbRole as 'student' | 'teacher' | 'admin',
+                    createdAt: new Date().toISOString()
+                });
+            }
+        } catch (error) {
+            console.error("Failed to refresh user", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, logout, debugToggleRole }}>
+        <AuthContext.Provider value={{ user, isLoading, login, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );
