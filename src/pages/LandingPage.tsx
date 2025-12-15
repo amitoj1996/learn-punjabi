@@ -28,35 +28,41 @@ const AnimatedCounter: React.FC<{ end: number; suffix?: string; duration?: numbe
     return <span>{count.toLocaleString()}{suffix}</span>;
 };
 
-// Floating shapes component
+// Cursor-following glow component
+const CursorGlow: React.FC = () => {
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            setMousePosition({ x: e.clientX, y: e.clientY });
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+
+    return (
+        <motion.div
+            animate={{ x: mousePosition.x - 200, y: mousePosition.y - 200 }}
+            transition={{ type: "spring", damping: 30, stiffness: 200 }}
+            className="fixed w-[400px] h-[400px] bg-gradient-to-br from-orange-400/40 via-accent-500/30 to-yellow-400/20 rounded-full blur-3xl pointer-events-none z-0"
+            style={{ top: 0, left: 0 }}
+        />
+    );
+};
+
+// Floating shapes component (static background only)
 const FloatingShapes: React.FC = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Animated gradient orbs */}
+        {/* Single primary gradient orb - subtle background */}
         <motion.div
             animate={{
-                x: [0, 100, 0],
-                y: [0, -50, 0],
-                scale: [1, 1.2, 1]
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-20 left-[10%] w-72 h-72 bg-gradient-to-br from-primary-400/30 to-primary-600/20 rounded-full blur-3xl"
-        />
-        <motion.div
-            animate={{
-                x: [0, -80, 0],
-                y: [0, 100, 0],
-                scale: [1, 0.8, 1]
+                x: [0, 50, 0],
+                y: [0, -30, 0],
+                scale: [1, 1.1, 1]
             }}
             transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-40 right-[5%] w-96 h-96 bg-gradient-to-br from-accent-400/20 to-orange-400/20 rounded-full blur-3xl"
-        />
-        <motion.div
-            animate={{
-                x: [0, 60, 0],
-                y: [0, -80, 0]
-            }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-20 left-[30%] w-80 h-80 bg-gradient-to-br from-green-400/20 to-teal-400/20 rounded-full blur-3xl"
+            className="absolute top-20 left-[10%] w-72 h-72 bg-gradient-to-br from-primary-400/20 to-primary-600/10 rounded-full blur-3xl"
         />
 
         {/* Floating Gurmukhi Letters - All 35 consonants */}
@@ -145,6 +151,11 @@ export const LandingPage: React.FC = () => {
 
     return (
         <Layout>
+            {/* Cursor-following glow - only on larger screens */}
+            <div className="hidden md:block">
+                <CursorGlow />
+            </div>
+
             {/* Hero Section */}
             <section className="relative min-h-[90vh] flex items-center overflow-hidden">
                 <FloatingShapes />
