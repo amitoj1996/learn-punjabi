@@ -24,6 +24,7 @@ interface Booking {
     hourlyRate: number;
     status: string;
     reviewed?: boolean;
+    meetingLink?: string;
 }
 
 export const StudentDashboard: React.FC = () => {
@@ -120,19 +121,17 @@ export const StudentDashboard: React.FC = () => {
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-2">
+                                                    {booking.meetingLink && (
+                                                        <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer">
+                                                            <Button size="sm" className="bg-green-600 hover:bg-green-700">📹 Join</Button>
+                                                        </a>
+                                                    )}
                                                     <span className={`text-xs px-2 py-1 rounded-full ${booking.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                                                         {booking.status}
                                                     </span>
                                                     {booking.status !== 'cancelled' && (
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => handleCancelBooking(booking.id)}
-                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                        >
-                                                            Cancel
-                                                        </Button>
+                                                        <Button variant="ghost" size="sm" onClick={() => handleCancelBooking(booking.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50">✕</Button>
                                                     )}
                                                 </div>
                                             </div>

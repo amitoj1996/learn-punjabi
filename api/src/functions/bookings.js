@@ -102,6 +102,7 @@ app.http('createBooking', {
                 duration: duration || 60,
                 hourlyRate: tutor.hourlyRate,
                 status: 'confirmed',
+                meetingLink: `https://meet.google.com/lookup/${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 4)}`,
                 createdAt: new Date().toISOString()
             };
 
