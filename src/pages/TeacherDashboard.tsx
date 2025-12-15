@@ -190,7 +190,7 @@ export const TeacherDashboard: React.FC = () => {
                         <Card className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-xl font-bold text-secondary-900">Availability</h2>
-                                <Button variant="outline" size="sm">Set Availability</Button>
+                                <Link to="/availability"><Button variant="outline" size="sm">Set Availability</Button></Link>
                             </div>
                             <p className="text-secondary-500 text-sm">Set your weekly availability so students know when to book.</p>
                         </Card>

@@ -3,8 +3,8 @@ import { LandingPage } from './pages/LandingPage';
 import { TeacherOnboarding } from './pages/TeacherOnboarding';
 import { TutorSearch } from './pages/TutorSearch';
 import { EditProfile } from './pages/EditProfile';
+import { AvailabilitySettings } from './pages/AvailabilitySettings';
 import { DashboardRouter } from './routes/DashboardRouter';
-// import { StudentDashboard } from './pages/StudentDashboard';
 
 function App() {
   return (
@@ -15,6 +15,7 @@ function App() {
         <Route path="/tutors" element={<TutorSearch />} />
         <Route path="/dashboard" element={<DashboardRouter />} />
         <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/availability" element={<AvailabilitySettings />} />
       </Routes>
     </BrowserRouter>
   );
