@@ -59,28 +59,69 @@ const FloatingShapes: React.FC = () => (
             className="absolute bottom-20 left-[30%] w-80 h-80 bg-gradient-to-br from-green-400/20 to-teal-400/20 rounded-full blur-3xl"
         />
 
-        {/* Floating icons */}
-        <motion.div
-            animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-32 left-[15%] text-4xl"
-        >
-            ਪ
-        </motion.div>
-        <motion.div
-            animate={{ y: [0, 20, 0], rotate: [0, -15, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            className="absolute top-48 right-[20%] text-3xl opacity-60"
-        >
-            ੳ
-        </motion.div>
-        <motion.div
-            animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-32 right-[25%] text-4xl opacity-50"
-        >
-            ੴ
-        </motion.div>
+        {/* Floating Gurmukhi Letters - All 35 consonants */}
+        {[
+            { char: 'ੳ', top: '10%', left: '5%', size: 'text-3xl', opacity: 0.4, delay: 0 },
+            { char: 'ਅ', top: '15%', left: '12%', size: 'text-2xl', opacity: 0.3, delay: 0.2 },
+            { char: 'ੲ', top: '8%', left: '25%', size: 'text-4xl', opacity: 0.5, delay: 0.4 },
+            { char: 'ਸ', top: '20%', left: '8%', size: 'text-2xl', opacity: 0.35, delay: 0.6 },
+            { char: 'ਹ', top: '12%', right: '10%', size: 'text-3xl', opacity: 0.45, delay: 0.3 },
+            { char: 'ਕ', top: '25%', right: '5%', size: 'text-2xl', opacity: 0.3, delay: 0.5 },
+            { char: 'ਖ', top: '18%', right: '20%', size: 'text-4xl', opacity: 0.4, delay: 0.1 },
+            { char: 'ਗ', top: '30%', left: '3%', size: 'text-3xl', opacity: 0.35, delay: 0.7 },
+            { char: 'ਘ', top: '35%', right: '8%', size: 'text-2xl', opacity: 0.3, delay: 0.9 },
+            { char: 'ਙ', bottom: '35%', left: '10%', size: 'text-3xl', opacity: 0.4, delay: 0.4 },
+            { char: 'ਚ', bottom: '40%', right: '12%', size: 'text-2xl', opacity: 0.35, delay: 0.2 },
+            { char: 'ਛ', bottom: '30%', left: '18%', size: 'text-4xl', opacity: 0.5, delay: 0.8 },
+            { char: 'ਜ', bottom: '25%', right: '5%', size: 'text-3xl', opacity: 0.4, delay: 0.6 },
+            { char: 'ਝ', bottom: '20%', left: '5%', size: 'text-2xl', opacity: 0.3, delay: 1 },
+            { char: 'ਞ', bottom: '15%', right: '15%', size: 'text-3xl', opacity: 0.35, delay: 0.3 },
+            { char: 'ਟ', top: '40%', left: '2%', size: 'text-2xl', opacity: 0.3, delay: 0.5 },
+            { char: 'ਠ', top: '45%', right: '3%', size: 'text-3xl', opacity: 0.4, delay: 0.7 },
+            { char: 'ਡ', bottom: '45%', left: '15%', size: 'text-2xl', opacity: 0.35, delay: 0.9 },
+            { char: 'ਢ', bottom: '50%', right: '10%', size: 'text-4xl', opacity: 0.45, delay: 0.1 },
+            { char: 'ਣ', top: '50%', left: '8%', size: 'text-3xl', opacity: 0.4, delay: 0.4 },
+            { char: 'ਤ', top: '5%', right: '30%', size: 'text-2xl', opacity: 0.3, delay: 0.6 },
+            { char: 'ਥ', bottom: '10%', left: '25%', size: 'text-3xl', opacity: 0.35, delay: 0.2 },
+            { char: 'ਦ', top: '22%', left: '20%', size: 'text-4xl', opacity: 0.5, delay: 0.8 },
+            { char: 'ਧ', bottom: '18%', right: '22%', size: 'text-2xl', opacity: 0.3, delay: 1.1 },
+            { char: 'ਨ', top: '55%', right: '6%', size: 'text-3xl', opacity: 0.4, delay: 0.3 },
+            { char: 'ਪ', top: '28%', left: '15%', size: 'text-4xl', opacity: 0.5, delay: 0.5 },
+            { char: 'ਫ', bottom: '28%', right: '18%', size: 'text-2xl', opacity: 0.35, delay: 0.7 },
+            { char: 'ਬ', top: '60%', left: '4%', size: 'text-3xl', opacity: 0.4, delay: 0.9 },
+            { char: 'ਭ', bottom: '55%', right: '4%', size: 'text-2xl', opacity: 0.3, delay: 0.1 },
+            { char: 'ਮ', top: '8%', left: '35%', size: 'text-3xl', opacity: 0.45, delay: 0.4 },
+            { char: 'ਯ', bottom: '8%', right: '28%', size: 'text-2xl', opacity: 0.3, delay: 0.6 },
+            { char: 'ਰ', top: '15%', right: '35%', size: 'text-4xl', opacity: 0.5, delay: 0.2 },
+            { char: 'ਲ', bottom: '12%', left: '8%', size: 'text-3xl', opacity: 0.4, delay: 0.8 },
+            { char: 'ੴ', top: '32%', right: '15%', size: 'text-5xl', opacity: 0.6, delay: 0 },
+            { char: 'ਵ', bottom: '35%', right: '25%', size: 'text-2xl', opacity: 0.35, delay: 0.5 }
+        ].map((letter, i) => (
+            <motion.div
+                key={i}
+                animate={{
+                    y: [0, Math.random() > 0.5 ? -20 : 20, 0],
+                    rotate: [0, Math.random() > 0.5 ? 15 : -15, 0],
+                    scale: [1, 1.1, 1]
+                }}
+                transition={{
+                    duration: 3 + Math.random() * 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: letter.delay
+                }}
+                className={`absolute ${letter.size} text-primary-600`}
+                style={{
+                    top: letter.top,
+                    bottom: letter.bottom,
+                    left: letter.left,
+                    right: letter.right,
+                    opacity: letter.opacity
+                }}
+            >
+                {letter.char}
+            </motion.div>
+        ))}
     </div>
 );
 
