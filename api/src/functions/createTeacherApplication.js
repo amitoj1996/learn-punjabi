@@ -1,4 +1,7 @@
 const { app } = require('@azure/functions');
+if (!global.crypto) {
+    global.crypto = require('crypto');
+}
 const { getContainer } = require('./config/cosmos');
 
 app.http('createTeacherApplication', {
@@ -38,7 +41,14 @@ app.http('createTeacherApplication', {
                     body: JSON.stringify({ error: "Database connection not configured." })
                 };
             }
-            return { status: 500, body: JSON.stringify({ error: "Internal Server Error" }) };
+            return {
+                status: 500,
+                body: JSON.stringify({
+                    error: "Internal Server Error",
+                    details: error.message,
+                    stack: error.stack
+                })
+            };
         }
     }
 });

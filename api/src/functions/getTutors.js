@@ -1,4 +1,7 @@
 const { app } = require('@azure/functions');
+if (!global.crypto) {
+    global.crypto = require('crypto');
+}
 const { getContainer } = require('./config/cosmos');
 
 app.http('getTutors', {
