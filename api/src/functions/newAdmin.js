@@ -1,10 +1,10 @@
 const { app } = require('@azure/functions');
 
-app.http('adminAppsProbe', {
+app.http('newAdminProbe', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'admin-test',
+    route: 'admin-debug',
     handler: async (request, context) => {
-        return { body: "Admin File Loaded Successfully" };
+        return { body: "New Admin File Works!" };
     }
 });
