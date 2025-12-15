@@ -81,6 +81,20 @@ export const TeacherDashboard: React.FC = () => {
 
     if (isLoading) return <Layout><div className="p-12 text-center">Loading...</div></Layout>;
     if (error) return <Layout><div className="container mx-auto px-4 py-12"><div className="bg-red-50 text-red-600 p-4 rounded-lg">Error: {error}</div></div></Layout>;
+
+    const handleCancelBooking = async (bookingId: string) => {
+        if (!confirm('Are you sure you want to cancel this session?')) return;
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}`, { method: 'DELETE' });
+            if (response.ok) {
+                setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
+            } else {
+                alert('Failed to cancel booking');
+            }
+        } catch (err) {
+            console.error('Cancel error:', err);
+        }
+    };
     if (!data?.hasApplication) {
         return (
             <Layout>
@@ -137,8 +151,8 @@ export const TeacherDashboard: React.FC = () => {
 
     // APPROVED - Full Dashboard
     const profile = data.tutorProfile;
-    const upcomingBookings = bookings.filter(b => new Date(b.date) >= new Date());
-    const totalEarnings = bookings.reduce((sum, b) => sum + b.hourlyRate, 0);
+    const upcomingBookings = bookings.filter(b => new Date(b.date) >= new Date() && b.status !== 'cancelled');
+    const totalEarnings = bookings.filter(b => b.status !== 'cancelled').reduce((sum, b) => sum + b.hourlyRate, 0);
 
     return (
         <Layout>
@@ -182,7 +196,12 @@ export const TeacherDashboard: React.FC = () => {
                                                 <p className="font-medium text-secondary-900">{booking.studentEmail.split('@')[0]}</p>
                                                 <p className="text-sm text-secondary-500">{new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.time}</p>
                                             </div>
-                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">{booking.status}</span>
+                                            <div className="flex items-center gap-3">
+                                                <span className={`text-xs px-2 py-1 rounded-full ${booking.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{booking.status}</span>
+                                                {booking.status !== 'cancelled' && (
+                                                    <Button variant="ghost" size="sm" onClick={() => handleCancelBooking(booking.id)} className="text-red-500 hover:text-red-700">Cancel</Button>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

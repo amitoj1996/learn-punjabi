@@ -58,7 +58,21 @@ export const StudentDashboard: React.FC = () => {
     };
 
     const displayName = user?.userDetails?.split('@')[0] || 'Student';
-    const upcomingBookings = bookings.filter(b => new Date(b.date) >= new Date());
+    const upcomingBookings = bookings.filter(b => new Date(b.date) >= new Date() && b.status !== 'cancelled');
+
+    const handleCancelBooking = async (bookingId: string) => {
+        if (!confirm('Are you sure you want to cancel this lesson?')) return;
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}`, { method: 'DELETE' });
+            if (response.ok) {
+                setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
+            } else {
+                alert('Failed to cancel booking');
+            }
+        } catch (err) {
+            console.error('Cancel error:', err);
+        }
+    };
 
     return (
         <Layout>
@@ -88,22 +102,35 @@ export const StudentDashboard: React.FC = () => {
                                 </Card>
                             ) : (
                                 <div className="space-y-4">
-                                    {upcomingBookings.slice(0, 3).map(booking => (
-                                        <Card key={booking.id} className="p-4 flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
-                                                    {booking.tutorName?.charAt(0) || 'T'}
+                                    {upcomingBookings.slice(0, 5).map(booking => (
+                                        <Card key={booking.id} className="p-4">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
+                                                        {booking.tutorName?.charAt(0) || 'T'}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-secondary-900">{booking.tutorName}</h3>
+                                                        <p className="text-sm text-secondary-500">
+                                                            {new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.time}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h3 className="font-bold text-secondary-900">{booking.tutorName}</h3>
-                                                    <p className="text-sm text-secondary-500">
-                                                        {new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.time}
-                                                    </p>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`text-xs px-2 py-1 rounded-full ${booking.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                        {booking.status}
+                                                    </span>
+                                                    {booking.status !== 'cancelled' && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleCancelBooking(booking.id)}
+                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    )}
                                                 </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">{booking.status}</span>
-                                                <p className="text-sm text-secondary-500 mt-1">${booking.hourlyRate}</p>
                                             </div>
                                         </Card>
                                     ))}

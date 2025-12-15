@@ -182,3 +182,58 @@ app.http('getTeacherBookings', {
         }
     }
 });
+
+// DELETE - Cancel a booking
+app.http('cancelBooking', {
+    methods: ['DELETE'],
+    authLevel: 'anonymous',
+    route: 'bookings/{bookingId}',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, body: JSON.stringify({ error: "Please log in" }) };
+            }
+
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+            const userEmail = clientPrincipal.userDetails;
+            const bookingId = request.params.bookingId;
+
+            const bookingsContainer = await getContainer("bookings");
+
+            // Find the booking
+            const { resources: bookings } = await bookingsContainer.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.id = @id",
+                    parameters: [{ name: "@id", value: bookingId }]
+                })
+                .fetchAll();
+
+            if (bookings.length === 0) {
+                return { status: 404, body: JSON.stringify({ error: "Booking not found" }) };
+            }
+
+            const booking = bookings[0];
+
+            // Verify user owns this booking (student or teacher)
+            if (booking.studentEmail !== userEmail && booking.tutorEmail !== userEmail) {
+                return { status: 403, body: JSON.stringify({ error: "You cannot cancel this booking" }) };
+            }
+
+            // Update booking status to cancelled
+            booking.status = 'cancelled';
+            booking.cancelledAt = new Date().toISOString();
+            booking.cancelledBy = userEmail;
+
+            await bookingsContainer.item(booking.id, booking.id).replace(booking);
+
+            return {
+                status: 200,
+                body: JSON.stringify({ message: "Booking cancelled successfully" })
+            };
+        } catch (error) {
+            context.log.error("Error cancelling booking:", error);
+            return { status: 500, body: JSON.stringify({ error: error.message }) };
+        }
+    }
+});
