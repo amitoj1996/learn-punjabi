@@ -196,7 +196,9 @@ export const TeacherDashboard: React.FC = () => {
                             </div>
                         </div>
                         <p className="text-secondary-600 text-sm mb-4">{profile?.bio}</p>
-                        <Button variant="outline">Edit Profile</Button>
+                        <Link to="/edit-profile">
+                            <Button variant="outline">Edit Profile</Button>
+                        </Link>
                     </Card>
 
                     {/* Upcoming Sessions */}
