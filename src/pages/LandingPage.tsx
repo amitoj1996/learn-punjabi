@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Star, Globe, Users, CheckCircle, Play, ArrowRight, Sparkles, BookOpen, Video, Award } from 'lucide-react';
+import { Star, Users, CheckCircle, Play, ArrowRight, Sparkles, BookOpen, Video, Award } from 'lucide-react';
 import { Layout } from '../components/Layout';
 
 // Animated counter component
@@ -99,7 +99,7 @@ export const LandingPage: React.FC = () => {
 
     const itemVariants = {
         hidden: { opacity: 0, y: 30 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+        visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
     };
 
     return (
