@@ -25,7 +25,7 @@ export const AdminDashboard: React.FC = () => {
 
     const fetchApplications = async () => {
         try {
-            const response = await fetch('/api/admin/applications');
+            const response = await fetch('/api/admin/apps-v2');
             if (response.ok) {
                 const json = await response.json();
                 // Check if response has wrapped structure with debug

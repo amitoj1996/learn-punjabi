@@ -1,10 +1,10 @@
 const { app } = require('@azure/functions');
 
 // TEMPORARY DEBUG: Removed DB dependency to see if function loads
-app.http('getAdminApps', {
+app.http('adminAppsV2', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'admin/applications',
+    route: 'admin/apps-v2',
     handler: async (request, context) => {
         context.log('Using Mock Admin Handler for Debugging');
 
