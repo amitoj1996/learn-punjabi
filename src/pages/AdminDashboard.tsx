@@ -49,7 +49,7 @@ export const AdminDashboard: React.FC = () => {
         if (!confirm('Are you sure you want to approve this teacher?')) return;
 
         try {
-            const response = await fetch('/api/admin/approve', {
+            const response = await fetch('/api/manager/approve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ applicationId: id })
