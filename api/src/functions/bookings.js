@@ -79,7 +79,17 @@ app.http('createBooking', {
             const tutor = tutors[0];
 
             // Create booking
-            const bookingsContainer = await getContainer("bookings");
+            let bookingsContainer;
+            try {
+                bookingsContainer = await getContainer("bookings");
+            } catch (containerError) {
+                context.log.error("Bookings container not found:", containerError);
+                return {
+                    status: 500,
+                    body: JSON.stringify({ error: "Bookings container not configured. Please create 'bookings' container in Cosmos DB with partition key '/id'." })
+                };
+            }
+
             const booking = {
                 id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 tutorId: tutor.id,
