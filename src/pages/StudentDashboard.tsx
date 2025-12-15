@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Layout } from '../components/Layout';
+import { ReviewModal } from '../components/ReviewModal';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -15,12 +16,14 @@ interface Tutor {
 
 interface Booking {
     id: string;
+    tutorId: string;
     tutorName: string;
     date: string;
     time: string;
     duration: number;
     hourlyRate: number;
     status: string;
+    reviewed?: boolean;
 }
 
 export const StudentDashboard: React.FC = () => {
@@ -28,6 +31,7 @@ export const StudentDashboard: React.FC = () => {
     const [featuredTutors, setFeaturedTutors] = useState<Tutor[]>([]);
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
 
     useEffect(() => {
         Promise.all([fetchFeaturedTutors(), fetchBookings()]).finally(() => setIsLoading(false));
@@ -201,7 +205,45 @@ export const StudentDashboard: React.FC = () => {
                         </Card>
                     </div>
                 </div>
+
+                {/* Past Lessons - For Review */}
+                {bookings.filter(b => new Date(b.date) < new Date() && b.status !== 'cancelled' && !b.reviewed).length > 0 && (
+                    <section className="mt-12">
+                        <h2 className="text-xl font-bold text-secondary-900 mb-4">Rate Your Recent Lessons</h2>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {bookings.filter(b => new Date(b.date) < new Date() && b.status !== 'cancelled' && !b.reviewed).slice(0, 3).map(booking => (
+                                <Card key={booking.id} className="p-4">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
+                                            {booking.tutorName?.charAt(0) || 'T'}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-secondary-900">{booking.tutorName}</h3>
+                                            <p className="text-xs text-secondary-500">{new Date(booking.date).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <Button size="sm" variant="outline" className="w-full" onClick={() => setReviewBooking(booking)}>
+                                        ⭐ Leave a Review
+                                    </Button>
+                                </Card>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </div>
+
+            {/* Review Modal */}
+            {reviewBooking && (
+                <ReviewModal
+                    booking={reviewBooking}
+                    onClose={() => setReviewBooking(null)}
+                    onSuccess={() => {
+                        setReviewBooking(null);
+                        setBookings(prev => prev.map(b => b.id === reviewBooking.id ? { ...b, reviewed: true } : b));
+                        alert('Thank you for your review! ⭐');
+                    }}
+                />
+            )}
         </Layout>
     );
 };
