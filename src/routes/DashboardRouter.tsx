@@ -3,26 +3,32 @@ import { useAuth } from '../context/AuthContext';
 import { StudentDashboard } from '../pages/StudentDashboard';
 import { TeacherDashboard } from '../pages/TeacherDashboard';
 import { AdminDashboard } from '../pages/AdminDashboard';
+import { Layout } from '../components/Layout';
 import { Button } from '../components/ui/Button';
-import { Link } from 'react-router-dom';
 
 export const DashboardRouter: React.FC = () => {
-    const { user, isLoading } = useAuth();
+    const { user, isLoading, login } = useAuth();
 
     if (isLoading) {
-        return <div className="p-12 text-center">Loading dashboard...</div>;
+        return (
+            <Layout>
+                <div className="p-12 text-center">Loading dashboard...</div>
+            </Layout>
+        );
     }
 
     if (!user) {
         return (
-            <div className="p-12 text-center">
-                <h2 className="text-xl font-bold mb-4">Please Log In</h2>
-                <Link to="/login"><Button>Log In</Button></Link>
-            </div>
+            <Layout>
+                <div className="p-12 text-center">
+                    <h2 className="text-xl font-bold mb-4">Please Log In</h2>
+                    <Button onClick={login}>Log In</Button>
+                </div>
+            </Layout>
         );
     }
 
-    // Role-based Switching
+    // Role-based Switching (dashboards now have their own Layout)
     if (user.role === 'teacher') {
         return <TeacherDashboard />;
     }
