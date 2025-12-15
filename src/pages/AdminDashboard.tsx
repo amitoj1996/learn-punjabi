@@ -25,13 +25,11 @@ export const AdminDashboard: React.FC = () => {
 
     const fetchApplications = async () => {
         try {
-            const response = await fetch('/api/admin-test');
+            const response = await fetch('/api/manager/applications');
             if (response.ok) {
-                // Testing plain text response first
-                const text = await response.text();
-                // @ts-ignore
-                setError(`SUCCESS: API is reachable! Response: ${text}`);
-                setApplications([]);
+                const data = await response.json();
+                setApplications(data);
+                setError(null);
             } else {
                 console.error("Failed to fetch applications");
                 // @ts-ignore
