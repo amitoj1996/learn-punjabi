@@ -17,6 +17,7 @@ interface Application {
 export const AdminDashboard: React.FC = () => {
     const [applications, setApplications] = useState<Application[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         fetchApplications();
@@ -30,9 +31,13 @@ export const AdminDashboard: React.FC = () => {
                 setApplications(data);
             } else {
                 console.error("Failed to fetch applications");
+                // @ts-ignore
+                setError(`Failed to load: ${response.status} ${response.statusText}`);
             }
         } catch (error) {
             console.error("Error fetching applications:", error);
+            // @ts-ignore
+            setError(error.message);
         } finally {
             setIsLoading(false);
         }
@@ -89,7 +94,13 @@ export const AdminDashboard: React.FC = () => {
                         <span className="bg-primary-100 text-primary-700 text-xs px-2 py-1 rounded-full">{applications.length}</span>
                     </h2>
 
-                    {applications.length === 0 ? (
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4 border border-red-200">
+                            <strong>debug error:</strong> {error}
+                        </div>
+                    )}
+
+                    {!error && applications.length === 0 ? (
                         <Card className="p-8 text-center text-secondary-500 bg-secondary-50">
                             <p>No pending applications. All caught up! 🎉</p>
                         </Card>
