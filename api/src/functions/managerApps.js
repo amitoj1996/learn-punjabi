@@ -40,7 +40,16 @@ app.http('getManagerApps', {
             };
         } catch (error) {
             context.log.error("Error in getManagerApps:", error);
-            return { status: 500, body: "Internal Server Error" };
+            // DEBUG: Return error details to client
+            return {
+                status: 500,
+                body: JSON.stringify({
+                    error: "Internal Server Error",
+                    details: error.message,
+                    target: "punjabi-db/applications",
+                    stack: error.stack
+                })
+            };
         }
     }
 });
