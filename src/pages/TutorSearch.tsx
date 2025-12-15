@@ -69,9 +69,30 @@ export const TutorSearch: React.FC = () => {
     if (loading) {
         return (
             <Layout>
-                <div className="flex justify-center items-center p-20">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                    <span className="ml-3 text-secondary-600">Loading tutors...</span>
+                <div className="container mx-auto px-4 py-12">
+                    <div className="mb-10 text-center">
+                        <div className="h-10 bg-secondary-200 rounded-lg w-80 mx-auto mb-4 animate-pulse"></div>
+                        <div className="h-6 bg-secondary-100 rounded w-96 mx-auto animate-pulse"></div>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div key={i} className="p-6 bg-white rounded-2xl border border-secondary-100 animate-pulse">
+                                <div className="flex gap-4 mb-4">
+                                    <div className="w-16 h-16 bg-secondary-200 rounded-full"></div>
+                                    <div className="flex-1">
+                                        <div className="h-5 bg-secondary-200 rounded w-32 mb-2"></div>
+                                        <div className="h-4 bg-secondary-100 rounded w-24"></div>
+                                    </div>
+                                </div>
+                                <div className="h-4 bg-secondary-100 rounded w-full mb-2"></div>
+                                <div className="h-4 bg-secondary-100 rounded w-3/4 mb-4"></div>
+                                <div className="flex justify-between items-center pt-4 border-t border-secondary-100">
+                                    <div className="h-6 bg-secondary-200 rounded w-16"></div>
+                                    <div className="h-8 bg-secondary-200 rounded w-20"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </Layout>
         );

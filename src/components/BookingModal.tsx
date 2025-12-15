@@ -19,14 +19,13 @@ interface Availability {
 const DAYS_OF_WEEK = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSuccess }) => {
+    const [step, setStep] = useState<'select' | 'payment' | 'processing' | 'success'>('select');
     const [availability, setAvailability] = useState<Availability>({});
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [selectedTime, setSelectedTime] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
-    const [isBooking, setIsBooking] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Generate next 7 days
     const getNextDays = () => {
         const days = [];
         for (let i = 1; i <= 7; i++) {
@@ -67,14 +66,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
         return availability[dayName] || [];
     };
 
-    const handleBook = async () => {
+    const handleProceedToPayment = () => {
         if (!selectedDate || !selectedTime) {
             setError('Please select a date and time');
             return;
         }
+        setStep('payment');
+    };
 
-        setIsBooking(true);
+    const handleConfirmPayment = async () => {
+        setStep('processing');
         setError(null);
+
+        // Simulate payment processing
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         try {
             const response = await fetch('/api/bookings', {
@@ -84,115 +89,181 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                     tutorId: tutor.id,
                     date: selectedDate,
                     time: selectedTime,
-                    duration: 60
+                    duration: 60,
+                    paymentStatus: 'paid',
+                    paymentAmount: tutor.hourlyRate
                 })
             });
 
             if (response.ok) {
-                onSuccess();
+                setStep('success');
+                setTimeout(() => onSuccess(), 2000);
             } else {
                 const data = await response.json();
                 setError(data.error || 'Failed to book');
+                setStep('payment');
             }
         } catch (err) {
             setError((err as Error).message);
-        } finally {
-            setIsBooking(false);
+            setStep('payment');
         }
     };
 
-    const selectedDayName = selectedDate
-        ? DAYS_OF_WEEK[new Date(selectedDate + 'T12:00:00').getDay()]
-        : '';
+    const selectedDayName = selectedDate ? DAYS_OF_WEEK[new Date(selectedDate + 'T12:00:00').getDay()] : '';
     const availableSlots = selectedDayName ? getAvailableSlots(selectedDayName) : [];
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
             <Card className="w-full max-w-md p-6 bg-white" onClick={(e) => e.stopPropagation()}>
+                {/* Header */}
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-secondary-900">Book with {tutor.name}</h2>
-                    <button onClick={onClose} className="text-secondary-400 hover:text-secondary-600 text-2xl">&times;</button>
+                    <h2 className="text-xl font-bold text-secondary-900">
+                        {step === 'select' && `Book with ${tutor.name}`}
+                        {step === 'payment' && 'Confirm Payment'}
+                        {step === 'processing' && 'Processing...'}
+                        {step === 'success' && 'Booking Confirmed!'}
+                    </h2>
+                    {step !== 'processing' && step !== 'success' && (
+                        <button onClick={onClose} className="text-secondary-400 hover:text-secondary-600 text-2xl">&times;</button>
+                    )}
                 </div>
 
                 {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
 
-                {isLoading ? (
-                    <div className="text-center py-8 text-secondary-500">Loading availability...</div>
-                ) : (
+                {/* Step: Select Date/Time */}
+                {step === 'select' && (
                     <>
-                        {/* Date Selection */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-secondary-700 mb-2">Select a Date</label>
-                            <div className="grid grid-cols-4 gap-2">
-                                {nextDays.map(day => {
-                                    const hasSlots = getAvailableSlots(day.dayName).length > 0;
-                                    return (
-                                        <button
-                                            key={day.date}
-                                            disabled={!hasSlots}
-                                            onClick={() => { setSelectedDate(day.date); setSelectedTime(''); }}
-                                            className={`p-2 rounded-lg text-sm transition-all ${selectedDate === day.date
-                                                    ? 'bg-primary-500 text-white'
-                                                    : hasSlots
-                                                        ? 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
-                                                        : 'bg-secondary-50 text-secondary-300 cursor-not-allowed'
-                                                }`}
-                                        >
-                                            {day.display}
-                                        </button>
-                                    );
-                                })}
+                        {isLoading ? (
+                            <div className="text-center py-8 text-secondary-500">Loading availability...</div>
+                        ) : (
+                            <>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-secondary-700 mb-2">Select a Date</label>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {nextDays.map(day => {
+                                            const hasSlots = getAvailableSlots(day.dayName).length > 0;
+                                            return (
+                                                <button
+                                                    key={day.date}
+                                                    disabled={!hasSlots}
+                                                    onClick={() => { setSelectedDate(day.date); setSelectedTime(''); }}
+                                                    className={`p-2 rounded-lg text-sm transition-all ${selectedDate === day.date
+                                                            ? 'bg-primary-500 text-white'
+                                                            : hasSlots
+                                                                ? 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                                : 'bg-secondary-50 text-secondary-300 cursor-not-allowed'
+                                                        }`}
+                                                >
+                                                    {day.display}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {selectedDate && (
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-medium text-secondary-700 mb-2">Select a Time</label>
+                                        {availableSlots.length === 0 ? (
+                                            <p className="text-secondary-500 text-sm">No slots available</p>
+                                        ) : (
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {availableSlots.map(time => (
+                                                    <button
+                                                        key={time}
+                                                        onClick={() => setSelectedTime(time)}
+                                                        className={`p-2 rounded-lg text-sm transition-all ${selectedTime === time
+                                                                ? 'bg-primary-500 text-white'
+                                                                : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                            }`}
+                                                    >
+                                                        {time}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3">
+                                    <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+                                    <Button onClick={handleProceedToPayment} disabled={!selectedDate || !selectedTime} className="flex-1">
+                                        Continue to Payment
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                    </>
+                )}
+
+                {/* Step: Payment */}
+                {step === 'payment' && (
+                    <>
+                        <div className="bg-primary-50 rounded-xl p-4 mb-6">
+                            <h3 className="font-bold text-primary-900 mb-3">Booking Summary</h3>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-primary-700">Tutor</span>
+                                    <span className="font-medium text-primary-900">{tutor.name}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-primary-700">Date</span>
+                                    <span className="font-medium text-primary-900">
+                                        {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-primary-700">Time</span>
+                                    <span className="font-medium text-primary-900">{selectedTime}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-primary-700">Duration</span>
+                                    <span className="font-medium text-primary-900">1 hour</span>
+                                </div>
+                                <div className="border-t border-primary-200 pt-2 mt-2 flex justify-between">
+                                    <span className="font-bold text-primary-900">Total</span>
+                                    <span className="font-bold text-primary-900 text-lg">${tutor.hourlyRate}</span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Time Selection */}
-                        {selectedDate && (
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium text-secondary-700 mb-2">Select a Time</label>
-                                {availableSlots.length === 0 ? (
-                                    <p className="text-secondary-500 text-sm">No slots available for this day</p>
-                                ) : (
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {availableSlots.map(time => (
-                                            <button
-                                                key={time}
-                                                onClick={() => setSelectedTime(time)}
-                                                className={`p-2 rounded-lg text-sm transition-all ${selectedTime === time
-                                                        ? 'bg-primary-500 text-white'
-                                                        : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
-                                                    }`}
-                                            >
-                                                {time}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
+                        {/* Mock Payment Form */}
+                        <div className="border border-secondary-200 rounded-xl p-4 mb-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="text-lg">💳</span>
+                                <span className="font-medium text-secondary-900">Payment Method</span>
                             </div>
-                        )}
-
-                        {/* Summary */}
-                        {selectedDate && selectedTime && (
-                            <div className="bg-primary-50 rounded-lg p-4 mb-6">
-                                <p className="text-sm text-primary-800">
-                                    <strong>Booking:</strong> {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {selectedTime}
-                                </p>
-                                <p className="text-sm text-primary-800"><strong>Duration:</strong> 1 hour</p>
-                                <p className="text-sm text-primary-800"><strong>Price:</strong> ${tutor.hourlyRate}</p>
+                            <div className="bg-secondary-50 rounded-lg p-3 text-sm text-secondary-600">
+                                <p className="font-medium text-secondary-900 mb-1">Demo Mode</p>
+                                <p>In production, this would connect to Stripe for secure payment processing.</p>
                             </div>
-                        )}
+                        </div>
 
-                        {/* Actions */}
                         <div className="flex gap-3">
-                            <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-                            <Button
-                                onClick={handleBook}
-                                disabled={!selectedDate || !selectedTime || isBooking}
-                                className="flex-1"
-                            >
-                                {isBooking ? 'Booking...' : 'Confirm Booking'}
+                            <Button variant="outline" onClick={() => setStep('select')} className="flex-1">Back</Button>
+                            <Button onClick={handleConfirmPayment} className="flex-1 bg-green-600 hover:bg-green-700">
+                                💳 Pay ${tutor.hourlyRate}
                             </Button>
                         </div>
                     </>
+                )}
+
+                {/* Step: Processing */}
+                {step === 'processing' && (
+                    <div className="text-center py-8">
+                        <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-secondary-600">Processing your payment...</p>
+                    </div>
+                )}
+
+                {/* Step: Success */}
+                {step === 'success' && (
+                    <div className="text-center py-8">
+                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✓</div>
+                        <h3 className="text-xl font-bold text-secondary-900 mb-2">Booking Confirmed!</h3>
+                        <p className="text-secondary-600 mb-4">Your lesson has been scheduled.</p>
+                        <p className="text-sm text-secondary-500">Check your dashboard for details.</p>
+                    </div>
                 )}
             </Card>
         </div>
