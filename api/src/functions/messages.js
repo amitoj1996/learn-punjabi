@@ -8,6 +8,16 @@ const BLOCKED_KEYWORDS = [
     'pussy', 'boobs', 'tits', 'ass', 'butt', 'penis', 'vagina', 'breasts', 'erotic',
     'orgasm', 'masturbate', 'blowjob', 'handjob', 'fetish', 'bdsm', 'kinky',
     'slutty', 'slut', 'whore', 'hooker', 'prostitute', 'escort service',
+    // Flirty/inappropriate for tutoring
+    'you look hot', 'look hot', 'so hot', 'youre hot', "you're hot", 'ur hot',
+    'you are hot', 'looking hot', 'beautiful body', 'nice body', 'hot body',
+    'love you', 'i love u', 'be my girlfriend', 'be my boyfriend', 'date me',
+    'marry me', 'kiss me', 'kiss you', 'hug you', 'cuddle', 'make out',
+    'turn me on', 'attracted to you', 'have feelings', 'romantic', 'relationship',
+    'go out with me', 'be together', 'miss you baby', 'babe', 'baby girl', 'baby boy',
+    'sweetheart', 'honey', 'darling', 'cutie', 'hottie', 'gorgeous',
+    'flirt', 'wanna date', 'single?', 'are you single', 'do you have a boyfriend',
+    'do you have a girlfriend', 'your place or mine',
     // Profanity
     'fuck', 'shit', 'bitch', 'bastard', 'damn', 'crap', 'piss', 'asshole',
     'motherfucker', 'wtf', 'stfu', 'bullshit',
@@ -19,7 +29,7 @@ const BLOCKED_KEYWORDS = [
     // Scam/inappropriate requests
     'send money', 'wire transfer', 'bitcoin', 'crypto payment', 'gift card',
     'meet alone', 'come to my house', 'my place', 'hotel room',
-    'nude photo', 'send pics', 'video call private'
+    'nude photo', 'send pics', 'video call private', 'private video'
 ];
 
 const WARNING_KEYWORDS = ['phone', 'number', 'address', 'meet outside', 'personal email', 'whatsapp', 'telegram', 'snapchat', 'instagram'];
