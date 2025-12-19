@@ -15,16 +15,20 @@ interface Message {
 
 interface ChatWindowProps {
     recipientId: string;
+    recipientEmail: string;
     recipientName: string;
     currentUserId: string;
+    currentUserEmail: string;
     bookingId?: string;
     onClose?: () => void;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
     recipientId,
+    recipientEmail,
     recipientName,
     currentUserId,
+    currentUserEmail,
     bookingId,
     onClose
 }) => {
@@ -38,8 +42,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Generate conversation ID
-    const conversationId = [currentUserId, recipientId].sort().join('_');
+    // Generate conversation ID using emails (consistent for both parties)
+    const emails = [currentUserEmail.toLowerCase(), recipientEmail.toLowerCase()].sort();
+    const conversationId = `conv_${emails[0].replace(/[^a-z0-9]/g, '_')}_${emails[1].replace(/[^a-z0-9]/g, '_')}`;
 
     useEffect(() => {
         fetchMessages();
@@ -84,6 +89,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     recipientId,
+                    recipientEmail,
                     recipientName,
                     content: newMessage.trim(),
                     bookingId
@@ -188,8 +194,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                     <div className={`group max-w-[75%] ${isOwn ? 'order-2' : ''}`}>
                                         <div
                                             className={`px-4 py-2 rounded-2xl ${isOwn
-                                                    ? 'bg-primary-500 text-white rounded-br-md'
-                                                    : 'bg-white text-secondary-900 rounded-bl-md shadow-sm'
+                                                ? 'bg-primary-500 text-white rounded-br-md'
+                                                : 'bg-white text-secondary-900 rounded-bl-md shadow-sm'
                                                 }`}
                                         >
                                             <p className="break-words">{message.content}</p>

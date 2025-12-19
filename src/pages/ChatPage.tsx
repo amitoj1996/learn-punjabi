@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 
 interface Conversation {
     recipientId: string;
+    recipientEmail: string;
     recipientName: string;
     lastMessage?: string;
     unreadCount?: number;
@@ -17,6 +18,7 @@ interface Booking {
     id: string;
     tutorId: string;
     tutorName: string;
+    tutorEmail: string;
     studentId: string;
     studentEmail: string;
     date: string;
@@ -53,9 +55,11 @@ export const ChatPage: React.FC = () => {
             if (bookingsResponse.ok) {
                 const studentBookings: Booking[] = await bookingsResponse.json();
                 studentBookings.forEach(booking => {
-                    if (!conversationMap.has(booking.tutorId)) {
-                        conversationMap.set(booking.tutorId, {
+                    const key = booking.tutorEmail?.toLowerCase() || booking.tutorId;
+                    if (!conversationMap.has(key)) {
+                        conversationMap.set(key, {
                             recipientId: booking.tutorId,
+                            recipientEmail: booking.tutorEmail || '',
                             recipientName: booking.tutorName
                         });
                     }
@@ -65,9 +69,11 @@ export const ChatPage: React.FC = () => {
             if (teacherBookingsResponse.ok) {
                 const teacherBookings: Booking[] = await teacherBookingsResponse.json();
                 teacherBookings.forEach(booking => {
-                    if (!conversationMap.has(booking.studentId)) {
-                        conversationMap.set(booking.studentId, {
+                    const key = booking.studentEmail?.toLowerCase() || booking.studentId;
+                    if (!conversationMap.has(key)) {
+                        conversationMap.set(key, {
                             recipientId: booking.studentId,
+                            recipientEmail: booking.studentEmail,
                             recipientName: booking.studentEmail.split('@')[0]
                         });
                     }
@@ -163,8 +169,10 @@ export const ChatPage: React.FC = () => {
                             {selectedConversation ? (
                                 <ChatWindow
                                     recipientId={selectedConversation.recipientId}
+                                    recipientEmail={selectedConversation.recipientEmail}
                                     recipientName={selectedConversation.recipientName}
                                     currentUserId={user.userId}
+                                    currentUserEmail={user.userDetails || ''}
                                     onClose={isMobileView ? () => setSelectedConversation(null) : undefined}
                                 />
                             ) : (

@@ -194,9 +194,23 @@ app.http('sendMessage', {
 
             const senderName = users.length > 0 ? users[0].name : userEmail;
 
-            // Create conversation ID (consistent ordering)
-            const ids = [userId, recipientId].sort();
-            const conversationId = `conv_${ids[0]}_${ids[1]}`;
+            // Get recipient email - could be passed or we find it from booking
+            let recipientEmail = body.recipientEmail || recipientId;
+
+            // If recipientId looks like an email, use it; otherwise find email from booking
+            if (!recipientEmail.includes('@') && bookings.length > 0) {
+                const booking = bookings[0];
+                // Figure out who the recipient is based on booking
+                if (booking.studentEmail === userEmail) {
+                    recipientEmail = booking.tutorEmail;
+                } else if (booking.tutorEmail === userEmail) {
+                    recipientEmail = booking.studentEmail;
+                }
+            }
+
+            // Create conversation ID using emails (consistent for both parties)
+            const emails = [userEmail.toLowerCase(), recipientEmail.toLowerCase()].sort();
+            const conversationId = `conv_${emails[0].replace(/[^a-z0-9]/g, '_')}_${emails[1].replace(/[^a-z0-9]/g, '_')}`;
 
             const messagesContainer = await getContainer('messages');
 
@@ -207,6 +221,7 @@ app.http('sendMessage', {
                 senderEmail: userEmail,
                 senderName,
                 recipientId,
+                recipientEmail,
                 recipientName: recipientName || 'Unknown',
                 content,
                 timestamp: new Date().toISOString(),
