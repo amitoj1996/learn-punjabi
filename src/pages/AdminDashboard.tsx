@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Layout } from '../components/Layout';
-import { Users, BookOpen, CheckCircle, Clock, XCircle, Search, Filter, TrendingUp } from 'lucide-react';
+import { Users, BookOpen, CheckCircle, Clock, XCircle, Search, TrendingUp } from 'lucide-react';
 
 interface Application {
     id: string;
@@ -312,8 +312,8 @@ export const AdminDashboard: React.FC = () => {
                                             key={status}
                                             onClick={() => setStatusFilter(status)}
                                             className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${statusFilter === status
-                                                    ? 'bg-primary-500 text-white'
-                                                    : 'bg-secondary-100 text-secondary-600 hover:bg-secondary-200'
+                                                ? 'bg-primary-500 text-white'
+                                                : 'bg-secondary-100 text-secondary-600 hover:bg-secondary-200'
                                                 }`}
                                         >
                                             {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -385,8 +385,8 @@ export const AdminDashboard: React.FC = () => {
                                                             </div>
                                                         </div>
                                                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${app.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                                app.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                                                    'bg-red-100 text-red-800'
+                                                            app.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                                                'bg-red-100 text-red-800'
                                                             }`}>
                                                             {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                                                         </span>
