@@ -38,11 +38,19 @@ const WARNING_KEYWORDS = ['phone', 'number', 'address', 'meet outside', 'persona
 const CONTENT_SAFETY_ENDPOINT = process.env.CONTENT_SAFETY_ENDPOINT;
 const CONTENT_SAFETY_KEY = process.env.CONTENT_SAFETY_KEY;
 
-// AI-powered content moderation with keyword fallback
+// Combined content moderation: Keywords FIRST (always), then AI as additional layer
 async function moderateContent(text, context) {
     const lowerText = text.toLowerCase();
 
-    // First, try Azure AI Content Safety if configured
+    // STEP 1: Always check keyword filter first (catches flirty phrases, scams, etc.)
+    for (const keyword of BLOCKED_KEYWORDS) {
+        if (lowerText.includes(keyword.toLowerCase())) {
+            context?.log('Keyword filter blocked:', keyword);
+            return { passed: false, reason: 'Message contains inappropriate content', keywordBlocked: true };
+        }
+    }
+
+    // STEP 2: Then check Azure AI Content Safety for explicit content (hate, sexual, violence)
     if (CONTENT_SAFETY_ENDPOINT && CONTENT_SAFETY_KEY) {
         try {
             const response = await fetch(`${CONTENT_SAFETY_ENDPOINT}/contentsafety/text:analyze?api-version=2023-10-01`, {
@@ -71,20 +79,14 @@ async function moderateContent(text, context) {
                     return { passed: false, reason: 'Message contains inappropriate content', aiBlocked: true };
                 }
             } else {
-                context?.log('AI Content Safety API error, falling back to keywords');
+                context?.log('AI Content Safety API error:', response.status);
             }
         } catch (error) {
-            context?.log('AI Content Safety error, falling back to keywords:', error.message);
+            context?.log('AI Content Safety error:', error.message);
         }
     }
 
-    // Fallback to keyword filtering
-    for (const keyword of BLOCKED_KEYWORDS) {
-        if (lowerText.includes(keyword.toLowerCase())) {
-            return { passed: false, reason: 'Message contains inappropriate content' };
-        }
-    }
-
+    // STEP 3: Check for warnings (allowed but flagged)
     const warnings = WARNING_KEYWORDS.filter(kw => lowerText.includes(kw.toLowerCase()));
     return {
         passed: true,
