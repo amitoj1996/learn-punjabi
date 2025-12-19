@@ -6,29 +6,15 @@ import { useAuth } from '../context/AuthContext';
 import { MessageCircle, Users, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-interface Conversation {
-    recipientId: string;
-    recipientEmail: string;
-    recipientName: string;
-    lastMessage?: string;
-    unreadCount?: number;
-}
-
-interface Booking {
-    id: string;
-    tutorId: string;
-    tutorName: string;
-    tutorEmail: string;
-    studentId: string;
-    studentEmail: string;
-    date: string;
-    status: string;
+interface ChatPartner {
+    email: string;
+    name: string;
 }
 
 export const ChatPage: React.FC = () => {
     const { user } = useAuth();
-    const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+    const [partners, setPartners] = useState<ChatPartner[]>([]);
+    const [selectedPartner, setSelectedPartner] = useState<ChatPartner | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
 
@@ -40,49 +26,21 @@ export const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (user) {
-            fetchConversations();
+            fetchPartners();
         }
     }, [user]);
 
-    const fetchConversations = async () => {
+    const fetchPartners = async () => {
         try {
-            // Get bookings to find people user can chat with
-            const bookingsResponse = await fetch('/api/bookings/student');
-            const teacherBookingsResponse = await fetch('/api/bookings/teacher');
-
-            const conversationMap = new Map<string, Conversation>();
-
-            if (bookingsResponse.ok) {
-                const studentBookings: Booking[] = await bookingsResponse.json();
-                studentBookings.forEach(booking => {
-                    const key = booking.tutorEmail?.toLowerCase() || booking.tutorId;
-                    if (!conversationMap.has(key)) {
-                        conversationMap.set(key, {
-                            recipientId: booking.tutorId,
-                            recipientEmail: booking.tutorEmail || '',
-                            recipientName: booking.tutorName
-                        });
-                    }
-                });
+            const response = await fetch('/api/chat/partners');
+            if (response.ok) {
+                const data = await response.json();
+                setPartners(data);
+            } else {
+                console.error('Failed to fetch partners');
             }
-
-            if (teacherBookingsResponse.ok) {
-                const teacherBookings: Booking[] = await teacherBookingsResponse.json();
-                teacherBookings.forEach(booking => {
-                    const key = booking.studentEmail?.toLowerCase() || booking.studentId;
-                    if (!conversationMap.has(key)) {
-                        conversationMap.set(key, {
-                            recipientId: booking.studentId,
-                            recipientEmail: booking.studentEmail,
-                            recipientName: booking.studentEmail.split('@')[0]
-                        });
-                    }
-                });
-            }
-
-            setConversations(Array.from(conversationMap.values()));
         } catch (error) {
-            console.error('Error fetching conversations:', error);
+            console.error('Error fetching partners:', error);
         } finally {
             setIsLoading(false);
         }
@@ -115,8 +73,8 @@ export const ChatPage: React.FC = () => {
 
                 <div className="bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden" style={{ height: 'calc(100vh - 250px)', minHeight: '500px' }}>
                     <div className="flex h-full">
-                        {/* Conversations List */}
-                        <div className={`${isMobileView && selectedConversation ? 'hidden' : 'block'} w-full md:w-80 border-r border-secondary-100 bg-secondary-50`}>
+                        {/* Partners List */}
+                        <div className={`${isMobileView && selectedPartner ? 'hidden' : 'block'} w-full md:w-80 border-r border-secondary-100 bg-secondary-50`}>
                             <div className="p-4 border-b border-secondary-100 bg-white">
                                 <h2 className="font-semibold text-secondary-900 flex items-center gap-2">
                                     <Users size={18} />
@@ -129,35 +87,30 @@ export const ChatPage: React.FC = () => {
                                     <div className="flex justify-center py-8">
                                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                                     </div>
-                                ) : conversations.length === 0 ? (
+                                ) : partners.length === 0 ? (
                                     <div className="text-center py-12 text-secondary-500 px-4">
                                         <MessageCircle size={48} className="mx-auto mb-4 opacity-50" />
                                         <p className="font-medium">No conversations yet</p>
                                         <p className="text-sm mt-2">Book a lesson to start chatting with a tutor!</p>
                                     </div>
                                 ) : (
-                                    conversations.map((conv) => (
+                                    partners.map((partner) => (
                                         <motion.button
-                                            key={conv.recipientId}
+                                            key={partner.email}
                                             whileHover={{ backgroundColor: 'rgba(99, 102, 241, 0.05)' }}
-                                            onClick={() => setSelectedConversation(conv)}
-                                            className={`w-full p-4 flex items-center gap-3 border-b border-secondary-100 transition-colors ${selectedConversation?.recipientId === conv.recipientId ? 'bg-primary-50' : ''
+                                            onClick={() => setSelectedPartner(partner)}
+                                            className={`w-full p-4 flex items-center gap-3 border-b border-secondary-100 transition-colors ${selectedPartner?.email === partner.email ? 'bg-primary-50' : ''
                                                 }`}
                                         >
                                             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
-                                                {conv.recipientName.charAt(0).toUpperCase()}
+                                                {partner.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <h3 className="font-medium text-secondary-900">{conv.recipientName}</h3>
+                                                <h3 className="font-medium text-secondary-900">{partner.name}</h3>
                                                 <p className="text-sm text-secondary-500 truncate">
-                                                    {conv.lastMessage || 'Start a conversation'}
+                                                    {partner.email}
                                                 </p>
                                             </div>
-                                            {conv.unreadCount && conv.unreadCount > 0 && (
-                                                <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs flex items-center justify-center">
-                                                    {conv.unreadCount}
-                                                </span>
-                                            )}
                                         </motion.button>
                                     ))
                                 )}
@@ -165,15 +118,13 @@ export const ChatPage: React.FC = () => {
                         </div>
 
                         {/* Chat Window */}
-                        <div className={`${isMobileView && !selectedConversation ? 'hidden' : 'block'} flex-1`}>
-                            {selectedConversation ? (
+                        <div className={`${isMobileView && !selectedPartner ? 'hidden' : 'block'} flex-1`}>
+                            {selectedPartner ? (
                                 <ChatWindow
-                                    recipientId={selectedConversation.recipientId}
-                                    recipientEmail={selectedConversation.recipientEmail}
-                                    recipientName={selectedConversation.recipientName}
-                                    currentUserId={user.userId}
+                                    partnerEmail={selectedPartner.email}
+                                    partnerName={selectedPartner.name}
                                     currentUserEmail={user.userDetails || ''}
-                                    onClose={isMobileView ? () => setSelectedConversation(null) : undefined}
+                                    onClose={isMobileView ? () => setSelectedPartner(null) : undefined}
                                 />
                             ) : (
                                 <div className="h-full flex items-center justify-center text-secondary-500">

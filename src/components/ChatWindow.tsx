@@ -1,35 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, AlertTriangle, Flag, X, MessageCircle } from 'lucide-react';
+import { Send, AlertTriangle, MessageCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 
 interface Message {
     id: string;
-    senderId: string;
+    senderEmail: string;
     senderName: string;
     content: string;
     timestamp: string;
     isRead: boolean;
-    warning?: string;
 }
 
 interface ChatWindowProps {
-    recipientId: string;
-    recipientEmail: string;
-    recipientName: string;
-    currentUserId: string;
+    partnerEmail: string;
+    partnerName: string;
     currentUserEmail: string;
-    bookingId?: string;
     onClose?: () => void;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
-    recipientId,
-    recipientEmail,
-    recipientName,
-    currentUserId,
+    partnerEmail,
+    partnerName,
     currentUserEmail,
-    bookingId,
     onClose
 }) => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -38,20 +31,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [warning, setWarning] = useState<string | null>(null);
-    const [reportingMessage, setReportingMessage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Generate conversation ID using emails (consistent for both parties)
-    const emails = [currentUserEmail.toLowerCase(), recipientEmail.toLowerCase()].sort();
-    const conversationId = `conv_${emails[0].replace(/[^a-z0-9]/g, '_')}_${emails[1].replace(/[^a-z0-9]/g, '_')}`;
-
     useEffect(() => {
         fetchMessages();
-        // Poll for new messages every 5 seconds
-        const interval = setInterval(fetchMessages, 5000);
+        // Poll for new messages every 3 seconds
+        const interval = setInterval(fetchMessages, 3000);
         return () => clearInterval(interval);
-    }, [conversationId]);
+    }, [partnerEmail]);
 
     useEffect(() => {
         scrollToBottom();
@@ -63,11 +51,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
     const fetchMessages = async () => {
         try {
-            const response = await fetch(`/api/messages/conv_${conversationId}`);
+            const encodedEmail = encodeURIComponent(partnerEmail);
+            const response = await fetch(`/api/chat/messages/${encodedEmail}`);
             if (response.ok) {
                 const data = await response.json();
                 setMessages(data);
                 setError(null);
+            } else {
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
             }
         } catch (err) {
             console.error('Error fetching messages:', err);
@@ -84,15 +76,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         setWarning(null);
 
         try {
-            const response = await fetch('/api/messages', {
+            const response = await fetch('/api/chat/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    recipientId,
-                    recipientEmail,
-                    recipientName,
-                    content: newMessage.trim(),
-                    bookingId
+                    recipientEmail: partnerEmail,
+                    recipientName: partnerName,
+                    content: newMessage.trim()
                 })
             });
 
@@ -119,23 +109,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         }
     };
 
-    const handleReport = async (messageId: string, reason: string) => {
-        try {
-            const response = await fetch(`/api/messages/${messageId}/report`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reason })
-            });
-
-            if (response.ok) {
-                setReportingMessage(null);
-                alert('Report submitted. Our team will review it.');
-            }
-        } catch (err) {
-            console.error('Error reporting message:', err);
-        }
-    };
-
     const formatTime = (timestamp: string) => {
         const date = new Date(timestamp);
         const now = new Date();
@@ -154,16 +127,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold">
-                        {recipientName.charAt(0).toUpperCase()}
+                        {partnerName.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <h3 className="font-semibold">{recipientName}</h3>
-                        <p className="text-xs text-white/70">Click to send a message</p>
+                        <h3 className="font-semibold">{partnerName}</h3>
+                        <p className="text-xs text-white/70">{partnerEmail}</p>
                     </div>
                 </div>
                 {onClose && (
                     <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X size={20} />
+                        ✕
                     </button>
                 )}
             </div>
@@ -183,7 +156,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 ) : (
                     <AnimatePresence>
                         {messages.map((message) => {
-                            const isOwn = message.senderId === currentUserId;
+                            const isOwn = message.senderEmail.toLowerCase() === currentUserEmail.toLowerCase();
                             return (
                                 <motion.div
                                     key={message.id}
@@ -191,11 +164,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                     animate={{ opacity: 1, y: 0 }}
                                     className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                                 >
-                                    <div className={`group max-w-[75%] ${isOwn ? 'order-2' : ''}`}>
+                                    <div className="max-w-[75%]">
                                         <div
                                             className={`px-4 py-2 rounded-2xl ${isOwn
-                                                ? 'bg-primary-500 text-white rounded-br-md'
-                                                : 'bg-white text-secondary-900 rounded-bl-md shadow-sm'
+                                                    ? 'bg-primary-500 text-white rounded-br-md'
+                                                    : 'bg-white text-secondary-900 rounded-bl-md shadow-sm'
                                                 }`}
                                         >
                                             <p className="break-words">{message.content}</p>
@@ -204,15 +177,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                             <span className="text-xs text-secondary-400">
                                                 {formatTime(message.timestamp)}
                                             </span>
-                                            {!isOwn && (
-                                                <button
-                                                    onClick={() => setReportingMessage(message.id)}
-                                                    className="opacity-0 group-hover:opacity-100 text-secondary-400 hover:text-red-500 transition-all"
-                                                    title="Report message"
-                                                >
-                                                    <Flag size={12} />
-                                                </button>
-                                            )}
                                         </div>
                                     </div>
                                 </motion.div>
@@ -272,48 +236,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     </Button>
                 </form>
                 <p className="text-xs text-secondary-400 mt-2 text-center">
-                    Messages are monitored for safety. Do not share personal contact information.
+                    Messages are monitored for safety.
                 </p>
             </div>
-
-            {/* Report Modal */}
-            <AnimatePresence>
-                {reportingMessage && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.95 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.95 }}
-                            className="bg-white rounded-xl p-6 max-w-sm w-full"
-                        >
-                            <h3 className="font-bold text-lg mb-4">Report Message</h3>
-                            <p className="text-secondary-600 mb-4">Why are you reporting this message?</p>
-                            <div className="space-y-2">
-                                {['Inappropriate content', 'Harassment', 'Spam', 'Other'].map((reason) => (
-                                    <button
-                                        key={reason}
-                                        onClick={() => handleReport(reportingMessage, reason)}
-                                        className="w-full text-left px-4 py-2 rounded-lg hover:bg-secondary-100 transition-colors"
-                                    >
-                                        {reason}
-                                    </button>
-                                ))}
-                            </div>
-                            <button
-                                onClick={() => setReportingMessage(null)}
-                                className="mt-4 w-full py-2 text-secondary-600 hover:text-secondary-900"
-                            >
-                                Cancel
-                            </button>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </div>
     );
 };

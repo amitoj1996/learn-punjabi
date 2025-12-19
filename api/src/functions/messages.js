@@ -2,33 +2,17 @@ const { app } = require('@azure/functions');
 const { getContainer } = require('./config/cosmos');
 
 // Basic keyword filter for inappropriate content
-const BLOCKED_KEYWORDS = [
-    // Add inappropriate words/phrases here
-    'inappropriate1', 'inappropriate2'
-];
-
-const WARNING_KEYWORDS = [
-    'phone', 'number', 'email', 'address', 'meet outside', 'personal'
-];
+const BLOCKED_KEYWORDS = ['inappropriate1', 'inappropriate2'];
+const WARNING_KEYWORDS = ['phone', 'number', 'address', 'meet outside'];
 
 function moderateContent(text) {
     const lowerText = text.toLowerCase();
-
-    // Check for blocked content
     for (const keyword of BLOCKED_KEYWORDS) {
         if (lowerText.includes(keyword.toLowerCase())) {
             return { passed: false, reason: 'Message contains inappropriate content' };
         }
     }
-
-    // Check for warnings (allowed but flagged)
-    const warnings = [];
-    for (const keyword of WARNING_KEYWORDS) {
-        if (lowerText.includes(keyword.toLowerCase())) {
-            warnings.push(keyword);
-        }
-    }
-
+    const warnings = WARNING_KEYWORDS.filter(kw => lowerText.includes(kw.toLowerCase()));
     return {
         passed: true,
         warnings: warnings.length > 0 ? warnings : null,
@@ -36,11 +20,18 @@ function moderateContent(text) {
     };
 }
 
-// Get conversations for a user
-app.http('getConversations', {
+// Helper to create consistent conversation ID from two emails
+function makeConversationId(email1, email2) {
+    const emails = [email1.toLowerCase(), email2.toLowerCase()].sort();
+    // Create a simple, clean conversation ID
+    return `chat_${emails.join('_').replace(/[^a-z0-9_]/g, '')}`;
+}
+
+// Get all messages for a user (by their email - works for both students and teachers)
+app.http('getChatMessages', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'conversations',
+    route: 'chat/messages/{partnerEmail}',
     handler: async (request, context) => {
         try {
             const clientPrincipal = request.headers.get('x-ms-client-principal');
@@ -49,76 +40,21 @@ app.http('getConversations', {
             }
 
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
-            const userId = principal.userId;
+            const userEmail = principal.userDetails;
+            const partnerEmail = decodeURIComponent(request.params.partnerEmail);
+
+            const conversationId = makeConversationId(userEmail, partnerEmail);
+            context.log('Getting messages for conversation:', conversationId);
 
             const container = await getContainer('messages');
-
-            // Get unique conversations for this user
             const { resources: messages } = await container.items
                 .query({
-                    query: 'SELECT DISTINCT c.conversationId, c.recipientId, c.senderId, c.senderName FROM c WHERE c.senderId = @userId OR c.recipientId = @userId ORDER BY c.timestamp DESC',
-                    parameters: [{ name: '@userId', value: userId }]
+                    query: 'SELECT * FROM c WHERE c.conversationId = @convId ORDER BY c.timestamp ASC',
+                    parameters: [{ name: '@convId', value: conversationId }]
                 })
                 .fetchAll();
 
-            // Group by conversation and get last message
-            const conversationMap = new Map();
-            for (const msg of messages) {
-                if (!conversationMap.has(msg.conversationId)) {
-                    conversationMap.set(msg.conversationId, msg);
-                }
-            }
-
-            return { jsonBody: Array.from(conversationMap.values()) };
-        } catch (error) {
-            context.error('Error getting conversations:', error);
-            return { status: 500, jsonBody: { error: error.message } };
-        }
-    }
-});
-
-// Get messages for a conversation
-app.http('getMessages', {
-    methods: ['GET'],
-    authLevel: 'anonymous',
-    route: 'messages/{conversationId}',
-    handler: async (request, context) => {
-        try {
-            const clientPrincipal = request.headers.get('x-ms-client-principal');
-            if (!clientPrincipal) {
-                return { status: 401, jsonBody: { error: 'Not authenticated' } };
-            }
-
-            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
-            const userId = principal.userId;
-            const conversationId = request.params.conversationId;
-
-            const container = await getContainer('messages');
-
-            // Get messages for this conversation
-            const { resources: messages } = await container.items
-                .query({
-                    query: 'SELECT * FROM c WHERE c.conversationId = @conversationId ORDER BY c.timestamp ASC',
-                    parameters: [{ name: '@conversationId', value: conversationId }]
-                })
-                .fetchAll();
-
-            // Verify user is part of this conversation
-            if (messages.length > 0) {
-                const firstMsg = messages[0];
-                if (firstMsg.senderId !== userId && firstMsg.recipientId !== userId) {
-                    return { status: 403, jsonBody: { error: 'Not authorized to view this conversation' } };
-                }
-            }
-
-            // Mark messages as read
-            for (const msg of messages) {
-                if (msg.recipientId === userId && !msg.isRead) {
-                    msg.isRead = true;
-                    await container.item(msg.id, msg.conversationId).replace(msg);
-                }
-            }
-
+            context.log('Found messages:', messages.length);
             return { jsonBody: messages };
         } catch (error) {
             context.error('Error getting messages:', error);
@@ -128,10 +64,10 @@ app.http('getMessages', {
 });
 
 // Send a message
-app.http('sendMessage', {
+app.http('sendChatMessage', {
     methods: ['POST'],
     authLevel: 'anonymous',
-    route: 'messages',
+    route: 'chat/send',
     handler: async (request, context) => {
         try {
             const clientPrincipal = request.headers.get('x-ms-client-principal');
@@ -140,14 +76,15 @@ app.http('sendMessage', {
             }
 
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
-            const userId = principal.userId;
-            const userEmail = principal.userDetails;
+            const senderEmail = principal.userDetails;
 
             const body = await request.json();
-            const { recipientId, recipientName, content, bookingId } = body;
+            const { recipientEmail, recipientName, content } = body;
 
-            if (!recipientId || !content) {
-                return { status: 400, jsonBody: { error: 'Recipient and content are required' } };
+            context.log('Sending message from', senderEmail, 'to', recipientEmail);
+
+            if (!recipientEmail || !content) {
+                return { status: 400, jsonBody: { error: 'Recipient email and content are required' } };
             }
 
             // Content moderation
@@ -156,84 +93,60 @@ app.http('sendMessage', {
                 return { status: 400, jsonBody: { error: moderation.reason, blocked: true } };
             }
 
-            // Verify they have a booking together (security check)
-            // Check by both userId AND email since tutorId in booking != userId from auth
+            // Verify they have a booking together
             const bookingsContainer = await getContainer('bookings');
             const { resources: bookings } = await bookingsContainer.items
                 .query({
                     query: `SELECT * FROM c WHERE 
-                        (c.studentId = @user1 AND c.tutorId = @user2) OR 
-                        (c.studentId = @user2 AND c.tutorId = @user1) OR
                         (c.studentEmail = @email1 AND c.tutorEmail = @email2) OR
-                        (c.studentEmail = @email2 AND c.tutorEmail = @email1) OR
-                        (c.studentId = @user1 AND c.tutorEmail = @email2) OR
-                        (c.studentEmail = @email1 AND c.tutorId = @user2) OR
-                        (c.tutorEmail = @email1) OR
-                        (c.studentEmail = @email1)`,
+                        (c.studentEmail = @email2 AND c.tutorEmail = @email1)`,
                     parameters: [
-                        { name: '@user1', value: userId },
-                        { name: '@user2', value: recipientId },
-                        { name: '@email1', value: userEmail },
-                        { name: '@email2', value: recipientId }
+                        { name: '@email1', value: senderEmail },
+                        { name: '@email2', value: recipientEmail }
                     ]
                 })
                 .fetchAll();
 
             if (bookings.length === 0) {
+                context.log('No booking found between', senderEmail, 'and', recipientEmail);
                 return { status: 403, jsonBody: { error: 'You can only message users you have bookings with' } };
             }
 
-            // Get sender name from users container
-            const usersContainer = await getContainer('users');
-            const { resources: users } = await usersContainer.items
-                .query({
-                    query: 'SELECT * FROM c WHERE c.userId = @userId',
-                    parameters: [{ name: '@userId', value: userId }]
-                })
-                .fetchAll();
-
-            const senderName = users.length > 0 ? users[0].name : userEmail;
-
-            // Get recipient email - could be passed or we find it from booking
-            let recipientEmail = body.recipientEmail || recipientId;
-
-            // If recipientId looks like an email, use it; otherwise find email from booking
-            if (!recipientEmail.includes('@') && bookings.length > 0) {
-                const booking = bookings[0];
-                // Figure out who the recipient is based on booking
-                if (booking.studentEmail === userEmail) {
-                    recipientEmail = booking.tutorEmail;
-                } else if (booking.tutorEmail === userEmail) {
-                    recipientEmail = booking.studentEmail;
+            // Get sender name from tutors or use email
+            let senderName = senderEmail.split('@')[0];
+            try {
+                const tutorsContainer = await getContainer('tutors');
+                const { resources: tutors } = await tutorsContainer.items
+                    .query({
+                        query: 'SELECT * FROM c WHERE c.email = @email',
+                        parameters: [{ name: '@email', value: senderEmail }]
+                    })
+                    .fetchAll();
+                if (tutors.length > 0) {
+                    senderName = tutors[0].name;
                 }
+            } catch (e) {
+                // Ignore, use email username
             }
 
-            // Create conversation ID using emails (consistent for both parties)
-            const emails = [userEmail.toLowerCase(), recipientEmail.toLowerCase()].sort();
-            const conversationId = `conv_${emails[0].replace(/[^a-z0-9]/g, '_')}_${emails[1].replace(/[^a-z0-9]/g, '_')}`;
+            const conversationId = makeConversationId(senderEmail, recipientEmail);
+            context.log('Creating message with conversationId:', conversationId);
 
             const messagesContainer = await getContainer('messages');
-
             const message = {
                 id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 conversationId,
-                senderId: userId,
-                senderEmail: userEmail,
+                senderEmail,
                 senderName,
-                recipientId,
                 recipientEmail,
-                recipientName: recipientName || 'Unknown',
+                recipientName: recipientName || recipientEmail.split('@')[0],
                 content,
                 timestamp: new Date().toISOString(),
-                isRead: false,
-                bookingId: bookingId || null,
-                moderation: {
-                    passed: true,
-                    warnings: moderation.warnings
-                }
+                isRead: false
             };
 
             await messagesContainer.items.create(message);
+            context.log('Message created successfully:', message.id);
 
             return {
                 jsonBody: {
@@ -248,64 +161,11 @@ app.http('sendMessage', {
     }
 });
 
-// Report a message
-app.http('reportMessage', {
-    methods: ['POST'],
-    authLevel: 'anonymous',
-    route: 'messages/{messageId}/report',
-    handler: async (request, context) => {
-        try {
-            const clientPrincipal = request.headers.get('x-ms-client-principal');
-            if (!clientPrincipal) {
-                return { status: 401, jsonBody: { error: 'Not authenticated' } };
-            }
-
-            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
-            const userId = principal.userId;
-            const messageId = request.params.messageId;
-            const body = await request.json();
-            const { reason } = body;
-
-            // Store the report (you could create a separate reports container)
-            const container = await getContainer('messages');
-
-            // Find the message
-            const { resources: messages } = await container.items
-                .query({
-                    query: 'SELECT * FROM c WHERE c.id = @messageId',
-                    parameters: [{ name: '@messageId', value: messageId }]
-                })
-                .fetchAll();
-
-            if (messages.length === 0) {
-                return { status: 404, jsonBody: { error: 'Message not found' } };
-            }
-
-            const message = messages[0];
-
-            // Add report to message
-            message.reports = message.reports || [];
-            message.reports.push({
-                reportedBy: userId,
-                reason,
-                timestamp: new Date().toISOString()
-            });
-
-            await container.item(message.id, message.conversationId).replace(message);
-
-            return { jsonBody: { success: true, message: 'Report submitted. Our team will review it.' } };
-        } catch (error) {
-            context.error('Error reporting message:', error);
-            return { status: 500, jsonBody: { error: error.message } };
-        }
-    }
-});
-
-// Get unread message count
-app.http('getUnreadCount', {
+// Get chat partners (people user can chat with based on bookings)
+app.http('getChatPartners', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'messages/unread/count',
+    route: 'chat/partners',
     handler: async (request, context) => {
         try {
             const clientPrincipal = request.headers.get('x-ms-client-principal');
@@ -314,20 +174,45 @@ app.http('getUnreadCount', {
             }
 
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
-            const userId = principal.userId;
+            const userEmail = principal.userDetails;
 
-            const container = await getContainer('messages');
+            context.log('Getting chat partners for:', userEmail);
 
-            const { resources } = await container.items
+            const bookingsContainer = await getContainer('bookings');
+            const { resources: bookings } = await bookingsContainer.items
                 .query({
-                    query: 'SELECT VALUE COUNT(1) FROM c WHERE c.recipientId = @userId AND c.isRead = false',
-                    parameters: [{ name: '@userId', value: userId }]
+                    query: 'SELECT * FROM c WHERE c.studentEmail = @email OR c.tutorEmail = @email',
+                    parameters: [{ name: '@email', value: userEmail }]
                 })
                 .fetchAll();
 
-            return { jsonBody: { unreadCount: resources[0] || 0 } };
+            // Extract unique chat partners
+            const partnersMap = new Map();
+            for (const booking of bookings) {
+                if (booking.studentEmail === userEmail) {
+                    // User is student, partner is tutor
+                    if (!partnersMap.has(booking.tutorEmail)) {
+                        partnersMap.set(booking.tutorEmail, {
+                            email: booking.tutorEmail,
+                            name: booking.tutorName || booking.tutorEmail.split('@')[0]
+                        });
+                    }
+                } else if (booking.tutorEmail === userEmail) {
+                    // User is tutor, partner is student
+                    if (!partnersMap.has(booking.studentEmail)) {
+                        partnersMap.set(booking.studentEmail, {
+                            email: booking.studentEmail,
+                            name: booking.studentEmail.split('@')[0]
+                        });
+                    }
+                }
+            }
+
+            const partners = Array.from(partnersMap.values());
+            context.log('Found partners:', partners.length);
+            return { jsonBody: partners };
         } catch (error) {
-            context.error('Error getting unread count:', error);
+            context.error('Error getting chat partners:', error);
             return { status: 500, jsonBody: { error: error.message } };
         }
     }
