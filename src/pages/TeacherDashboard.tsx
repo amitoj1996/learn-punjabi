@@ -3,6 +3,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Layout } from '../components/Layout';
 import { Link } from 'react-router-dom';
+import { MessageCircle } from 'lucide-react';
 
 interface Application {
     id: string;
@@ -198,6 +199,11 @@ export const TeacherDashboard: React.FC = () => {
                                                 <p className="text-sm text-secondary-500">{new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.time}</p>
                                             </div>
                                             <div className="flex items-center gap-2">
+                                                <Link to="/messages">
+                                                    <Button size="sm" variant="outline" className="flex items-center gap-1">
+                                                        <MessageCircle size={14} /> Chat
+                                                    </Button>
+                                                </Link>
                                                 {booking.meetingLink && (
                                                     <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer">
                                                         <Button size="sm" className="bg-green-600 hover:bg-green-700">📹 Join</Button>

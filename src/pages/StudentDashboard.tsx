@@ -5,6 +5,7 @@ import { Layout } from '../components/Layout';
 import { ReviewModal } from '../components/ReviewModal';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { MessageCircle } from 'lucide-react';
 
 interface Tutor {
     id: string;
@@ -122,6 +123,11 @@ export const StudentDashboard: React.FC = () => {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
+                                                    <Link to={`/messages`}>
+                                                        <Button size="sm" variant="outline" className="flex items-center gap-1">
+                                                            <MessageCircle size={14} /> Chat
+                                                        </Button>
+                                                    </Link>
                                                     {booking.meetingLink && (
                                                         <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer">
                                                             <Button size="sm" className="bg-green-600 hover:bg-green-700">📹 Join</Button>

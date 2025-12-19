@@ -5,6 +5,7 @@ import { TutorSearch } from './pages/TutorSearch';
 import { EditProfile } from './pages/EditProfile';
 import { AvailabilitySettings } from './pages/AvailabilitySettings';
 import { LoginPage } from './pages/LoginPage';
+import { ChatPage } from './pages/ChatPage';
 import { DashboardRouter } from './routes/DashboardRouter';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardRouter />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/availability" element={<AvailabilitySettings />} />
+        <Route path="/messages" element={<ChatPage />} />
       </Routes>
     </BrowserRouter>
   );
