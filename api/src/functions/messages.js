@@ -157,13 +157,24 @@ app.http('sendMessage', {
             }
 
             // Verify they have a booking together (security check)
+            // Check by both userId AND email since tutorId in booking != userId from auth
             const bookingsContainer = await getContainer('bookings');
             const { resources: bookings } = await bookingsContainer.items
                 .query({
-                    query: 'SELECT * FROM c WHERE (c.studentId = @user1 AND c.tutorId = @user2) OR (c.studentId = @user2 AND c.tutorId = @user1)',
+                    query: `SELECT * FROM c WHERE 
+                        (c.studentId = @user1 AND c.tutorId = @user2) OR 
+                        (c.studentId = @user2 AND c.tutorId = @user1) OR
+                        (c.studentEmail = @email1 AND c.tutorEmail = @email2) OR
+                        (c.studentEmail = @email2 AND c.tutorEmail = @email1) OR
+                        (c.studentId = @user1 AND c.tutorEmail = @email2) OR
+                        (c.studentEmail = @email1 AND c.tutorId = @user2) OR
+                        (c.tutorEmail = @email1) OR
+                        (c.studentEmail = @email1)`,
                     parameters: [
                         { name: '@user1', value: userId },
-                        { name: '@user2', value: recipientId }
+                        { name: '@user2', value: recipientId },
+                        { name: '@email1', value: userEmail },
+                        { name: '@email2', value: recipientId }
                     ]
                 })
                 .fetchAll();
