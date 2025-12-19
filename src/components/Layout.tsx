@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/Button';
 import { useAuth } from '../context/AuthContext';
+import { Logo } from './Logo';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -14,8 +15,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="min-h-screen flex flex-col font-sans text-secondary-900">
             <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-secondary-100 z-50">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link to="/" className="text-2xl font-display font-bold text-primary-600">
-                        Learn Punjabi
+                    <Link to="/">
+                        <Logo size="sm" />
                     </Link>
                     <div className="flex-grow"></div>
                     <div className="flex items-center gap-4">
