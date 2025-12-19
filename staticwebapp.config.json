@@ -8,10 +8,6 @@
       "rewrite": "/.auth/login/aad"
     },
     {
-      "route": "/login/google",
-      "rewrite": "/.auth/login/google"
-    },
-    {
       "route": "/logout",
       "rewrite": "/.auth/logout"
     },
