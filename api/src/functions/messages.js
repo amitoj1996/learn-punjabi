@@ -1,9 +1,28 @@
 const { app } = require('@azure/functions');
 const { getContainer } = require('./config/cosmos');
 
-// Basic keyword filter for inappropriate content
-const BLOCKED_KEYWORDS = ['inappropriate1', 'inappropriate2'];
-const WARNING_KEYWORDS = ['phone', 'number', 'address', 'meet outside'];
+// Content moderation - blocked words for a tutoring platform
+const BLOCKED_KEYWORDS = [
+    // Sexual/explicit content
+    'sexy', 'sex', 'porn', 'nude', 'naked', 'xxx', 'nsfw', 'horny', 'dick', 'cock',
+    'pussy', 'boobs', 'tits', 'ass', 'butt', 'penis', 'vagina', 'breasts', 'erotic',
+    'orgasm', 'masturbate', 'blowjob', 'handjob', 'fetish', 'bdsm', 'kinky',
+    'slutty', 'slut', 'whore', 'hooker', 'prostitute', 'escort service',
+    // Profanity
+    'fuck', 'shit', 'bitch', 'bastard', 'damn', 'crap', 'piss', 'asshole',
+    'motherfucker', 'wtf', 'stfu', 'bullshit',
+    // Harassment/threats
+    'kill you', 'hurt you', 'beat you', 'rape', 'molest', 'abuse', 'attack',
+    'stalk', 'harass', 'threaten', 'die', 'suicide', 'murder',
+    // Discrimination
+    'racist', 'n-word', 'nigger', 'faggot', 'retard', 'cunt',
+    // Scam/inappropriate requests
+    'send money', 'wire transfer', 'bitcoin', 'crypto payment', 'gift card',
+    'meet alone', 'come to my house', 'my place', 'hotel room',
+    'nude photo', 'send pics', 'video call private'
+];
+
+const WARNING_KEYWORDS = ['phone', 'number', 'address', 'meet outside', 'personal email', 'whatsapp', 'telegram', 'snapchat', 'instagram'];
 
 function moderateContent(text) {
     const lowerText = text.toLowerCase();
