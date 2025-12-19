@@ -5,7 +5,7 @@
   "routes": [
     {
       "route": "/login/microsoft",
-      "rewrite": "/.auth/login/aad"
+      "rewrite": "/.auth/login/aad?prompt=select_account"
     },
     {
       "route": "/logout",
