@@ -12,8 +12,8 @@
       "rewrite": "/.auth/login/google"
     },
     {
-      "route": "/login/github",
-      "rewrite": "/.auth/login/github"
+      "route": "/login/apple",
+      "rewrite": "/.auth/login/apple"
     },
     {
       "route": "/logout",
