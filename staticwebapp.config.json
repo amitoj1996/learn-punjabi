@@ -4,8 +4,16 @@
   },
   "routes": [
     {
-      "route": "/login",
+      "route": "/login/microsoft",
       "rewrite": "/.auth/login/aad"
+    },
+    {
+      "route": "/login/google",
+      "rewrite": "/.auth/login/google"
+    },
+    {
+      "route": "/login/github",
+      "rewrite": "/.auth/login/github"
     },
     {
       "route": "/logout",

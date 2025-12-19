@@ -4,6 +4,7 @@ import { TeacherOnboarding } from './pages/TeacherOnboarding';
 import { TutorSearch } from './pages/TutorSearch';
 import { EditProfile } from './pages/EditProfile';
 import { AvailabilitySettings } from './pages/AvailabilitySettings';
+import { LoginPage } from './pages/LoginPage';
 import { DashboardRouter } from './routes/DashboardRouter';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/teach" element={<TeacherOnboarding />} />
         <Route path="/tutors" element={<TutorSearch />} />
         <Route path="/dashboard" element={<DashboardRouter />} />
