@@ -34,13 +34,57 @@ const BLOCKED_KEYWORDS = [
 
 const WARNING_KEYWORDS = ['phone', 'number', 'address', 'meet outside', 'personal email', 'whatsapp', 'telegram', 'snapchat', 'instagram'];
 
-function moderateContent(text) {
+// Azure AI Content Safety configuration
+const CONTENT_SAFETY_ENDPOINT = process.env.CONTENT_SAFETY_ENDPOINT;
+const CONTENT_SAFETY_KEY = process.env.CONTENT_SAFETY_KEY;
+
+// AI-powered content moderation with keyword fallback
+async function moderateContent(text, context) {
     const lowerText = text.toLowerCase();
+
+    // First, try Azure AI Content Safety if configured
+    if (CONTENT_SAFETY_ENDPOINT && CONTENT_SAFETY_KEY) {
+        try {
+            const response = await fetch(`${CONTENT_SAFETY_ENDPOINT}/contentsafety/text:analyze?api-version=2023-10-01`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Ocp-Apim-Subscription-Key': CONTENT_SAFETY_KEY
+                },
+                body: JSON.stringify({
+                    text: text,
+                    categories: ['Hate', 'Sexual', 'Violence', 'SelfHarm'],
+                    blocklistNames: [],
+                    haltOnBlocklistHit: false
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                // Check if any category has severity >= 2 (Medium or higher)
+                const blocked = result.categoriesAnalysis?.some(cat => cat.severity >= 2);
+                if (blocked) {
+                    const blockedCategories = result.categoriesAnalysis
+                        .filter(cat => cat.severity >= 2)
+                        .map(cat => cat.category);
+                    context?.log('AI Content Safety blocked:', blockedCategories);
+                    return { passed: false, reason: 'Message contains inappropriate content', aiBlocked: true };
+                }
+            } else {
+                context?.log('AI Content Safety API error, falling back to keywords');
+            }
+        } catch (error) {
+            context?.log('AI Content Safety error, falling back to keywords:', error.message);
+        }
+    }
+
+    // Fallback to keyword filtering
     for (const keyword of BLOCKED_KEYWORDS) {
         if (lowerText.includes(keyword.toLowerCase())) {
             return { passed: false, reason: 'Message contains inappropriate content' };
         }
     }
+
     const warnings = WARNING_KEYWORDS.filter(kw => lowerText.includes(kw.toLowerCase()));
     return {
         passed: true,
@@ -116,8 +160,8 @@ app.http('sendChatMessage', {
                 return { status: 400, jsonBody: { error: 'Recipient email and content are required' } };
             }
 
-            // Content moderation
-            const moderation = moderateContent(content);
+            // Content moderation (AI-powered with keyword fallback)
+            const moderation = await moderateContent(content, context);
             if (!moderation.passed) {
                 return { status: 400, jsonBody: { error: moderation.reason, blocked: true } };
             }
