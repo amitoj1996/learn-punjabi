@@ -100,7 +100,6 @@ const FloatingShapes: React.FC = () => (
             { char: 'ਯ', bottom: '8%', right: '28%', size: 'text-2xl', opacity: 0.3, delay: 0.6 },
             { char: 'ਰ', top: '15%', right: '35%', size: 'text-4xl', opacity: 0.5, delay: 0.2 },
             { char: 'ਲ', bottom: '12%', left: '8%', size: 'text-3xl', opacity: 0.4, delay: 0.8 },
-            { char: 'ੴ', top: '32%', right: '15%', size: 'text-5xl', opacity: 0.6, delay: 0 },
             { char: 'ਵ', bottom: '35%', right: '25%', size: 'text-2xl', opacity: 0.35, delay: 0.5 }
         ].map((letter, i) => (
             <motion.div
