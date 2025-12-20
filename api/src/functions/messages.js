@@ -436,9 +436,16 @@ app.http('getReports', {
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
             const userEmail = principal.userDetails;
 
-            // Check if user is admin (you can add more admin emails here)
-            const ADMIN_EMAILS = ['amitojmusic@gmail.com']; // Add your admin emails
-            if (!ADMIN_EMAILS.includes(userEmail.toLowerCase())) {
+            // Check if user is admin from database
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                    parameters: [{ name: '@email', value: userEmail }]
+                })
+                .fetchAll();
+
+            if (!users.length || users[0].role !== 'admin') {
                 return { status: 403, jsonBody: { error: 'Admin access required' } };
             }
 

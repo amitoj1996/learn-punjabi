@@ -1,6 +1,24 @@
 const { app } = require('@azure/functions');
 const { getContainer } = require('./config/cosmos');
 
+// Helper to check if user is admin
+async function isAdmin(userEmail) {
+    try {
+        const usersContainer = await getContainer('users');
+        const { resources: users } = await usersContainer.items
+            .query({
+                query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                parameters: [{ name: '@email', value: userEmail }]
+            })
+            .fetchAll();
+
+        return users.length > 0 && users[0].role === 'admin';
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+    }
+}
+
 // Admin: Suspend/Remove a teacher
 app.http('suspendTeacher', {
     methods: ['POST'],
@@ -16,9 +34,8 @@ app.http('suspendTeacher', {
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
             const adminEmail = principal.userDetails;
 
-            // Check if user is admin
-            const ADMIN_EMAILS = ['amitojmusic@gmail.com']; // Add your admin emails
-            if (!ADMIN_EMAILS.includes(adminEmail.toLowerCase())) {
+            // Check if user is admin using role from database
+            if (!await isAdmin(adminEmail)) {
                 return { status: 403, jsonBody: { error: 'Admin access required' } };
             }
 
@@ -96,9 +113,8 @@ app.http('getAllTeachers', {
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
             const adminEmail = principal.userDetails;
 
-            // Check if user is admin
-            const ADMIN_EMAILS = ['amitojmusic@gmail.com'];
-            if (!ADMIN_EMAILS.includes(adminEmail.toLowerCase())) {
+            // Check if user is admin using role from database
+            if (!await isAdmin(adminEmail)) {
                 return { status: 403, jsonBody: { error: 'Admin access required' } };
             }
 
@@ -132,8 +148,8 @@ app.http('reinstateTeacher', {
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
             const adminEmail = principal.userDetails;
 
-            const ADMIN_EMAILS = ['amitojmusic@gmail.com'];
-            if (!ADMIN_EMAILS.includes(adminEmail.toLowerCase())) {
+            // Check if user is admin using role from database
+            if (!await isAdmin(adminEmail)) {
                 return { status: 403, jsonBody: { error: 'Admin access required' } };
             }
 
