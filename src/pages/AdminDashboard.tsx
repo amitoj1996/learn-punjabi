@@ -154,7 +154,7 @@ export const AdminDashboard: React.FC = () => {
 
         // Fetch teachers
         try {
-            const teacherResponse = await fetch('/api/admin/teachers');
+            const teacherResponse = await fetch('/api/manager/teachers');
             if (teacherResponse.ok) {
                 const data = await teacherResponse.json();
                 setTeachers(data);
@@ -165,7 +165,7 @@ export const AdminDashboard: React.FC = () => {
 
         // Fetch reports
         try {
-            const reportsResponse = await fetch('/api/admin/reports');
+            const reportsResponse = await fetch('/api/manager/reports');
             if (reportsResponse.ok) {
                 const data = await reportsResponse.json();
                 setReports(data);
@@ -218,7 +218,7 @@ export const AdminDashboard: React.FC = () => {
     const handleSuspend = async (email: string) => {
         setIsProcessing(true);
         try {
-            const response = await fetch('/api/admin/teachers/suspend', {
+            const response = await fetch('/api/manager/teachers/suspend', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ teacherEmail: email, action: 'suspend', reason: 'Admin action' })
@@ -241,7 +241,7 @@ export const AdminDashboard: React.FC = () => {
     const handleReinstate = async (email: string) => {
         setIsProcessing(true);
         try {
-            const response = await fetch('/api/admin/teachers/reinstate', {
+            const response = await fetch('/api/manager/teachers/reinstate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ teacherEmail: email })

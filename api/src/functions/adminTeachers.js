@@ -23,7 +23,7 @@ async function isAdmin(userEmail) {
 app.http('suspendTeacher', {
     methods: ['POST'],
     authLevel: 'anonymous',
-    route: 'admin/teachers/suspend',
+    route: 'manager/teachers/suspend',
     handler: async (request, context) => {
         try {
             const clientPrincipal = request.headers.get('x-ms-client-principal');
@@ -102,7 +102,7 @@ app.http('suspendTeacher', {
 app.http('getAllTeachers', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'admin/teachers',
+    route: 'manager/teachers',
     handler: async (request, context) => {
         try {
             const clientPrincipal = request.headers.get('x-ms-client-principal');
@@ -137,7 +137,7 @@ app.http('getAllTeachers', {
 app.http('reinstateTeacher', {
     methods: ['POST'],
     authLevel: 'anonymous',
-    route: 'admin/teachers/reinstate',
+    route: 'manager/teachers/reinstate',
     handler: async (request, context) => {
         try {
             const clientPrincipal = request.headers.get('x-ms-client-principal');

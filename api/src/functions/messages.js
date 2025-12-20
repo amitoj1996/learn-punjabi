@@ -425,7 +425,7 @@ app.http('reportMessage', {
 app.http('getReports', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'admin/reports',
+    route: 'manager/reports',
     handler: async (request, context) => {
         try {
             const clientPrincipal = request.headers.get('x-ms-client-principal');
