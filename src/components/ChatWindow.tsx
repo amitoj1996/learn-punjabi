@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Send, AlertTriangle, MessageCircle, Trash2 } from 'lucide-react';
 import { Button } from './ui/Button';
 
 interface Message {
@@ -17,13 +17,15 @@ interface ChatWindowProps {
     partnerName: string;
     currentUserEmail: string;
     onClose?: () => void;
+    onDeleted?: () => void;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
     partnerEmail,
     partnerName,
     currentUserEmail,
-    onClose
+    onClose,
+    onDeleted
 }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
@@ -31,6 +33,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [warning, setWarning] = useState<string | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -109,6 +113,27 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         }
     };
 
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/chat/delete/${encodeURIComponent(partnerEmail)}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                setShowDeleteConfirm(false);
+                setMessages([]);
+                if (onDeleted) onDeleted();
+            } else {
+                const data = await response.json();
+                setError(data.error || 'Failed to delete conversation');
+            }
+        } catch (err) {
+            setError('Network error. Please try again.');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     const formatTime = (timestamp: string) => {
         const date = new Date(timestamp);
         const now = new Date();
@@ -134,11 +159,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                         <p className="text-xs text-white/70">{partnerEmail}</p>
                     </div>
                 </div>
-                {onClose && (
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                        ✕
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                        title="Delete conversation"
+                    >
+                        <Trash2 size={18} />
                     </button>
-                )}
+                    {onClose && (
+                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                            ✕
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Messages */}
@@ -167,8 +201,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                     <div className="max-w-[75%]">
                                         <div
                                             className={`px-4 py-2 rounded-2xl ${isOwn
-                                                    ? 'bg-primary-500 text-white rounded-br-md'
-                                                    : 'bg-white text-secondary-900 rounded-bl-md shadow-sm'
+                                                ? 'bg-primary-500 text-white rounded-br-md'
+                                                : 'bg-white text-secondary-900 rounded-bl-md shadow-sm'
                                                 }`}
                                         >
                                             <p className="break-words">{message.content}</p>
@@ -239,6 +273,52 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     Messages are monitored for safety.
                 </p>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {showDeleteConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.95 }}
+                            className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl"
+                        >
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                    <Trash2 className="text-red-600" size={20} />
+                                </div>
+                                <h3 className="font-bold text-lg text-secondary-900">Delete Conversation?</h3>
+                            </div>
+                            <p className="text-secondary-600 mb-6">
+                                This will hide all messages in this conversation from your view.
+                                Messages are preserved for safety review.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="flex-1 px-4 py-2 border border-secondary-300 rounded-lg hover:bg-secondary-50 transition-colors"
+                                    disabled={isDeleting}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                                >
+                                    {isDeleting ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

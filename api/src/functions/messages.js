@@ -124,8 +124,14 @@ app.http('getChatMessages', {
             const container = await getContainer('messages');
             const { resources: messages } = await container.items
                 .query({
-                    query: 'SELECT * FROM c WHERE c.conversationId = @convId ORDER BY c.timestamp ASC',
-                    parameters: [{ name: '@convId', value: conversationId }]
+                    // Filter out messages that this user has soft-deleted
+                    query: `SELECT * FROM c WHERE c.conversationId = @convId 
+                            AND (NOT IS_DEFINED(c.deletedBy) OR NOT ARRAY_CONTAINS(c.deletedBy, @userEmail))
+                            ORDER BY c.timestamp ASC`,
+                    parameters: [
+                        { name: '@convId', value: conversationId },
+                        { name: '@userEmail', value: userEmail.toLowerCase() }
+                    ]
                 })
                 .fetchAll();
 
@@ -133,6 +139,69 @@ app.http('getChatMessages', {
             return { jsonBody: messages };
         } catch (error) {
             context.error('Error getting messages:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
+
+// Soft-delete a conversation (hides from user but preserves for admin)
+app.http('deleteChat', {
+    methods: ['DELETE'],
+    authLevel: 'anonymous',
+    route: 'chat/delete/{partnerEmail}',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipal = request.headers.get('x-ms-client-principal');
+            if (!clientPrincipal) {
+                return { status: 401, jsonBody: { error: 'Not authenticated' } };
+            }
+
+            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
+            const userEmail = principal.userDetails.toLowerCase();
+            const partnerEmail = decodeURIComponent(request.params.partnerEmail);
+
+            const conversationId = makeConversationId(userEmail, partnerEmail);
+            context.log('Soft-deleting conversation:', conversationId, 'for user:', userEmail);
+
+            const container = await getContainer('messages');
+
+            // Get all messages in this conversation
+            const { resources: messages } = await container.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.conversationId = @convId',
+                    parameters: [{ name: '@convId', value: conversationId }]
+                })
+                .fetchAll();
+
+            // Mark each message as deleted by this user (soft delete)
+            let deletedCount = 0;
+            for (const message of messages) {
+                // Initialize deletedBy array if not exists
+                if (!message.deletedBy) {
+                    message.deletedBy = [];
+                }
+
+                // Add this user to deletedBy if not already there
+                if (!message.deletedBy.includes(userEmail)) {
+                    message.deletedBy.push(userEmail);
+                    message.deletedAt = message.deletedAt || {};
+                    message.deletedAt[userEmail] = new Date().toISOString();
+
+                    await container.item(message.id, message.conversationId).replace(message);
+                    deletedCount++;
+                }
+            }
+
+            context.log('Soft-deleted', deletedCount, 'messages');
+            return {
+                jsonBody: {
+                    success: true,
+                    message: `Conversation deleted. ${deletedCount} messages hidden.`,
+                    note: 'Messages are preserved for safety review if needed.'
+                }
+            };
+        } catch (error) {
+            context.error('Error deleting chat:', error);
             return { status: 500, jsonBody: { error: error.message } };
         }
     }
