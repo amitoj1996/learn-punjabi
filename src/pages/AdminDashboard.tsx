@@ -3,7 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Layout } from '../components/Layout';
-import { Users, BookOpen, CheckCircle, Clock, XCircle, Search, TrendingUp } from 'lucide-react';
+import {
+    Users, BookOpen, CheckCircle, Clock, XCircle, Search, TrendingUp,
+    Flag, UserX, UserCheck, MessageCircle, AlertTriangle, Eye
+} from 'lucide-react';
 
 interface Application {
     id: string;
@@ -13,8 +16,33 @@ interface Application {
     email: string;
     bio: string;
     hourlyRate: number;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'suspended';
     submittedAt: string;
+}
+
+interface Teacher {
+    id: string;
+    email: string;
+    name: string;
+    bio: string;
+    hourlyRate: number;
+    rating: number;
+    reviewCount: number;
+    status?: string;
+    isActive?: boolean;
+    createdAt: string;
+}
+
+interface Report {
+    id: string;
+    type: string;
+    messageId: string;
+    messageContent: string;
+    senderEmail: string;
+    reporterEmail: string;
+    reason: string;
+    status: string;
+    createdAt: string;
 }
 
 interface PlatformStats {
@@ -22,51 +50,10 @@ interface PlatformStats {
     totalTutors: number;
     totalBookings: number;
     pendingApplications: number;
+    pendingReports: number;
 }
 
-// Animated counter for stats
-const AnimatedNumber: React.FC<{ value: number; duration?: number }> = ({ value, duration = 1.5 }) => {
-    const [count, setCount] = useState(0);
-
-    useEffect(() => {
-        let start = 0;
-        const increment = value / (duration * 60);
-        const timer = setInterval(() => {
-            start += increment;
-            if (start >= value) {
-                setCount(value);
-                clearInterval(timer);
-            } else {
-                setCount(Math.floor(start));
-            }
-        }, 1000 / 60);
-        return () => clearInterval(timer);
-    }, [value, duration]);
-
-    return <span>{count}</span>;
-};
-
-// Skeleton loader for cards
-const ApplicationSkeleton: React.FC = () => (
-    <div className="p-6 bg-white rounded-xl border border-secondary-100 animate-pulse">
-        <div className="flex justify-between items-start mb-4">
-            <div className="flex gap-4">
-                <div className="w-12 h-12 bg-secondary-200 rounded-full" />
-                <div>
-                    <div className="h-5 bg-secondary-200 rounded w-32 mb-2" />
-                    <div className="h-4 bg-secondary-100 rounded w-40" />
-                </div>
-            </div>
-            <div className="h-6 bg-yellow-100 rounded-full w-16" />
-        </div>
-        <div className="h-4 bg-secondary-100 rounded w-full mb-2" />
-        <div className="h-4 bg-secondary-100 rounded w-3/4 mb-4" />
-        <div className="flex gap-3 justify-end">
-            <div className="h-8 bg-secondary-100 rounded w-20" />
-            <div className="h-8 bg-secondary-200 rounded w-28" />
-        </div>
-    </div>
-);
+type TabType = 'applications' | 'teachers' | 'reports';
 
 // Confirmation Modal
 const ConfirmModal: React.FC<{
@@ -80,13 +67,11 @@ const ConfirmModal: React.FC<{
     isLoading?: boolean;
 }> = ({ isOpen, title, message, confirmText, confirmVariant, onConfirm, onCancel, isLoading }) => {
     if (!isOpen) return null;
-
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
                 className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
             >
                 <h3 className="text-xl font-bold text-secondary-900 mb-2">{title}</h3>
@@ -128,47 +113,66 @@ const Toast: React.FC<{ message: string; type: 'success' | 'error'; onClose: () 
 };
 
 export const AdminDashboard: React.FC = () => {
+    const [activeTab, setActiveTab] = useState<TabType>('applications');
     const [applications, setApplications] = useState<Application[]>([]);
+    const [teachers, setTeachers] = useState<Teacher[]>([]);
+    const [reports, setReports] = useState<Report[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [stats, setStats] = useState<PlatformStats>({ totalStudents: 0, totalTutors: 0, totalBookings: 0, pendingApplications: 0 });
+    const [stats, setStats] = useState<PlatformStats>({
+        totalStudents: 0, totalTutors: 0, totalBookings: 0, pendingApplications: 0, pendingReports: 0
+    });
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
-    const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; type: 'approve' | 'reject'; appId: string } | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        type: 'approve' | 'reject' | 'suspend' | 'reinstate' | 'dismiss';
+        id: string;
+        email?: string
+    } | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     useEffect(() => {
-        fetchApplications();
-        fetchStats();
+        fetchData();
     }, []);
 
-    const fetchApplications = async () => {
+    const fetchData = async () => {
+        setIsLoading(true);
+
+        // Fetch applications
         try {
-            const response = await fetch('/api/manager/applications');
-            if (response.ok) {
-                const data = await response.json();
+            const appResponse = await fetch('/api/manager/applications');
+            if (appResponse.ok) {
+                const data = await appResponse.json();
                 setApplications(data);
-                setError(null);
-            } else {
-                const errorBody = await response.text();
-                setError(`Failed (${response.status}): ${errorBody || response.statusText}`);
             }
         } catch (err) {
-            setError((err as Error).message);
-        } finally {
-            setIsLoading(false);
+            console.error('Error fetching applications:', err);
         }
-    };
 
-    const fetchStats = async () => {
-        // Simulated stats - in production, fetch from API
-        setStats({
-            totalStudents: 142,
-            totalTutors: 18,
-            totalBookings: 567,
-            pendingApplications: applications.filter(a => a.status === 'pending').length
-        });
+        // Fetch teachers
+        try {
+            const teacherResponse = await fetch('/api/admin/teachers');
+            if (teacherResponse.ok) {
+                const data = await teacherResponse.json();
+                setTeachers(data);
+            }
+        } catch (err) {
+            console.error('Error fetching teachers:', err);
+        }
+
+        // Fetch reports
+        try {
+            const reportsResponse = await fetch('/api/admin/reports');
+            if (reportsResponse.ok) {
+                const data = await reportsResponse.json();
+                setReports(data);
+            }
+        } catch (err) {
+            console.error('Error fetching reports:', err);
+        }
+
+        setIsLoading(false);
     };
 
     const handleApprove = async (id: string) => {
@@ -184,11 +188,11 @@ export const AdminDashboard: React.FC = () => {
                     app.id === id ? { ...app, status: 'approved' as const } : app
                 ));
                 setToast({ message: 'Teacher approved successfully! 🎉', type: 'success' });
+                fetchData();
             } else {
                 setToast({ message: 'Failed to approve teacher', type: 'error' });
             }
         } catch (err) {
-            console.error("Error approving teacher:", err);
             setToast({ message: 'An error occurred', type: 'error' });
         } finally {
             setIsProcessing(false);
@@ -199,7 +203,6 @@ export const AdminDashboard: React.FC = () => {
     const handleReject = async (id: string) => {
         setIsProcessing(true);
         try {
-            // In production, make API call to reject
             setApplications(prev => prev.map(app =>
                 app.id === id ? { ...app, status: 'rejected' as const } : app
             ));
@@ -210,28 +213,63 @@ export const AdminDashboard: React.FC = () => {
         }
     };
 
-    const filteredApplications = applications.filter(app => {
-        const matchesSearch = (app.fullName || app.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            app.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
-        return matchesSearch && matchesStatus;
-    });
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    const handleSuspend = async (email: string) => {
+        setIsProcessing(true);
+        try {
+            const response = await fetch('/api/admin/teachers/suspend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teacherEmail: email, action: 'suspend', reason: 'Admin action' })
+            });
+            if (response.ok) {
+                setToast({ message: 'Teacher suspended', type: 'success' });
+                fetchData();
+            } else {
+                const data = await response.json();
+                setToast({ message: data.error || 'Failed to suspend teacher', type: 'error' });
+            }
+        } catch (err) {
+            setToast({ message: 'An error occurred', type: 'error' });
+        } finally {
+            setIsProcessing(false);
+            setConfirmModal(null);
+        }
     };
 
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
+    const handleReinstate = async (email: string) => {
+        setIsProcessing(true);
+        try {
+            const response = await fetch('/api/admin/teachers/reinstate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teacherEmail: email })
+            });
+            if (response.ok) {
+                setToast({ message: 'Teacher reinstated', type: 'success' });
+                fetchData();
+            } else {
+                const data = await response.json();
+                setToast({ message: data.error || 'Failed to reinstate teacher', type: 'error' });
+            }
+        } catch (err) {
+            setToast({ message: 'An error occurred', type: 'error' });
+        } finally {
+            setIsProcessing(false);
+            setConfirmModal(null);
+        }
     };
+
+    const tabs = [
+        { id: 'applications' as TabType, label: 'Applications', icon: Clock, count: applications.filter(a => a.status === 'pending').length },
+        { id: 'teachers' as TabType, label: 'Teachers', icon: Users, count: teachers.length },
+        { id: 'reports' as TabType, label: 'Reports', icon: Flag, count: reports.filter(r => r.status === 'pending').length }
+    ];
 
     const statCards = [
-        { label: 'Total Students', value: stats.totalStudents, icon: Users, color: 'primary', trend: '+12%' },
-        { label: 'Active Tutors', value: stats.totalTutors, icon: BookOpen, color: 'green', trend: '+5%' },
-        { label: 'Total Bookings', value: stats.totalBookings, icon: CheckCircle, color: 'accent', trend: '+23%' },
-        { label: 'Pending Review', value: applications.filter(a => a.status === 'pending').length, icon: Clock, color: 'yellow', trend: '' }
+        { label: 'Applications', value: applications.filter(a => a.status === 'pending').length, icon: Clock, color: 'yellow' },
+        { label: 'Active Teachers', value: teachers.filter(t => t.status !== 'suspended').length, icon: Users, color: 'green' },
+        { label: 'Suspended', value: teachers.filter(t => t.status === 'suspended').length, icon: UserX, color: 'red' },
+        { label: 'Open Reports', value: reports.filter(r => r.status === 'pending').length, icon: Flag, color: 'orange' }
     ];
 
     return (
@@ -242,191 +280,263 @@ export const AdminDashboard: React.FC = () => {
                     <motion.header
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mb-10"
+                        className="mb-8"
                     >
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                             <div>
-                                <h1 className="text-3xl md:text-4xl font-display font-bold text-secondary-900">Admin Dashboard</h1>
-                                <p className="text-secondary-600 mt-1">Manage the platform and review applications</p>
+                                <h1 className="text-3xl font-display font-bold text-secondary-900">Admin Dashboard</h1>
+                                <p className="text-secondary-600 mt-1">Manage teachers, applications, and reports</p>
                             </div>
-                            <Button onClick={fetchApplications} variant="outline" className="flex items-center gap-2">
+                            <Button onClick={fetchData} variant="outline" className="flex items-center gap-2">
                                 <TrendingUp size={18} />
-                                Refresh Data
+                                Refresh
                             </Button>
                         </div>
                     </motion.header>
 
-                    {/* Stats Grid */}
-                    <motion.div
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
-                    >
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         {statCards.map((stat, i) => (
-                            <motion.div key={i} variants={itemVariants}>
-                                <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow group">
-                                    <div className="flex items-start justify-between">
-                                        <div className={`p-2 md:p-3 rounded-xl bg-${stat.color}-100 text-${stat.color}-600 group-hover:scale-110 transition-transform`}>
-                                            <stat.icon size={20} />
-                                        </div>
-                                        {stat.trend && (
-                                            <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                                {stat.trend}
-                                            </span>
-                                        )}
+                            <Card key={i} className="p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-lg bg-${stat.color}-100 text-${stat.color}-600`}>
+                                        <stat.icon size={20} />
                                     </div>
-                                    <div className="mt-4">
-                                        <div className="text-2xl md:text-3xl font-bold text-secondary-900">
-                                            <AnimatedNumber value={stat.value} />
-                                        </div>
-                                        <div className="text-sm text-secondary-500 mt-1">{stat.label}</div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-secondary-900">{stat.value}</div>
+                                        <div className="text-sm text-secondary-500">{stat.label}</div>
                                     </div>
-                                </Card>
-                            </motion.div>
+                                </div>
+                            </Card>
                         ))}
-                    </motion.div>
+                    </div>
 
-                    {/* Applications Section */}
-                    <div className="grid lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-3">
-                            {/* Filters */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="flex flex-col md:flex-row gap-4 mb-6"
+                    {/* Tabs */}
+                    <div className="flex gap-2 mb-6 border-b border-secondary-200 pb-2">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id
+                                        ? 'bg-primary-500 text-white'
+                                        : 'text-secondary-600 hover:bg-secondary-100'
+                                    }`}
                             >
-                                <div className="relative flex-1">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={18} />
-                                    <input
-                                        type="text"
-                                        placeholder="Search by name or email..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-secondary-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
-                                    />
-                                </div>
-                                <div className="flex gap-2">
-                                    {(['all', 'pending', 'approved', 'rejected'] as const).map(status => (
-                                        <button
-                                            key={status}
-                                            onClick={() => setStatusFilter(status)}
-                                            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${statusFilter === status
-                                                ? 'bg-primary-500 text-white'
-                                                : 'bg-secondary-100 text-secondary-600 hover:bg-secondary-200'
-                                                }`}
-                                        >
-                                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-                            </motion.div>
+                                <tab.icon size={18} />
+                                {tab.label}
+                                {tab.count > 0 && (
+                                    <span className={`px-2 py-0.5 text-xs rounded-full ${activeTab === tab.id ? 'bg-white/20' : 'bg-secondary-200'
+                                        }`}>
+                                        {tab.count}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
 
-                            {/* Error State */}
-                            {error && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 border border-red-200 flex items-center gap-3"
-                                >
-                                    <XCircle size={20} />
-                                    <span><strong>Error:</strong> {error}</span>
-                                </motion.div>
-                            )}
+                    {/* Search */}
+                    <div className="relative mb-6">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-secondary-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none"
+                        />
+                    </div>
 
-                            {/* Loading State */}
-                            {isLoading && (
+                    {isLoading ? (
+                        <div className="text-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                            <p className="mt-4 text-secondary-600">Loading...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Applications Tab */}
+                            {activeTab === 'applications' && (
                                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                    {[1, 2, 3].map(i => <ApplicationSkeleton key={i} />)}
-                                </div>
-                            )}
-
-                            {/* Empty State */}
-                            {!isLoading && !error && filteredApplications.length === 0 && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                >
-                                    <Card className="p-12 text-center">
-                                        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4 text-primary-600">
-                                            <CheckCircle size={32} />
-                                        </div>
-                                        <h3 className="text-xl font-bold text-secondary-900 mb-2">All caught up!</h3>
-                                        <p className="text-secondary-500">No {statusFilter !== 'all' ? statusFilter : ''} applications to review.</p>
-                                    </Card>
-                                </motion.div>
-                            )}
-
-                            {/* Applications Grid */}
-                            {!isLoading && !error && filteredApplications.length > 0 && (
-                                <motion.div
-                                    variants={containerVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    className="grid md:grid-cols-2 xl:grid-cols-3 gap-6"
-                                >
-                                    <AnimatePresence>
-                                        {filteredApplications.map((app) => (
-                                            <motion.div
-                                                key={app.id}
-                                                variants={itemVariants}
-                                                layout
-                                                exit={{ opacity: 0, scale: 0.9 }}
-                                            >
-                                                <Card className="p-6 h-full flex flex-col hover:shadow-lg transition-shadow">
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <div className="flex gap-3 items-center">
-                                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
-                                                                {(app.fullName || app.name || 'U').charAt(0).toUpperCase()}
-                                                            </div>
-                                                            <div>
-                                                                <h3 className="font-bold text-secondary-900">{app.fullName || app.name}</h3>
-                                                                <p className="text-sm text-secondary-500 truncate max-w-[150px]">{app.email}</p>
-                                                            </div>
+                                    {applications
+                                        .filter(app => (app.fullName || app.name || '').toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map(app => (
+                                            <Card key={app.id} className="p-6">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className="flex gap-3 items-center">
+                                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold">
+                                                            {(app.fullName || app.name || 'U').charAt(0).toUpperCase()}
                                                         </div>
-                                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${app.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        <div>
+                                                            <h3 className="font-bold text-secondary-900">{app.fullName || app.name}</h3>
+                                                            <p className="text-sm text-secondary-500">{app.email}</p>
+                                                        </div>
+                                                    </div>
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${app.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                                                             app.status === 'approved' ? 'bg-green-100 text-green-800' :
                                                                 'bg-red-100 text-red-800'
-                                                            }`}>
-                                                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
-                                                        </span>
+                                                        }`}>
+                                                        {app.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-secondary-600 text-sm mb-4 line-clamp-2">{app.bio || 'No bio'}</p>
+                                                <div className="flex justify-between items-center text-sm mb-4">
+                                                    <span className="text-primary-600 font-semibold">${app.hourlyRate}/hr</span>
+                                                    <span className="text-secondary-400">{new Date(app.submittedAt).toLocaleDateString()}</span>
+                                                </div>
+                                                {app.status === 'pending' && (
+                                                    <div className="flex gap-2 pt-4 border-t border-secondary-100">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="flex-1 text-red-600"
+                                                            onClick={() => setConfirmModal({ isOpen: true, type: 'reject', id: app.id })}
+                                                        >
+                                                            <XCircle size={16} className="mr-1" /> Reject
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            className="flex-1"
+                                                            onClick={() => setConfirmModal({ isOpen: true, type: 'approve', id: app.id })}
+                                                        >
+                                                            <CheckCircle size={16} className="mr-1" /> Approve
+                                                        </Button>
                                                     </div>
-
-                                                    <div className="flex-1 space-y-2 text-sm mb-4">
-                                                        <p className="text-secondary-600 line-clamp-2">{app.bio || 'No bio provided'}</p>
-                                                        <div className="flex items-center gap-4 text-secondary-500">
-                                                            <span className="font-semibold text-primary-600">${app.hourlyRate}/hr</span>
-                                                            <span className="text-xs">Applied {new Date(app.submittedAt).toLocaleDateString()}</span>
-                                                        </div>
-                                                    </div>
-
-                                                    {app.status === 'pending' && (
-                                                        <div className="flex gap-2 pt-4 border-t border-secondary-100">
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                className="flex-1 text-red-600 hover:bg-red-50 hover:border-red-300"
-                                                                onClick={() => setConfirmModal({ isOpen: true, type: 'reject', appId: app.id })}
-                                                            >
-                                                                Reject
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                className="flex-1"
-                                                                onClick={() => setConfirmModal({ isOpen: true, type: 'approve', appId: app.id })}
-                                                            >
-                                                                Approve
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </Card>
-                                            </motion.div>
+                                                )}
+                                            </Card>
                                         ))}
-                                    </AnimatePresence>
-                                </motion.div>
+                                    {applications.length === 0 && (
+                                        <Card className="col-span-full p-12 text-center">
+                                            <Clock size={48} className="mx-auto mb-4 text-secondary-300" />
+                                            <p className="text-secondary-500">No applications</p>
+                                        </Card>
+                                    )}
+                                </div>
                             )}
-                        </div>
-                    </div>
+
+                            {/* Teachers Tab */}
+                            {activeTab === 'teachers' && (
+                                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {teachers
+                                        .filter(t => t.name?.toLowerCase().includes(searchTerm.toLowerCase()) || t.email?.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map(teacher => (
+                                            <Card key={teacher.id} className={`p-6 ${teacher.status === 'suspended' ? 'border-red-200 bg-red-50/50' : ''}`}>
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className="flex gap-3 items-center">
+                                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${teacher.status === 'suspended' ? 'bg-red-400' : 'bg-gradient-to-br from-green-400 to-green-600'
+                                                            }`}>
+                                                            {(teacher.name || 'T').charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-secondary-900">{teacher.name}</h3>
+                                                            <p className="text-sm text-secondary-500">{teacher.email}</p>
+                                                        </div>
+                                                    </div>
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${teacher.status === 'suspended' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                                        }`}>
+                                                        {teacher.status === 'suspended' ? 'Suspended' : 'Active'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-sm mb-4">
+                                                    <span className="text-primary-600 font-semibold">${teacher.hourlyRate}/hr</span>
+                                                    <span className="text-secondary-400">⭐ {teacher.rating || 'N/A'} ({teacher.reviewCount || 0})</span>
+                                                </div>
+                                                <div className="flex gap-2 pt-4 border-t border-secondary-100">
+                                                    {teacher.status === 'suspended' ? (
+                                                        <Button
+                                                            size="sm"
+                                                            className="flex-1 bg-green-600 hover:bg-green-700"
+                                                            onClick={() => setConfirmModal({ isOpen: true, type: 'reinstate', id: teacher.id, email: teacher.email })}
+                                                        >
+                                                            <UserCheck size={16} className="mr-1" /> Reinstate
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="flex-1 text-red-600"
+                                                            onClick={() => setConfirmModal({ isOpen: true, type: 'suspend', id: teacher.id, email: teacher.email })}
+                                                        >
+                                                            <UserX size={16} className="mr-1" /> Suspend
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </Card>
+                                        ))}
+                                    {teachers.length === 0 && (
+                                        <Card className="col-span-full p-12 text-center">
+                                            <Users size={48} className="mx-auto mb-4 text-secondary-300" />
+                                            <p className="text-secondary-500">No teachers</p>
+                                        </Card>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Reports Tab */}
+                            {activeTab === 'reports' && (
+                                <div className="space-y-4">
+                                    {reports
+                                        .filter(r => r.messageContent?.toLowerCase().includes(searchTerm.toLowerCase()) || r.senderEmail?.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map(report => (
+                                            <Card key={report.id} className={`p-6 ${report.status === 'pending' ? 'border-orange-200' : ''}`}>
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
+                                                            <Flag size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-secondary-900">{report.reason}</h3>
+                                                            <p className="text-sm text-secondary-500">
+                                                                Reported by: {report.reporterEmail}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${report.status === 'pending' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
+                                                        }`}>
+                                                        {report.status}
+                                                    </span>
+                                                </div>
+                                                <div className="bg-secondary-50 rounded-lg p-4 mb-4">
+                                                    <p className="text-sm text-secondary-600 mb-2">
+                                                        <strong>From:</strong> {report.senderEmail}
+                                                    </p>
+                                                    <p className="text-secondary-800 italic">"{report.messageContent}"</p>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-secondary-400">
+                                                        {new Date(report.createdAt).toLocaleString()}
+                                                    </span>
+                                                    <div className="flex gap-2">
+                                                        {report.status === 'pending' && (
+                                                            <>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => setConfirmModal({ isOpen: true, type: 'suspend', id: report.id, email: report.senderEmail })}
+                                                                >
+                                                                    <UserX size={16} className="mr-1" /> Suspend Sender
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => setConfirmModal({ isOpen: true, type: 'dismiss', id: report.id })}
+                                                                >
+                                                                    Dismiss
+                                                                </Button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </Card>
+                                        ))}
+                                    {reports.length === 0 && (
+                                        <Card className="p-12 text-center">
+                                            <CheckCircle size={48} className="mx-auto mb-4 text-green-300" />
+                                            <p className="text-secondary-500">No reports - All clear!</p>
+                                        </Card>
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -434,14 +544,35 @@ export const AdminDashboard: React.FC = () => {
             {confirmModal && (
                 <ConfirmModal
                     isOpen={confirmModal.isOpen}
-                    title={confirmModal.type === 'approve' ? 'Approve Teacher' : 'Reject Application'}
-                    message={confirmModal.type === 'approve'
-                        ? 'This will grant the applicant teacher privileges and add them to the tutor pool.'
-                        : 'This will reject the application. The applicant will need to reapply.'
+                    title={
+                        confirmModal.type === 'approve' ? 'Approve Teacher' :
+                            confirmModal.type === 'reject' ? 'Reject Application' :
+                                confirmModal.type === 'suspend' ? 'Suspend Teacher' :
+                                    confirmModal.type === 'reinstate' ? 'Reinstate Teacher' :
+                                        'Dismiss Report'
                     }
-                    confirmText={confirmModal.type === 'approve' ? 'Approve' : 'Reject'}
-                    confirmVariant={confirmModal.type === 'approve' ? 'primary' : 'danger'}
-                    onConfirm={() => confirmModal.type === 'approve' ? handleApprove(confirmModal.appId) : handleReject(confirmModal.appId)}
+                    message={
+                        confirmModal.type === 'approve' ? 'This will grant teacher privileges.' :
+                            confirmModal.type === 'reject' ? 'This will reject the application.' :
+                                confirmModal.type === 'suspend' ? `This will suspend ${confirmModal.email} from teaching.` :
+                                    confirmModal.type === 'reinstate' ? `This will reinstate ${confirmModal.email} as an active teacher.` :
+                                        'This will dismiss the report.'
+                    }
+                    confirmText={
+                        confirmModal.type === 'approve' ? 'Approve' :
+                            confirmModal.type === 'reject' ? 'Reject' :
+                                confirmModal.type === 'suspend' ? 'Suspend' :
+                                    confirmModal.type === 'reinstate' ? 'Reinstate' :
+                                        'Dismiss'
+                    }
+                    confirmVariant={confirmModal.type === 'reinstate' || confirmModal.type === 'approve' ? 'primary' : 'danger'}
+                    onConfirm={() => {
+                        if (confirmModal.type === 'approve') handleApprove(confirmModal.id);
+                        else if (confirmModal.type === 'reject') handleReject(confirmModal.id);
+                        else if (confirmModal.type === 'suspend' && confirmModal.email) handleSuspend(confirmModal.email);
+                        else if (confirmModal.type === 'reinstate' && confirmModal.email) handleReinstate(confirmModal.email);
+                        else setConfirmModal(null);
+                    }}
                     onCancel={() => setConfirmModal(null)}
                     isLoading={isProcessing}
                 />
