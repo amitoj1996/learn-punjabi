@@ -238,6 +238,55 @@ export const AdminDashboard: React.FC = () => {
         }
     };
 
+    // Suspend any user (teacher or student) - used for reported messages
+    const handleSuspendUser = async (email: string, reportId?: string) => {
+        setIsProcessing(true);
+        try {
+            const response = await fetch('/api/manager/users/suspend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail: email, reason: 'Reported for inappropriate behavior', reportId })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setToast({ message: data.message || 'User suspended', type: 'success' });
+                fetchData();
+            } else {
+                const data = await response.json();
+                setToast({ message: data.error || 'Failed to suspend user', type: 'error' });
+            }
+        } catch (err) {
+            setToast({ message: 'An error occurred', type: 'error' });
+        } finally {
+            setIsProcessing(false);
+            setConfirmModal(null);
+        }
+    };
+
+    // Dismiss a report without taking action
+    const handleDismiss = async (reportId: string) => {
+        setIsProcessing(true);
+        try {
+            const response = await fetch('/api/manager/reports/dismiss', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reportId })
+            });
+            if (response.ok) {
+                setToast({ message: 'Report dismissed', type: 'success' });
+                fetchData();
+            } else {
+                const data = await response.json();
+                setToast({ message: data.error || 'Failed to dismiss report', type: 'error' });
+            }
+        } catch (err) {
+            setToast({ message: 'An error occurred', type: 'error' });
+        } finally {
+            setIsProcessing(false);
+            setConfirmModal(null);
+        }
+    };
+
     const handleReinstate = async (email: string) => {
         setIsProcessing(true);
         try {
@@ -514,7 +563,7 @@ export const AdminDashboard: React.FC = () => {
                                                                     size="sm"
                                                                     onClick={() => setConfirmModal({ isOpen: true, type: 'suspend', id: report.id, email: report.senderEmail })}
                                                                 >
-                                                                    <UserX size={16} className="mr-1" /> Suspend Sender
+                                                                    <UserX size={16} className="mr-1" /> Suspend User
                                                                 </Button>
                                                                 <Button
                                                                     variant="outline"
@@ -549,15 +598,15 @@ export const AdminDashboard: React.FC = () => {
                     title={
                         confirmModal.type === 'approve' ? 'Approve Teacher' :
                             confirmModal.type === 'reject' ? 'Reject Application' :
-                                confirmModal.type === 'suspend' ? 'Suspend Teacher' :
+                                confirmModal.type === 'suspend' ? 'Suspend User' :
                                     confirmModal.type === 'reinstate' ? 'Reinstate Teacher' :
                                         'Dismiss Report'
                     }
                     message={
                         confirmModal.type === 'approve' ? 'This will grant teacher privileges.' :
                             confirmModal.type === 'reject' ? 'This will reject the application.' :
-                                confirmModal.type === 'suspend' ? `This will suspend ${confirmModal.email} from teaching.` :
-                                    confirmModal.type === 'reinstate' ? `This will reinstate ${confirmModal.email} as an active teacher.` :
+                                confirmModal.type === 'suspend' ? `This will suspend ${confirmModal.email}. They will not be able to use the platform until reinstated. Their data is preserved.` :
+                                    confirmModal.type === 'reinstate' ? `This will reinstate ${confirmModal.email} as an active user.` :
                                         'This will dismiss the report.'
                     }
                     confirmText={
@@ -571,8 +620,17 @@ export const AdminDashboard: React.FC = () => {
                     onConfirm={() => {
                         if (confirmModal.type === 'approve') handleApprove(confirmModal.id);
                         else if (confirmModal.type === 'reject') handleReject(confirmModal.id);
-                        else if (confirmModal.type === 'suspend' && confirmModal.email) handleSuspend(confirmModal.email);
+                        else if (confirmModal.type === 'suspend' && confirmModal.email) {
+                            // If there's an id, it's from Reports (id = reportId), use handleSuspendUser
+                            // Otherwise it's from Teachers tab, use handleSuspend
+                            if (confirmModal.id && confirmModal.id.startsWith('report_')) {
+                                handleSuspendUser(confirmModal.email, confirmModal.id);
+                            } else {
+                                handleSuspend(confirmModal.email);
+                            }
+                        }
                         else if (confirmModal.type === 'reinstate' && confirmModal.email) handleReinstate(confirmModal.email);
+                        else if (confirmModal.type === 'dismiss') handleDismiss(confirmModal.id);
                         else setConfirmModal(null);
                     }}
                     onCancel={() => setConfirmModal(null)}
