@@ -4,8 +4,8 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Layout } from '../components/Layout';
 import {
-    Users, BookOpen, CheckCircle, Clock, XCircle, Search, TrendingUp,
-    Flag, UserX, UserCheck, MessageCircle, AlertTriangle, Eye
+    Users, CheckCircle, Clock, XCircle, Search, TrendingUp,
+    Flag, UserX, UserCheck
 } from 'lucide-react';
 
 interface Application {
@@ -118,8 +118,10 @@ export const AdminDashboard: React.FC = () => {
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [reports, setReports] = useState<Report[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [stats, setStats] = useState<PlatformStats>({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_error, _setError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_stats, _setStats] = useState<PlatformStats>({
         totalStudents: 0, totalTutors: 0, totalBookings: 0, pendingApplications: 0, pendingReports: 0
     });
     const [searchTerm, setSearchTerm] = useState('');
@@ -318,8 +320,8 @@ export const AdminDashboard: React.FC = () => {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id
-                                        ? 'bg-primary-500 text-white'
-                                        : 'text-secondary-600 hover:bg-secondary-100'
+                                    ? 'bg-primary-500 text-white'
+                                    : 'text-secondary-600 hover:bg-secondary-100'
                                     }`}
                             >
                                 <tab.icon size={18} />
@@ -371,8 +373,8 @@ export const AdminDashboard: React.FC = () => {
                                                         </div>
                                                     </div>
                                                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${app.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                            app.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                                                'bg-red-100 text-red-800'
+                                                        app.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                                            'bg-red-100 text-red-800'
                                                         }`}>
                                                         {app.status}
                                                     </span>
