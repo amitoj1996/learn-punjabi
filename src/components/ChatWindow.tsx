@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, AlertTriangle, MessageCircle, Trash2 } from 'lucide-react';
+import { Send, AlertTriangle, MessageCircle, Trash2, Flag } from 'lucide-react';
 import { Button } from './ui/Button';
 
 interface Message {
@@ -35,6 +35,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const [warning, setWarning] = useState<string | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [reportingMessage, setReportingMessage] = useState<Message | null>(null);
+    const [isReporting, setIsReporting] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -134,6 +136,36 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         }
     };
 
+    const handleReport = async (reason: string) => {
+        if (!reportingMessage) return;
+        setIsReporting(true);
+        try {
+            const response = await fetch('/api/chat/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messageId: reportingMessage.id,
+                    reason,
+                    messageContent: reportingMessage.content,
+                    senderEmail: reportingMessage.senderEmail,
+                    partnerEmail
+                })
+            });
+            if (response.ok) {
+                setReportingMessage(null);
+                setWarning('Report submitted. Our team will review it.');
+                setTimeout(() => setWarning(null), 5000);
+            } else {
+                const data = await response.json();
+                setError(data.error || 'Failed to submit report');
+            }
+        } catch (err) {
+            setError('Network error. Please try again.');
+        } finally {
+            setIsReporting(false);
+        }
+    };
+
     const formatTime = (timestamp: string) => {
         const date = new Date(timestamp);
         const now = new Date();
@@ -198,7 +230,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                     animate={{ opacity: 1, y: 0 }}
                                     className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                                 >
-                                    <div className="max-w-[75%]">
+                                    <div className="group max-w-[75%]">
                                         <div
                                             className={`px-4 py-2 rounded-2xl ${isOwn
                                                 ? 'bg-primary-500 text-white rounded-br-md'
@@ -211,6 +243,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                             <span className="text-xs text-secondary-400">
                                                 {formatTime(message.timestamp)}
                                             </span>
+                                            {!isOwn && (
+                                                <button
+                                                    onClick={() => setReportingMessage(message)}
+                                                    className="opacity-0 group-hover:opacity-100 text-secondary-400 hover:text-red-500 transition-all p-1"
+                                                    title="Report message"
+                                                >
+                                                    <Flag size={12} />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </motion.div>
@@ -315,6 +356,57 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                     {isDeleting ? 'Deleting...' : 'Delete'}
                                 </button>
                             </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Report Modal */}
+            <AnimatePresence>
+                {reportingMessage && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.95 }}
+                            className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl"
+                        >
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                                    <Flag className="text-orange-600" size={20} />
+                                </div>
+                                <h3 className="font-bold text-lg text-secondary-900">Report Message</h3>
+                            </div>
+                            <p className="text-secondary-600 mb-2 text-sm">
+                                Reported message: "{reportingMessage.content.substring(0, 50)}..."
+                            </p>
+                            <p className="text-secondary-500 mb-4 text-sm">
+                                Select a reason for reporting:
+                            </p>
+                            <div className="space-y-2 mb-4">
+                                {['Inappropriate content', 'Harassment', 'Spam', 'Scam or fraud', 'Other'].map(reason => (
+                                    <button
+                                        key={reason}
+                                        onClick={() => handleReport(reason)}
+                                        disabled={isReporting}
+                                        className="w-full px-4 py-2 text-left border border-secondary-200 rounded-lg hover:bg-secondary-50 hover:border-primary-300 transition-colors disabled:opacity-50"
+                                    >
+                                        {reason}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setReportingMessage(null)}
+                                className="w-full px-4 py-2 text-secondary-600 hover:bg-secondary-50 rounded-lg transition-colors"
+                                disabled={isReporting}
+                            >
+                                Cancel
+                            </button>
                         </motion.div>
                     </motion.div>
                 )}

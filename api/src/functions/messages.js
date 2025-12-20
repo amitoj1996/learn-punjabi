@@ -361,3 +361,98 @@ app.http('getChatPartners', {
         }
     }
 });
+
+// Report a message
+app.http('reportMessage', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'chat/report',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipal = request.headers.get('x-ms-client-principal');
+            if (!clientPrincipal) {
+                return { status: 401, jsonBody: { error: 'Not authenticated' } };
+            }
+
+            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
+            const reporterEmail = principal.userDetails;
+
+            const body = await request.json();
+            const { messageId, reason, messageContent, senderEmail, partnerEmail } = body;
+
+            if (!messageId || !reason) {
+                return { status: 400, jsonBody: { error: 'Message ID and reason are required' } };
+            }
+
+            context.log('Reporting message:', messageId, 'by:', reporterEmail);
+
+            // Store report in a reports collection
+            const reportsContainer = await getContainer('reports');
+
+            const report = {
+                id: `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                type: 'message',
+                messageId,
+                messageContent: messageContent || '',
+                senderEmail: senderEmail || '',
+                reporterEmail,
+                reason,
+                status: 'pending', // pending, reviewed, actioned, dismissed
+                createdAt: new Date().toISOString(),
+                reviewedAt: null,
+                reviewedBy: null,
+                action: null
+            };
+
+            await reportsContainer.items.create(report);
+            context.log('Report created:', report.id);
+
+            return {
+                jsonBody: {
+                    success: true,
+                    message: 'Report submitted. Our team will review it.',
+                    reportId: report.id
+                }
+            };
+        } catch (error) {
+            context.error('Error reporting message:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
+
+// Admin: Get all reports (for admin dashboard)
+app.http('getReports', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'admin/reports',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipal = request.headers.get('x-ms-client-principal');
+            if (!clientPrincipal) {
+                return { status: 401, jsonBody: { error: 'Not authenticated' } };
+            }
+
+            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
+            const userEmail = principal.userDetails;
+
+            // Check if user is admin (you can add more admin emails here)
+            const ADMIN_EMAILS = ['amitojmusic@gmail.com']; // Add your admin emails
+            if (!ADMIN_EMAILS.includes(userEmail.toLowerCase())) {
+                return { status: 403, jsonBody: { error: 'Admin access required' } };
+            }
+
+            const reportsContainer = await getContainer('reports');
+            const { resources: reports } = await reportsContainer.items
+                .query({
+                    query: 'SELECT * FROM c ORDER BY c.createdAt DESC'
+                })
+                .fetchAll();
+
+            return { jsonBody: reports };
+        } catch (error) {
+            context.error('Error getting reports:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
