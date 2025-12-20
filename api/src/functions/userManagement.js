@@ -192,3 +192,174 @@ app.http('dismissReport', {
         }
     }
 });
+
+// Admin: Get all users
+app.http('getAllUsers', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'manager/users',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipal = request.headers.get('x-ms-client-principal');
+            if (!clientPrincipal) {
+                return { status: 401, jsonBody: { error: 'Not authenticated' } };
+            }
+
+            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
+            const adminEmail = principal.userDetails;
+
+            if (!await isAdmin(adminEmail)) {
+                return { status: 403, jsonBody: { error: 'Admin access required' } };
+            }
+
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c ORDER BY c.createdAt DESC'
+                })
+                .fetchAll();
+
+            return { jsonBody: users };
+        } catch (error) {
+            context.error('Error getting users:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
+
+// Admin: Reinstate a suspended user
+app.http('reinstateUser', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'manager/users/reinstate',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipal = request.headers.get('x-ms-client-principal');
+            if (!clientPrincipal) {
+                return { status: 401, jsonBody: { error: 'Not authenticated' } };
+            }
+
+            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
+            const adminEmail = principal.userDetails;
+
+            if (!await isAdmin(adminEmail)) {
+                return { status: 403, jsonBody: { error: 'Admin access required' } };
+            }
+
+            const body = await request.json();
+            const { userEmail } = body;
+
+            if (!userEmail) {
+                return { status: 400, jsonBody: { error: 'User email is required' } };
+            }
+
+            context.log('Admin reinstating user:', userEmail, 'by:', adminEmail);
+
+            // Update user record
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                    parameters: [{ name: '@email', value: userEmail }]
+                })
+                .fetchAll();
+
+            let userRole = 'unknown';
+            if (users.length > 0) {
+                const user = users[0];
+                userRole = user.role;
+                user.suspended = false;
+                user.reinstatedAt = new Date().toISOString();
+                user.reinstatedBy = adminEmail;
+                await usersContainer.item(user.id, user.userId).replace(user);
+            }
+
+            // If user is a teacher, also reinstate their tutor profile
+            if (userRole === 'teacher') {
+                const tutorsContainer = await getContainer('tutors');
+                const { resources: tutors } = await tutorsContainer.items
+                    .query({
+                        query: 'SELECT * FROM c WHERE c.email = @email',
+                        parameters: [{ name: '@email', value: userEmail }]
+                    })
+                    .fetchAll();
+
+                if (tutors.length > 0) {
+                    const tutor = tutors[0];
+                    tutor.status = 'active';
+                    tutor.isActive = true;
+                    tutor.reinstatedAt = new Date().toISOString();
+                    tutor.reinstatedBy = adminEmail;
+                    await tutorsContainer.item(tutor.id, tutor.id).replace(tutor);
+                }
+
+                // Also update teacher application
+                const appsContainer = await getContainer('teacherApplications');
+                const { resources: applications } = await appsContainer.items
+                    .query({
+                        query: 'SELECT * FROM c WHERE c.email = @email',
+                        parameters: [{ name: '@email', value: userEmail }]
+                    })
+                    .fetchAll();
+
+                if (applications.length > 0) {
+                    const application = applications[0];
+                    application.status = 'approved';
+                    await appsContainer.item(application.id, application.id).replace(application);
+                }
+            }
+
+            return {
+                jsonBody: {
+                    success: true,
+                    message: `User reinstated successfully`,
+                    userRole
+                }
+            };
+        } catch (error) {
+            context.error('Error reinstating user:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
+
+// Check if current user is suspended (for frontend blocking)
+app.http('checkSuspension', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'users/check-suspension',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipal = request.headers.get('x-ms-client-principal');
+            if (!clientPrincipal) {
+                return { status: 401, jsonBody: { error: 'Not authenticated' } };
+            }
+
+            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
+            const userEmail = principal.userDetails;
+
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                    parameters: [{ name: '@email', value: userEmail }]
+                })
+                .fetchAll();
+
+            if (users.length > 0 && users[0].suspended === true) {
+                return {
+                    jsonBody: {
+                        suspended: true,
+                        reason: users[0].suspendReason || 'Account suspended',
+                        suspendedAt: users[0].suspendedAt
+                    }
+                };
+            }
+
+            return { jsonBody: { suspended: false } };
+        } catch (error) {
+            context.error('Error checking suspension:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});

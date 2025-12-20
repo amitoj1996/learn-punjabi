@@ -53,7 +53,18 @@ interface PlatformStats {
     pendingReports: number;
 }
 
-type TabType = 'applications' | 'teachers' | 'reports';
+interface User {
+    id: string;
+    userId: string;
+    userDetails: string; // email
+    role: 'student' | 'teacher' | 'admin';
+    suspended?: boolean;
+    suspendedAt?: string;
+    suspendReason?: string;
+    createdAt: string;
+}
+
+type TabType = 'applications' | 'teachers' | 'users' | 'reports';
 
 // Confirmation Modal
 const ConfirmModal: React.FC<{
@@ -117,6 +128,7 @@ export const AdminDashboard: React.FC = () => {
     const [applications, setApplications] = useState<Application[]>([]);
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [reports, setReports] = useState<Report[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_error, _setError] = useState<string | null>(null);
@@ -172,6 +184,17 @@ export const AdminDashboard: React.FC = () => {
             }
         } catch (err) {
             console.error('Error fetching reports:', err);
+        }
+
+        // Fetch all users
+        try {
+            const usersResponse = await fetch('/api/manager/users');
+            if (usersResponse.ok) {
+                const data = await usersResponse.json();
+                setUsers(data);
+            }
+        } catch (err) {
+            console.error('Error fetching users:', err);
         }
 
         setIsLoading(false);
@@ -310,16 +333,41 @@ export const AdminDashboard: React.FC = () => {
         }
     };
 
+    // Reinstate any user (works for both teachers and students)
+    const handleReinstateUser = async (email: string) => {
+        setIsProcessing(true);
+        try {
+            const response = await fetch('/api/manager/users/reinstate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail: email })
+            });
+            if (response.ok) {
+                setToast({ message: 'User reinstated successfully', type: 'success' });
+                fetchData();
+            } else {
+                const data = await response.json();
+                setToast({ message: data.error || 'Failed to reinstate user', type: 'error' });
+            }
+        } catch (err) {
+            setToast({ message: 'An error occurred', type: 'error' });
+        } finally {
+            setIsProcessing(false);
+            setConfirmModal(null);
+        }
+    };
+
     const tabs = [
         { id: 'applications' as TabType, label: 'Applications', icon: Clock, count: applications.filter(a => a.status === 'pending').length },
         { id: 'teachers' as TabType, label: 'Teachers', icon: Users, count: teachers.length },
+        { id: 'users' as TabType, label: 'All Users', icon: Users, count: users.filter(u => u.suspended).length },
         { id: 'reports' as TabType, label: 'Reports', icon: Flag, count: reports.filter(r => r.status === 'pending').length }
     ];
 
     const statCards = [
         { label: 'Applications', value: applications.filter(a => a.status === 'pending').length, icon: Clock, color: 'yellow' },
-        { label: 'Active Teachers', value: teachers.filter(t => t.status !== 'suspended').length, icon: Users, color: 'green' },
-        { label: 'Suspended', value: teachers.filter(t => t.status === 'suspended').length, icon: UserX, color: 'red' },
+        { label: 'Active Users', value: users.filter(u => !u.suspended).length, icon: Users, color: 'green' },
+        { label: 'Suspended', value: users.filter(u => u.suspended).length, icon: UserX, color: 'red' },
         { label: 'Open Reports', value: reports.filter(r => r.status === 'pending').length, icon: Flag, color: 'orange' }
     ];
 
@@ -516,6 +564,61 @@ export const AdminDashboard: React.FC = () => {
                                         <Card className="col-span-full p-12 text-center">
                                             <Users size={48} className="mx-auto mb-4 text-secondary-300" />
                                             <p className="text-secondary-500">No teachers</p>
+                                        </Card>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Users Tab */}
+                            {activeTab === 'users' && (
+                                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {users
+                                        .filter(u => u.userDetails?.toLowerCase().includes(searchTerm.toLowerCase()) || u.role?.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map(user => (
+                                            <Card key={user.id} className={`p-6 ${user.suspended ? 'border-red-200 bg-red-50/50' : ''}`}>
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className="flex gap-3 items-center">
+                                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${user.suspended ? 'bg-red-400' :
+                                                                user.role === 'admin' ? 'bg-purple-500' :
+                                                                    user.role === 'teacher' ? 'bg-green-500' : 'bg-blue-500'
+                                                            }`}>
+                                                            {(user.userDetails || 'U').charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-secondary-900">{user.userDetails}</h3>
+                                                            <p className="text-sm text-secondary-500 capitalize">{user.role}</p>
+                                                        </div>
+                                                    </div>
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${user.suspended ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                                        }`}>
+                                                        {user.suspended ? 'Suspended' : 'Active'}
+                                                    </span>
+                                                </div>
+                                                {user.suspended && (
+                                                    <div className="bg-red-100 rounded-lg p-3 mb-4 text-sm">
+                                                        <p className="text-red-700"><strong>Reason:</strong> {user.suspendReason || 'Not specified'}</p>
+                                                        <p className="text-red-600 text-xs mt-1">
+                                                            Suspended: {user.suspendedAt ? new Date(user.suspendedAt).toLocaleString() : 'Unknown'}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                                {user.suspended && user.role !== 'admin' && (
+                                                    <div className="flex gap-2 pt-4 border-t border-secondary-100">
+                                                        <Button
+                                                            size="sm"
+                                                            className="flex-1 bg-green-600 hover:bg-green-700"
+                                                            onClick={() => handleReinstateUser(user.userDetails)}
+                                                        >
+                                                            <UserCheck size={16} className="mr-1" /> Reinstate
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </Card>
+                                        ))}
+                                    {users.length === 0 && (
+                                        <Card className="col-span-full p-12 text-center">
+                                            <Users size={48} className="mx-auto mb-4 text-secondary-300" />
+                                            <p className="text-secondary-500">No users found</p>
                                         </Card>
                                     )}
                                 </div>

@@ -56,6 +56,25 @@ app.http('createBooking', {
             const studentEmail = clientPrincipal.userDetails;
             const studentId = clientPrincipal.userId;
 
+            // Check if student is suspended
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                    parameters: [{ name: '@email', value: studentEmail }]
+                })
+                .fetchAll();
+
+            if (users.length > 0 && users[0].suspended === true) {
+                return {
+                    status: 403,
+                    body: JSON.stringify({
+                        error: 'Your account has been suspended. You cannot make bookings.',
+                        suspended: true
+                    })
+                };
+            }
+
             const body = await request.json();
             const { tutorId, date, time, duration } = body;
 

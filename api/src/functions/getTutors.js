@@ -8,8 +8,9 @@ app.http('getTutors', {
     handler: async (request, context) => {
         try {
             const container = await getContainer("tutors");
+            // Only return active (non-suspended) tutors
             const { resources: tutors } = await container.items
-                .query("SELECT * FROM c")
+                .query("SELECT * FROM c WHERE (c.status != 'suspended' OR NOT IS_DEFINED(c.status)) AND (c.isActive = true OR NOT IS_DEFINED(c.isActive))")
                 .fetchAll();
 
             return {

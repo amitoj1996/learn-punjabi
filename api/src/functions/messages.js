@@ -222,6 +222,25 @@ app.http('sendChatMessage', {
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
             const senderEmail = principal.userDetails;
 
+            // Check if sender is suspended
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                    parameters: [{ name: '@email', value: senderEmail }]
+                })
+                .fetchAll();
+
+            if (users.length > 0 && users[0].suspended === true) {
+                return {
+                    status: 403,
+                    jsonBody: {
+                        error: 'Your account has been suspended. You cannot send messages.',
+                        suspended: true
+                    }
+                };
+            }
+
             const body = await request.json();
             const { recipientEmail, recipientName, content } = body;
 
