@@ -213,9 +213,10 @@ app.http('getAllUsers', {
             }
 
             const usersContainer = await getContainer('users');
+            // Exclude deleted users
             const { resources: users } = await usersContainer.items
                 .query({
-                    query: 'SELECT * FROM c ORDER BY c.createdAt DESC'
+                    query: 'SELECT * FROM c WHERE (c.deleted != true OR NOT IS_DEFINED(c.deleted)) ORDER BY c.createdAt DESC'
                 })
                 .fetchAll();
 
@@ -359,6 +360,116 @@ app.http('checkSuspension', {
             return { jsonBody: { suspended: false } };
         } catch (error) {
             context.error('Error checking suspension:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
+
+// Admin: Delete a user (soft delete - marks as deleted but preserves data)
+app.http('deleteUser', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'manager/users/delete',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipal = request.headers.get('x-ms-client-principal');
+            if (!clientPrincipal) {
+                return { status: 401, jsonBody: { error: 'Not authenticated' } };
+            }
+
+            const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
+            const adminEmail = principal.userDetails;
+
+            if (!await isAdmin(adminEmail)) {
+                return { status: 403, jsonBody: { error: 'Admin access required' } };
+            }
+
+            const body = await request.json();
+            const { userEmail, confirmEmail } = body;
+
+            if (!userEmail) {
+                return { status: 400, jsonBody: { error: 'User email is required' } };
+            }
+
+            // Require typing the email to confirm deletion
+            if (userEmail !== confirmEmail) {
+                return { status: 400, jsonBody: { error: 'Email confirmation does not match' } };
+            }
+
+            context.log('Admin deleting user:', userEmail, 'by:', adminEmail);
+
+            // Soft delete user record
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                    parameters: [{ name: '@email', value: userEmail }]
+                })
+                .fetchAll();
+
+            let userRole = 'unknown';
+            if (users.length > 0) {
+                const user = users[0];
+                userRole = user.role;
+
+                // Cannot delete admin users
+                if (user.role === 'admin') {
+                    return { status: 403, jsonBody: { error: 'Cannot delete admin users' } };
+                }
+
+                user.deleted = true;
+                user.deletedAt = new Date().toISOString();
+                user.deletedBy = adminEmail;
+                await usersContainer.item(user.id, user.userId).replace(user);
+            } else {
+                return { status: 404, jsonBody: { error: 'User not found' } };
+            }
+
+            // If user is a teacher, also mark their tutor profile as deleted
+            if (userRole === 'teacher') {
+                const tutorsContainer = await getContainer('tutors');
+                const { resources: tutors } = await tutorsContainer.items
+                    .query({
+                        query: 'SELECT * FROM c WHERE c.email = @email',
+                        parameters: [{ name: '@email', value: userEmail }]
+                    })
+                    .fetchAll();
+
+                if (tutors.length > 0) {
+                    const tutor = tutors[0];
+                    tutor.deleted = true;
+                    tutor.isActive = false;
+                    tutor.deletedAt = new Date().toISOString();
+                    tutor.deletedBy = adminEmail;
+                    await tutorsContainer.item(tutor.id, tutor.id).replace(tutor);
+                }
+
+                // Also mark teacher application as deleted
+                const appsContainer = await getContainer('teacherApplications');
+                const { resources: applications } = await appsContainer.items
+                    .query({
+                        query: 'SELECT * FROM c WHERE c.email = @email',
+                        parameters: [{ name: '@email', value: userEmail }]
+                    })
+                    .fetchAll();
+
+                if (applications.length > 0) {
+                    const application = applications[0];
+                    application.deleted = true;
+                    application.status = 'deleted';
+                    await appsContainer.item(application.id, application.id).replace(application);
+                }
+            }
+
+            return {
+                jsonBody: {
+                    success: true,
+                    message: `User ${userEmail} has been deleted`,
+                    userRole
+                }
+            };
+        } catch (error) {
+            context.error('Error deleting user:', error);
             return { status: 500, jsonBody: { error: error.message } };
         }
     }
