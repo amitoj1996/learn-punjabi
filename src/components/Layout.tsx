@@ -14,25 +14,36 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
 
     // Fetch unread message count
+    const fetchUnreadCount = async () => {
+        if (!user) return;
+        try {
+            const response = await fetch('/api/messages/unread-count');
+            if (response.ok) {
+                const data = await response.json();
+                setUnreadCount(data.count || 0);
+            }
+        } catch (err) {
+            console.error('Failed to fetch unread count:', err);
+        }
+    };
+
     useEffect(() => {
         if (!user) return;
 
-        const fetchUnreadCount = async () => {
-            try {
-                const response = await fetch('/api/messages/unread-count');
-                if (response.ok) {
-                    const data = await response.json();
-                    setUnreadCount(data.count || 0);
-                }
-            } catch (err) {
-                console.error('Failed to fetch unread count:', err);
-            }
-        };
-
         fetchUnreadCount();
-        // Poll every 30 seconds for new messages
-        const interval = setInterval(fetchUnreadCount, 30000);
-        return () => clearInterval(interval);
+        // Poll every 15 seconds for new messages
+        const interval = setInterval(fetchUnreadCount, 15000);
+
+        // Listen for custom event when messages are read
+        const handleMessagesRead = () => {
+            fetchUnreadCount();
+        };
+        window.addEventListener('messagesRead', handleMessagesRead);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('messagesRead', handleMessagesRead);
+        };
     }, [user]);
 
     return (

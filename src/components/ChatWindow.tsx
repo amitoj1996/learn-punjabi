@@ -70,6 +70,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 const data = await response.json();
                 setMessages(data);
                 setError(null);
+                // Dispatch event to notify Layout that messages were read
+                window.dispatchEvent(new CustomEvent('messagesRead'));
             }
         } catch (err) {
             console.error('Error fetching messages:', err);
