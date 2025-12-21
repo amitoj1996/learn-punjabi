@@ -381,8 +381,6 @@ export const LandingPage: React.FC = () => {
                         variants={containerVariants}
                         className="grid md:grid-cols-3 gap-12 relative"
                     >
-                        {/* Connecting line */}
-                        <div className="hidden md:block absolute top-16 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-primary-200 via-primary-400 to-primary-200" />
 
                         {[
                             { step: 1, title: 'Find Your Tutor', desc: 'Browse profiles, watch intro videos, and pick the perfect match for your child.' },
