@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/Button';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from './Logo';
+import { MessageCircle } from 'lucide-react';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -10,6 +11,29 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { user, login, logout, isLoading } = useAuth();
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    // Fetch unread message count
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchUnreadCount = async () => {
+            try {
+                const response = await fetch('/api/messages/unread-count');
+                if (response.ok) {
+                    const data = await response.json();
+                    setUnreadCount(data.count || 0);
+                }
+            } catch (err) {
+                console.error('Failed to fetch unread count:', err);
+            }
+        };
+
+        fetchUnreadCount();
+        // Poll every 30 seconds for new messages
+        const interval = setInterval(fetchUnreadCount, 30000);
+        return () => clearInterval(interval);
+    }, [user]);
 
     return (
         <div className="min-h-screen flex flex-col font-sans text-secondary-900">
@@ -35,6 +59,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 </span>
                                 <Link to="/dashboard" className="text-sm font-medium text-primary-600 hover:text-primary-700">
                                     Dashboard
+                                </Link>
+                                {/* Messages Icon with Badge */}
+                                <Link to="/messages" className="relative">
+                                    <MessageCircle size={22} className="text-secondary-600 hover:text-primary-600 transition-colors" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                                            {unreadCount > 99 ? '99+' : unreadCount}
+                                        </span>
+                                    )}
                                 </Link>
                                 <Button variant="ghost" size="sm" onClick={logout}>Log Out</Button>
                             </div>

@@ -135,6 +135,15 @@ app.http('getChatMessages', {
                 })
                 .fetchAll();
 
+            // Mark messages as read (messages received by current user)
+            for (const msg of messages) {
+                if (msg.to === userEmail && msg.read !== true) {
+                    msg.read = true;
+                    msg.readAt = new Date().toISOString();
+                    await container.items.upsert(msg);
+                }
+            }
+
             context.log('Found messages:', messages.length);
             return { jsonBody: messages };
         } catch (error) {
@@ -478,6 +487,38 @@ app.http('getReports', {
             return { jsonBody: reports };
         } catch (error) {
             context.error('Error getting reports:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
+
+// Get unread message count for current user
+app.http('getUnreadCount', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'messages/unread-count',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("utf8"));
+            const userEmail = clientPrincipal.userDetails;
+
+            const container = await getContainer('messages');
+
+            // Count messages where user is recipient and read is false
+            const { resources: unreadMessages } = await container.items
+                .query({
+                    query: "SELECT c.id FROM c WHERE c.to = @email AND (c.read = false OR NOT IS_DEFINED(c.read))",
+                    parameters: [{ name: "@email", value: userEmail }]
+                })
+                .fetchAll();
+
+            return { jsonBody: { count: unreadMessages.length } };
+        } catch (error) {
+            context.error('Error getting unread count:', error);
             return { status: 500, jsonBody: { error: error.message } };
         }
     }
