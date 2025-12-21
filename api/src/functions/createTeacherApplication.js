@@ -14,16 +14,41 @@ app.http('createTeacherApplication', {
         try {
             const applicationData = await request.json();
 
-            // Basic validation
-            if (!applicationData.email || !applicationData.fullName) {
-                return { status: 400, body: JSON.stringify({ error: "Missing required fields" }) };
+            // Validate required fields
+            const requiredFields = ['email', 'fullName', 'proficiencyLevel', 'bio', 'hourlyRate', 'weeklyAvailability'];
+            for (const field of requiredFields) {
+                if (!applicationData[field]) {
+                    return { status: 400, jsonBody: { error: `Missing required field: ${field}` } };
+                }
             }
 
+            // Validate proficiency level
+            const validProficiency = ['native', 'fluent', 'advanced', 'intermediate'];
+            if (!validProficiency.includes(applicationData.proficiencyLevel)) {
+                return { status: 400, jsonBody: { error: 'Invalid proficiency level' } };
+            }
+
+            // Validate hourly rate
+            if (applicationData.hourlyRate < 5 || applicationData.hourlyRate > 200) {
+                return { status: 400, jsonBody: { error: 'Hourly rate must be between $5 and $200' } };
+            }
+
+            // Check for existing application with same email
             const container = await getContainer('applications');
+            const { resources: existing } = await container.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.email = @email AND c.status = "pending"',
+                    parameters: [{ name: '@email', value: applicationData.email }]
+                })
+                .fetchAll();
+
+            if (existing.length > 0) {
+                return { status: 400, jsonBody: { error: 'You already have a pending application' } };
+            }
 
             // Add metadata
             const newApplication = {
-                id: new Date().getTime().toString(), // Simple ID generation
+                id: new Date().getTime().toString(),
                 ...applicationData,
                 status: 'pending',
                 submittedAt: new Date().toISOString()

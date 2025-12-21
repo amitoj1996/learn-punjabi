@@ -459,6 +459,94 @@ export const LandingPage: React.FC = () => {
                 </div>
             </section>
 
+            {/* Become a Teacher Section */}
+            <section className="py-24 bg-gradient-to-br from-accent-50 to-orange-50 relative overflow-hidden">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="grid lg:grid-cols-2 gap-12 items-center">
+                            <motion.div
+                                initial={{ opacity: 0, x: -30 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                            >
+                                <div className="inline-flex items-center gap-2 bg-accent-100 text-accent-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                                    <Award size={16} />
+                                    <span>Join Our Teaching Community</span>
+                                </div>
+                                <h2 className="text-4xl md:text-5xl font-display font-bold text-secondary-900 mb-6">
+                                    Are You a Native Punjabi Speaker?
+                                </h2>
+                                <p className="text-xl text-secondary-600 mb-8 leading-relaxed">
+                                    Share your language and culture with the next generation. Help NRI kids connect with their heritage while earning on your own schedule.
+                                </p>
+                                <div className="space-y-4 mb-8">
+                                    {[
+                                        'Set your own hours and rates',
+                                        'Teach from anywhere in the world',
+                                        'Make a meaningful cultural impact',
+                                        'Join a supportive teaching community'
+                                    ].map((benefit, i) => (
+                                        <div key={i} className="flex items-center gap-3">
+                                            <div className="w-6 h-6 rounded-full bg-accent-500 text-white flex items-center justify-center">
+                                                <CheckCircle size={14} />
+                                            </div>
+                                            <span className="text-secondary-700">{benefit}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Link to="/teach">
+                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                        <Button size="lg" className="bg-accent-500 hover:bg-accent-600 px-8 py-4 text-lg shadow-xl">
+                                            Apply to Teach
+                                            <ArrowRight size={20} className="ml-2" />
+                                        </Button>
+                                    </motion.div>
+                                </Link>
+                            </motion.div>
+                            <motion.div
+                                initial={{ opacity: 0, x: 30 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                className="relative"
+                            >
+                                <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-2xl">
+                                    <h3 className="text-2xl font-bold text-secondary-900 mb-6">What We're Looking For</h3>
+                                    <div className="space-y-6">
+                                        <div className="flex gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
+                                                <Users size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-secondary-900">Native Punjabi Speakers</h4>
+                                                <p className="text-secondary-600 text-sm">Fluent in spoken and written Punjabi</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-accent-100 text-accent-600 flex items-center justify-center flex-shrink-0">
+                                                <BookOpen size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-secondary-900">Teaching Experience</h4>
+                                                <p className="text-secondary-600 text-sm">Prior teaching or tutoring preferred</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0">
+                                                <Video size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-secondary-900">Reliable Internet</h4>
+                                                <p className="text-secondary-600 text-sm">For quality video lessons</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Final CTA */}
             <section className="py-24 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 relative overflow-hidden">
                 <FloatingShapes />
