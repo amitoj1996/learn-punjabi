@@ -1,6 +1,23 @@
 const { app } = require('@azure/functions');
 const { getContainer } = require('./config/cosmos');
 
+// Helper to check if user is admin
+async function isAdmin(userEmail) {
+    try {
+        const usersContainer = await getContainer('users');
+        const { resources: users } = await usersContainer.items
+            .query({
+                query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                parameters: [{ name: '@email', value: userEmail }]
+            })
+            .fetchAll();
+        return users.length > 0 && users[0].role === 'admin';
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+    }
+}
+
 // Get teacher earnings report
 app.http('getEarningsReport', {
     methods: ['GET'],
@@ -8,10 +25,17 @@ app.http('getEarningsReport', {
     route: 'manager/earnings',
     handler: async (request, context) => {
         try {
-            // Just require login (skip admin check for debugging)
             const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
             if (!clientPrincipalHeader) {
                 return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+            const userEmail = clientPrincipal.userDetails;
+
+            // Check admin access
+            if (!await isAdmin(userEmail)) {
+                return { status: 403, jsonBody: { error: "Admin access required" } };
             }
 
             // Get date range from query params
@@ -21,11 +45,12 @@ app.http('getEarningsReport', {
 
             context.log(`Fetching earnings from ${startDate} to ${endDate}`);
 
-            // Get all paid bookings in date range
+            // ONLY count sessions that are PAID and COMPLETED (not cancelled, not upcoming)
             const bookingsContainer = await getContainer("bookings");
             const { resources: bookings } = await bookingsContainer.items
                 .query({
                     query: `SELECT * FROM c WHERE c.paymentStatus = 'paid' 
+                            AND c.status = 'completed'
                             AND c.date >= @startDate AND c.date <= @endDate`,
                     parameters: [
                         { name: "@startDate", value: startDate },
@@ -34,7 +59,7 @@ app.http('getEarningsReport', {
                 })
                 .fetchAll();
 
-            context.log(`Found ${bookings.length} paid bookings`);
+            context.log(`Found ${bookings.length} completed paid bookings`);
 
             // Group bookings by teacher
             const teacherEarnings = {};
@@ -90,7 +115,7 @@ app.http('getEarningsReport', {
     }
 });
 
-// Mark teacher as paid (simplified)
+// Mark teacher as paid
 app.http('markTeacherPaid', {
     methods: ['POST'],
     authLevel: 'anonymous',
@@ -100,6 +125,14 @@ app.http('markTeacherPaid', {
             const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
             if (!clientPrincipalHeader) {
                 return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+            const userEmail = clientPrincipal.userDetails;
+
+            // Check admin access
+            if (!await isAdmin(userEmail)) {
+                return { status: 403, jsonBody: { error: "Admin access required" } };
             }
 
             const body = await request.json();
