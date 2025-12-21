@@ -6,7 +6,7 @@ import { Layout } from '../components/Layout';
 import {
     Users, CheckCircle, Clock, XCircle, Search, TrendingUp,
     Flag, UserX, UserCheck, Trash2, ChevronLeft, ChevronRight,
-    MoreVertical, Filter, AlertTriangle
+    MoreVertical, Filter
 } from 'lucide-react';
 
 interface Application {
@@ -17,7 +17,7 @@ interface Application {
     email: string;
     bio: string;
     hourlyRate: number;
-    status: 'pending' | 'approved' | 'rejected' | 'suspended';
+    status: 'pending' | 'approved' | 'rejected' | 'suspended' | 'deleted';
     submittedAt: string;
 }
 
@@ -458,8 +458,8 @@ export const AdminDashboard: React.FC = () => {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`px-4 py-2 rounded-t-lg font-medium text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id
-                                        ? 'bg-primary-600 text-white'
-                                        : 'text-secondary-600 hover:bg-secondary-100'
+                                    ? 'bg-primary-600 text-white'
+                                    : 'text-secondary-600 hover:bg-secondary-100'
                                     }`}
                             >
                                 <tab.icon size={18} />
@@ -618,8 +618,8 @@ export const AdminDashboard: React.FC = () => {
                                                         <td className="px-4 py-3 font-medium text-secondary-900">{user.userDetails}</td>
                                                         <td className="px-4 py-3">
                                                             <span className={`px-2 py-1 text-xs rounded-full font-medium ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                                                                    user.role === 'teacher' ? 'bg-blue-100 text-blue-800' :
-                                                                        'bg-secondary-100 text-secondary-800'
+                                                                user.role === 'teacher' ? 'bg-blue-100 text-blue-800' :
+                                                                    'bg-secondary-100 text-secondary-800'
                                                                 }`}>
                                                                 {user.role}
                                                             </span>
@@ -712,8 +712,8 @@ export const AdminDashboard: React.FC = () => {
                                                         <td className="px-4 py-3 text-sm text-secondary-600 max-w-[200px] truncate">{report.messageContent}</td>
                                                         <td className="px-4 py-3">
                                                             <span className={`px-2 py-1 text-xs rounded-full ${report.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-                                                                    report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                                                                        'bg-secondary-100 text-secondary-800'
+                                                                report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                                                                    'bg-secondary-100 text-secondary-800'
                                                                 }`}>{report.status}</span>
                                                         </td>
                                                         <td className="px-4 py-3">
