@@ -8,17 +8,10 @@ app.http('debugBookings', {
     route: 'debug/bookings',
     handler: async (request, context) => {
         try {
-            // Verify admin access
+            // Just require login, no admin check for debugging
             const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
             if (!clientPrincipalHeader) {
                 return { status: 401, jsonBody: { error: "Please log in" } };
-            }
-
-            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
-            const userRoles = clientPrincipal.userRoles || [];
-
-            if (!userRoles.includes('admin')) {
-                return { status: 403, jsonBody: { error: "Admin access required" } };
             }
 
             const bookingsContainer = await getContainer("bookings");
