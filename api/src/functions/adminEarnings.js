@@ -1,7 +1,7 @@
 const { app } = require('@azure/functions');
 const { getContainer } = require('./config/cosmos');
 
-// Helper to check if user is admin (checks database, not Azure roles)
+// Helper to check if user is admin (checks database)
 async function isAdmin(userEmail) {
     try {
         const usersContainer = await getContainer('users');
@@ -35,9 +35,14 @@ app.http('getEarningsReport', {
             const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
             const userEmail = clientPrincipal.userDetails;
 
+            context.log(`Checking admin status for: ${userEmail}`);
+
             // Check if user is admin in database
-            if (!await isAdmin(userEmail)) {
-                return { status: 403, jsonBody: { error: "Admin access required" } };
+            const adminCheck = await isAdmin(userEmail);
+            context.log(`isAdmin result: ${adminCheck}`);
+
+            if (!adminCheck) {
+                return { status: 403, jsonBody: { error: "Admin access required", email: userEmail } };
             }
 
             // Get date range from query params
@@ -62,17 +67,24 @@ app.http('getEarningsReport', {
 
             context.log(`Found ${bookings.length} paid bookings`);
 
-            // Get payouts to check what's already been paid
-            const payoutsContainer = await getContainer("payouts");
-            const { resources: payouts } = await payoutsContainer.items
-                .query({
-                    query: "SELECT * FROM c WHERE c.startDate <= @endDate AND c.endDate >= @startDate",
-                    parameters: [
-                        { name: "@startDate", value: startDate },
-                        { name: "@endDate", value: endDate }
-                    ]
-                })
-                .fetchAll();
+            // Try to get payouts, but don't fail if container doesn't exist
+            let payouts = [];
+            try {
+                const payoutsContainer = await getContainer("payouts");
+                const result = await payoutsContainer.items
+                    .query({
+                        query: "SELECT * FROM c WHERE c.startDate <= @endDate AND c.endDate >= @startDate",
+                        parameters: [
+                            { name: "@startDate", value: startDate },
+                            { name: "@endDate", value: endDate }
+                        ]
+                    })
+                    .fetchAll();
+                payouts = result.resources || [];
+            } catch (payoutError) {
+                context.log.warn("Payouts container may not exist yet:", payoutError.message);
+                payouts = [];
+            }
 
             // Group bookings by teacher
             const teacherEarnings = {};
@@ -88,7 +100,7 @@ app.http('getEarningsReport', {
                     };
                 }
                 teacherEarnings[email].sessions += 1;
-                teacherEarnings[email].totalEarnings += booking.hourlyRate * (booking.duration / 60);
+                teacherEarnings[email].totalEarnings += (booking.hourlyRate || 0) * ((booking.duration || 60) / 60);
                 teacherEarnings[email].bookingIds.push(booking.id);
             }
 
@@ -118,7 +130,7 @@ app.http('getEarningsReport', {
             };
         } catch (error) {
             context.log.error("Error fetching earnings:", error);
-            return { status: 500, jsonBody: { error: error.message } };
+            return { status: 500, jsonBody: { error: error.message, stack: error.stack } };
         }
     }
 });
@@ -130,7 +142,6 @@ app.http('markTeacherPaid', {
     route: 'manager/payouts',
     handler: async (request, context) => {
         try {
-            // Get user email from auth
             const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
             if (!clientPrincipalHeader) {
                 return { status: 401, jsonBody: { error: "Please log in" } };
@@ -139,7 +150,6 @@ app.http('markTeacherPaid', {
             const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
             const userEmail = clientPrincipal.userDetails;
 
-            // Check if user is admin in database
             if (!await isAdmin(userEmail)) {
                 return { status: 403, jsonBody: { error: "Admin access required" } };
             }
@@ -169,7 +179,6 @@ app.http('markTeacherPaid', {
                 return { status: 400, jsonBody: { error: "Already marked as paid" } };
             }
 
-            // Create payout record
             const payout = {
                 id: `payout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 teacherEmail,
@@ -196,12 +205,12 @@ app.http('markTeacherPaid', {
 
 function getDefaultStartDate() {
     const date = new Date();
-    date.setDate(date.getDate() - 30); // Last 30 days
+    date.setDate(date.getDate() - 30);
     return date.toISOString().split('T')[0];
 }
 
 function getDefaultEndDate() {
     const date = new Date();
-    date.setDate(date.getDate() + 30); // Next 30 days (for future bookings)
+    date.setDate(date.getDate() + 30);
     return date.toISOString().split('T')[0];
 }
