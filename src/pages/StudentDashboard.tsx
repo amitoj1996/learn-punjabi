@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import {
     MessageCircle, BookOpen, Star, DollarSign,
     Calendar, Video, X, ChevronLeft, ChevronRight,
-    Search, GraduationCap
+    Search, GraduationCap, AlertTriangle, RefreshCw
 } from 'lucide-react';
 
 interface Booking {
@@ -35,6 +35,9 @@ export const StudentDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('upcoming');
     const [searchTerm, setSearchTerm] = useState('');
     const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+    const [disputeBooking, setDisputeBooking] = useState<Booking | null>(null);
+    const [rescheduleBooking, setRescheduleBooking] = useState<Booking | null>(null);
+    const [disputeReason, setDisputeReason] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -69,6 +72,28 @@ export const StudentDashboard: React.FC = () => {
             }
         } catch (err) {
             console.error('Cancel error:', err);
+        }
+    };
+
+    const handleDispute = async () => {
+        if (!disputeBooking || !disputeReason.trim()) return;
+        try {
+            const response = await fetch(`/api/bookings/${disputeBooking.id}/dispute`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: disputeReason })
+            });
+            if (response.ok) {
+                setBookings(prev => prev.map(b => b.id === disputeBooking.id ? { ...b, status: 'disputed' } : b));
+                setDisputeBooking(null);
+                setDisputeReason('');
+                alert('Dispute submitted. Admin will review.');
+            } else {
+                const data = await response.json();
+                alert(data.error || 'Failed to submit dispute');
+            }
+        } catch (err) {
+            console.error('Dispute error:', err);
         }
     };
 
@@ -183,8 +208,8 @@ export const StudentDashboard: React.FC = () => {
                                         key={tab.id}
                                         onClick={() => { setActiveTab(tab.id); setCurrentPage(1); }}
                                         className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${activeTab === tab.id
-                                                ? 'bg-primary-600 text-white'
-                                                : 'text-secondary-600 hover:bg-secondary-100'
+                                            ? 'bg-primary-600 text-white'
+                                            : 'text-secondary-600 hover:bg-secondary-100'
                                             }`}
                                     >
                                         {tab.label}
@@ -268,8 +293,8 @@ export const StudentDashboard: React.FC = () => {
 
                                             {/* Status Badge */}
                                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                                    booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                        'bg-yellow-100 text-yellow-700'
+                                                booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                    'bg-yellow-100 text-yellow-700'
                                                 }`}>
                                                 {booking.status}
                                             </span>
@@ -289,6 +314,18 @@ export const StudentDashboard: React.FC = () => {
                                                 {isPast(booking) && booking.status !== 'cancelled' && !booking.reviewed && (
                                                     <Button size="sm" variant="outline" className="text-yellow-600 border-yellow-300" onClick={() => setReviewBooking(booking)}>
                                                         <Star size={14} />
+                                                    </Button>
+                                                )}
+                                                {/* Dispute button - for past sessions */}
+                                                {isPast(booking) && booking.status !== 'cancelled' && booking.status !== 'disputed' && (
+                                                    <Button size="sm" variant="outline" className="text-orange-500 border-orange-200 hover:bg-orange-50" onClick={() => setDisputeBooking(booking)} title="Dispute - Teacher didn't show">
+                                                        <AlertTriangle size={14} />
+                                                    </Button>
+                                                )}
+                                                {/* Reschedule button - for upcoming sessions */}
+                                                {!isPast(booking) && booking.status !== 'cancelled' && (
+                                                    <Button size="sm" variant="outline" className="text-blue-500 border-blue-200 hover:bg-blue-50" onClick={() => setRescheduleBooking(booking)} title="Reschedule">
+                                                        <RefreshCw size={14} />
                                                     </Button>
                                                 )}
                                                 {!isPast(booking) && booking.status !== 'cancelled' && (
@@ -352,6 +389,83 @@ export const StudentDashboard: React.FC = () => {
                             setBookings(prev => prev.map(b => b.id === reviewBooking.id ? { ...b, reviewed: true } : b));
                         }}
                     />
+                )}
+            </AnimatePresence>
+
+            {/* Dispute Modal */}
+            <AnimatePresence>
+                {disputeBooking && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setDisputeBooking(null)}>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                        >
+                            <Card className="w-full max-w-md p-6 bg-white" onClick={(e) => e.stopPropagation()}>
+                                <h2 className="text-xl font-bold text-secondary-900 mb-4 flex items-center gap-2">
+                                    <AlertTriangle className="text-orange-500" size={24} />
+                                    Dispute Session
+                                </h2>
+                                <p className="text-secondary-600 mb-4">
+                                    If your teacher didn't show up or there was an issue, please describe what happened:
+                                </p>
+                                <textarea
+                                    value={disputeReason}
+                                    onChange={(e) => setDisputeReason(e.target.value)}
+                                    placeholder="Describe the issue..."
+                                    className="w-full p-3 border border-secondary-200 rounded-lg mb-4 h-24 resize-none"
+                                />
+                                <p className="text-sm text-secondary-500 mb-4">
+                                    Session: {disputeBooking.tutorName} on {disputeBooking.date} at {disputeBooking.time}
+                                </p>
+                                <div className="flex gap-3">
+                                    <Button variant="outline" onClick={() => { setDisputeBooking(null); setDisputeReason(''); }} className="flex-1">
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={handleDispute} disabled={!disputeReason.trim()} className="flex-1 bg-orange-500 hover:bg-orange-600">
+                                        Submit Dispute
+                                    </Button>
+                                </div>
+                            </Card>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Reschedule Modal */}
+            <AnimatePresence>
+                {rescheduleBooking && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setRescheduleBooking(null)}>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                        >
+                            <Card className="w-full max-w-md p-6 bg-white" onClick={(e) => e.stopPropagation()}>
+                                <h2 className="text-xl font-bold text-secondary-900 mb-4 flex items-center gap-2">
+                                    <RefreshCw className="text-blue-500" size={24} />
+                                    Reschedule Session
+                                </h2>
+                                <p className="text-secondary-600 mb-4">
+                                    To reschedule your session with <strong>{rescheduleBooking.tutorName}</strong>, please contact them directly via messages.
+                                </p>
+                                <p className="text-sm text-secondary-500 mb-4">
+                                    Current: {rescheduleBooking.date} at {rescheduleBooking.time}
+                                </p>
+                                <div className="flex gap-3">
+                                    <Button variant="outline" onClick={() => setRescheduleBooking(null)} className="flex-1">
+                                        Close
+                                    </Button>
+                                    <Link to={`/messages?to=${rescheduleBooking.tutorEmail || ''}`} className="flex-1">
+                                        <Button className="w-full">
+                                            <MessageCircle size={16} className="mr-2" />
+                                            Message Tutor
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </Card>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </Layout>
