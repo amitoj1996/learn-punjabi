@@ -189,15 +189,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                             <ArrowLeft size={20} className="text-secondary-600" />
                         </button>
                     )}
-                    <div className="relative">
-                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold shadow-md">
-                            {partnerName.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white"></div>
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold shadow-md">
+                        {partnerName.charAt(0).toUpperCase()}
                     </div>
                     <div>
                         <h3 className="font-semibold text-secondary-900">{partnerName}</h3>
-                        <p className="text-xs text-green-600">Online</p>
+                        <p className="text-xs text-secondary-500">{partnerEmail}</p>
                     </div>
                 </div>
                 <div className="relative">

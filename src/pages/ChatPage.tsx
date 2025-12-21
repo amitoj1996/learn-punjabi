@@ -160,15 +160,12 @@ export const ChatPage: React.FC = () => {
                                                     whileTap={{ scale: 0.98 }}
                                                     onClick={() => setSelectedPartner(partner)}
                                                     className={`w-full p-4 flex items-center gap-3 transition-all ${selectedPartner?.email === partner.email
-                                                            ? 'bg-primary-50 border-l-4 border-l-primary-500'
-                                                            : 'border-l-4 border-l-transparent hover:border-l-primary-200'
+                                                        ? 'bg-primary-50 border-l-4 border-l-primary-500'
+                                                        : 'border-l-4 border-l-transparent hover:border-l-primary-200'
                                                         }`}
                                                 >
-                                                    <div className="relative">
-                                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                                                            {partner.name.charAt(0).toUpperCase()}
-                                                        </div>
-                                                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                                                        {partner.name.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div className="flex-1 text-left min-w-0">
                                                         <h3 className="font-medium text-secondary-900 truncate">{partner.name}</h3>
