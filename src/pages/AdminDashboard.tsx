@@ -6,7 +6,7 @@ import { Layout } from '../components/Layout';
 import {
     Users, CheckCircle, Clock, XCircle, Search, TrendingUp,
     Flag, UserX, UserCheck, Trash2, ChevronLeft, ChevronRight,
-    MoreVertical, Filter
+    MoreVertical, Filter, DollarSign, Calendar
 } from 'lucide-react';
 
 interface Application {
@@ -44,7 +44,16 @@ interface User {
     createdAt: string;
 }
 
-type TabType = 'applications' | 'users' | 'reports';
+interface TeacherEarning {
+    teacherEmail: string;
+    teacherName: string;
+    sessions: number;
+    totalEarnings: number;
+    payoutStatus: 'pending' | 'paid';
+    paidAt?: string;
+}
+
+type TabType = 'applications' | 'users' | 'reports' | 'earnings';
 
 // Confirmation Modal with Delete Input
 const ConfirmModal: React.FC<{
@@ -198,6 +207,15 @@ export const AdminDashboard: React.FC = () => {
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
+
+    // Earnings state
+    const [earnings, setEarnings] = useState<TeacherEarning[]>([]);
+    const [earningsLoading, setEarningsLoading] = useState(false);
+    const [earningsDateRange, setEarningsDateRange] = useState({
+        startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0]
+    });
+    const [earningsTotals, setEarningsTotals] = useState({ totalEarnings: 0, totalSessions: 0 });
 
     useEffect(() => {
         fetchData();
@@ -411,7 +429,8 @@ export const AdminDashboard: React.FC = () => {
     const tabs = [
         { id: 'applications' as TabType, label: 'Applications', icon: Clock, count: applications.filter(a => a.status === 'pending').length },
         { id: 'users' as TabType, label: 'Users', icon: Users, count: users.length },
-        { id: 'reports' as TabType, label: 'Reports', icon: Flag, count: reports.filter(r => r.status === 'pending').length }
+        { id: 'reports' as TabType, label: 'Reports', icon: Flag, count: reports.filter(r => r.status === 'pending').length },
+        { id: 'earnings' as TabType, label: 'Earnings', icon: DollarSign, count: 0 }
     ];
 
     const statCards = [
@@ -788,6 +807,158 @@ export const AdminDashboard: React.FC = () => {
                                     )}
                                 </>
                             )}
+                        </>
+                    )}
+
+                    {/* Earnings Tab */}
+                    {activeTab === 'earnings' && (
+                        <>
+                            <Card className="p-4 mb-4">
+                                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar size={18} className="text-secondary-500" />
+                                        <span className="text-sm font-medium text-secondary-700">Date Range:</span>
+                                    </div>
+                                    <div className="flex gap-2 items-center">
+                                        <input
+                                            type="date"
+                                            value={earningsDateRange.startDate}
+                                            onChange={(e) => setEarningsDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                                            className="px-3 py-2 border border-secondary-200 rounded-lg text-sm"
+                                        />
+                                        <span className="text-secondary-400">to</span>
+                                        <input
+                                            type="date"
+                                            value={earningsDateRange.endDate}
+                                            onChange={(e) => setEarningsDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                                            className="px-3 py-2 border border-secondary-200 rounded-lg text-sm"
+                                        />
+                                        <Button
+                                            size="sm"
+                                            onClick={async () => {
+                                                setEarningsLoading(true);
+                                                try {
+                                                    const response = await fetch(`/api/manager/earnings?startDate=${earningsDateRange.startDate}&endDate=${earningsDateRange.endDate}`);
+                                                    if (response.ok) {
+                                                        const data = await response.json();
+                                                        setEarnings(data.teachers || []);
+                                                        setEarningsTotals({ totalEarnings: data.totalEarnings, totalSessions: data.totalSessions });
+                                                    }
+                                                } catch (err) {
+                                                    console.error('Error fetching earnings:', err);
+                                                } finally {
+                                                    setEarningsLoading(false);
+                                                }
+                                            }}
+                                        >
+                                            Load Report
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card>
+
+                            {/* Summary Cards */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                <Card className="p-4">
+                                    <p className="text-sm text-secondary-500">Total Earnings</p>
+                                    <p className="text-2xl font-bold text-green-600">${earningsTotals.totalEarnings.toFixed(2)}</p>
+                                </Card>
+                                <Card className="p-4">
+                                    <p className="text-sm text-secondary-500">Total Sessions</p>
+                                    <p className="text-2xl font-bold text-primary-600">{earningsTotals.totalSessions}</p>
+                                </Card>
+                                <Card className="p-4">
+                                    <p className="text-sm text-secondary-500">Teachers</p>
+                                    <p className="text-2xl font-bold text-secondary-900">{earnings.length}</p>
+                                </Card>
+                                <Card className="p-4">
+                                    <p className="text-sm text-secondary-500">Pending Payouts</p>
+                                    <p className="text-2xl font-bold text-orange-600">{earnings.filter(e => e.payoutStatus === 'pending').length}</p>
+                                </Card>
+                            </div>
+
+                            {/* Teachers Table */}
+                            <Card className="overflow-hidden">
+                                {earningsLoading ? (
+                                    <div className="text-center py-12">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+                                        <p className="text-secondary-500 mt-2">Loading...</p>
+                                    </div>
+                                ) : earnings.length === 0 ? (
+                                    <div className="text-center py-12 text-secondary-500">
+                                        <DollarSign size={48} className="mx-auto mb-4 text-secondary-300" />
+                                        <p>No earnings data. Select a date range and click "Load Report".</p>
+                                    </div>
+                                ) : (
+                                    <table className="w-full">
+                                        <thead className="bg-secondary-50">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Teacher</th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Sessions</th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Earnings</th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Status</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold text-secondary-700">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-secondary-100">
+                                            {earnings.map((teacher) => (
+                                                <tr key={teacher.teacherEmail} className="hover:bg-secondary-50">
+                                                    <td className="px-4 py-3">
+                                                        <p className="font-medium text-secondary-900">{teacher.teacherName}</p>
+                                                        <p className="text-sm text-secondary-500">{teacher.teacherEmail}</p>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-secondary-700">{teacher.sessions}</td>
+                                                    <td className="px-4 py-3 font-semibold text-green-600">${teacher.totalEarnings.toFixed(2)}</td>
+                                                    <td className="px-4 py-3">
+                                                        {teacher.payoutStatus === 'paid' ? (
+                                                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Paid</span>
+                                                        ) : (
+                                                            <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">Pending</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right">
+                                                        {teacher.payoutStatus === 'pending' && (
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        const response = await fetch('/api/manager/payouts', {
+                                                                            method: 'POST',
+                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                            body: JSON.stringify({
+                                                                                teacherEmail: teacher.teacherEmail,
+                                                                                teacherName: teacher.teacherName,
+                                                                                startDate: earningsDateRange.startDate,
+                                                                                endDate: earningsDateRange.endDate,
+                                                                                amount: teacher.totalEarnings
+                                                                            })
+                                                                        });
+                                                                        if (response.ok) {
+                                                                            setEarnings(prev => prev.map(e =>
+                                                                                e.teacherEmail === teacher.teacherEmail
+                                                                                    ? { ...e, payoutStatus: 'paid' }
+                                                                                    : e
+                                                                            ));
+                                                                            setToast({ message: `Marked ${teacher.teacherName} as paid`, type: 'success' });
+                                                                        }
+                                                                    } catch (err) {
+                                                                        setToast({ message: 'Failed to mark as paid', type: 'error' });
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <CheckCircle size={14} className="mr-1" /> Mark Paid
+                                                            </Button>
+                                                        )}
+                                                        {teacher.payoutStatus === 'paid' && (
+                                                            <span className="text-sm text-secondary-400">✓ Complete</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </Card>
                         </>
                     )}
                 </div>
