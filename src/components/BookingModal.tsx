@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
+import { CreditCard, Lock } from 'lucide-react';
 
 interface BookingModalProps {
     tutor: {
@@ -18,8 +19,8 @@ interface Availability {
 
 const DAYS_OF_WEEK = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSuccess }) => {
-    const [step, setStep] = useState<'select' | 'payment' | 'processing' | 'success'>('select');
+export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSuccess: _onSuccess }) => {
+    const [step, setStep] = useState<'select' | 'confirm' | 'processing'>('select');
     const [availability, setAvailability] = useState<Availability>({});
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [selectedTime, setSelectedTime] = useState<string>('');
@@ -71,18 +72,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
             setError('Please select a date and time');
             return;
         }
-        setStep('payment');
+        setStep('confirm');
     };
 
-    const handleConfirmPayment = async () => {
+    const handleConfirmAndPay = async () => {
         setStep('processing');
         setError(null);
 
-        // Simulate payment processing
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
         try {
-            const response = await fetch('/api/bookings', {
+            // Step 1: Create the booking (without payment)
+            const bookingResponse = await fetch('/api/bookings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -90,22 +89,46 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                     date: selectedDate,
                     time: selectedTime,
                     duration: 60,
-                    paymentStatus: 'paid',
+                    paymentStatus: 'pending',
                     paymentAmount: tutor.hourlyRate
                 })
             });
 
-            if (response.ok) {
-                setStep('success');
-                setTimeout(() => onSuccess(), 2000);
+            if (!bookingResponse.ok) {
+                const data = await bookingResponse.json();
+                throw new Error(data.error || 'Failed to create booking');
+            }
+
+            const bookingData = await bookingResponse.json();
+            const bookingId = bookingData.booking?.id;
+
+            if (!bookingId) {
+                throw new Error('Booking created but no ID returned');
+            }
+
+            // Step 2: Create Stripe checkout session
+            const checkoutResponse = await fetch('/api/checkout/create-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingId })
+            });
+
+            if (!checkoutResponse.ok) {
+                const data = await checkoutResponse.json();
+                throw new Error(data.error || 'Failed to create payment session');
+            }
+
+            const checkoutData = await checkoutResponse.json();
+
+            // Step 3: Redirect to Stripe Checkout
+            if (checkoutData.url) {
+                window.location.href = checkoutData.url;
             } else {
-                const data = await response.json();
-                setError(data.error || 'Failed to book');
-                setStep('payment');
+                throw new Error('No checkout URL received');
             }
         } catch (err) {
             setError((err as Error).message);
-            setStep('payment');
+            setStep('confirm');
         }
     };
 
@@ -119,11 +142,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-secondary-900">
                         {step === 'select' && `Book with ${tutor.name}`}
-                        {step === 'payment' && 'Confirm Payment'}
-                        {step === 'processing' && 'Processing...'}
-                        {step === 'success' && 'Booking Confirmed!'}
+                        {step === 'confirm' && 'Confirm & Pay'}
+                        {step === 'processing' && 'Redirecting...'}
                     </h2>
-                    {step !== 'processing' && step !== 'success' && (
+                    {step !== 'processing' && (
                         <button onClick={onClose} className="text-secondary-400 hover:text-secondary-600 text-2xl">&times;</button>
                     )}
                 </div>
@@ -148,10 +170,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                                     disabled={!hasSlots}
                                                     onClick={() => { setSelectedDate(day.date); setSelectedTime(''); }}
                                                     className={`p-2 rounded-lg text-sm transition-all ${selectedDate === day.date
-                                                            ? 'bg-primary-500 text-white'
-                                                            : hasSlots
-                                                                ? 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
-                                                                : 'bg-secondary-50 text-secondary-300 cursor-not-allowed'
+                                                        ? 'bg-primary-500 text-white'
+                                                        : hasSlots
+                                                            ? 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                            : 'bg-secondary-50 text-secondary-300 cursor-not-allowed'
                                                         }`}
                                                 >
                                                     {day.display}
@@ -173,8 +195,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                                         key={time}
                                                         onClick={() => setSelectedTime(time)}
                                                         className={`p-2 rounded-lg text-sm transition-all ${selectedTime === time
-                                                                ? 'bg-primary-500 text-white'
-                                                                : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                            ? 'bg-primary-500 text-white'
+                                                            : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
                                                             }`}
                                                     >
                                                         {time}
@@ -196,8 +218,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                     </>
                 )}
 
-                {/* Step: Payment */}
-                {step === 'payment' && (
+                {/* Step: Confirm & Pay */}
+                {step === 'confirm' && (
                     <>
                         <div className="bg-primary-50 rounded-xl p-4 mb-6">
                             <h3 className="font-bold text-primary-900 mb-3">Booking Summary</h3>
@@ -227,42 +249,32 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                             </div>
                         </div>
 
-                        {/* Mock Payment Form */}
+                        {/* Stripe Notice */}
                         <div className="border border-secondary-200 rounded-xl p-4 mb-6">
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="text-lg">💳</span>
-                                <span className="font-medium text-secondary-900">Payment Method</span>
+                            <div className="flex items-center gap-2 mb-2">
+                                <CreditCard size={20} className="text-primary-600" />
+                                <span className="font-medium text-secondary-900">Secure Payment with Stripe</span>
                             </div>
-                            <div className="bg-secondary-50 rounded-lg p-3 text-sm text-secondary-600">
-                                <p className="font-medium text-secondary-900 mb-1">Demo Mode</p>
-                                <p>In production, this would connect to Stripe for secure payment processing.</p>
-                            </div>
+                            <p className="text-sm text-secondary-600 flex items-center gap-1">
+                                <Lock size={14} /> You'll be redirected to Stripe's secure checkout page
+                            </p>
                         </div>
 
                         <div className="flex gap-3">
                             <Button variant="outline" onClick={() => setStep('select')} className="flex-1">Back</Button>
-                            <Button onClick={handleConfirmPayment} className="flex-1 bg-green-600 hover:bg-green-700">
-                                💳 Pay ${tutor.hourlyRate}
+                            <Button onClick={handleConfirmAndPay} className="flex-1 bg-green-600 hover:bg-green-700">
+                                Pay ${tutor.hourlyRate}
                             </Button>
                         </div>
                     </>
                 )}
 
-                {/* Step: Processing */}
+                {/* Step: Processing/Redirecting */}
                 {step === 'processing' && (
                     <div className="text-center py-8">
                         <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-secondary-600">Processing your payment...</p>
-                    </div>
-                )}
-
-                {/* Step: Success */}
-                {step === 'success' && (
-                    <div className="text-center py-8">
-                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✓</div>
-                        <h3 className="text-xl font-bold text-secondary-900 mb-2">Booking Confirmed!</h3>
-                        <p className="text-secondary-600 mb-4">Your lesson has been scheduled.</p>
-                        <p className="text-sm text-secondary-500">Check your dashboard for details.</p>
+                        <p className="text-secondary-600">Redirecting to secure payment...</p>
+                        <p className="text-sm text-secondary-400 mt-2">Please wait, do not close this window</p>
                     </div>
                 )}
             </Card>

@@ -7,6 +7,8 @@ import { AvailabilitySettings } from './pages/AvailabilitySettings';
 import { LoginPage } from './pages/LoginPage';
 import { ChatPage } from './pages/ChatPage';
 import { SuspendedPage } from './pages/SuspendedPage';
+import { PaymentSuccess } from './pages/PaymentSuccess';
+import { PaymentCancelled } from './pages/PaymentCancelled';
 import { DashboardRouter } from './routes/DashboardRouter';
 import { useAuth } from './context/AuthContext';
 
@@ -42,6 +44,8 @@ function AppContent() {
       <Route path="/edit-profile" element={<EditProfile />} />
       <Route path="/availability" element={<AvailabilitySettings />} />
       <Route path="/messages" element={<ChatPage />} />
+      <Route path="/payment/success" element={<PaymentSuccess />} />
+      <Route path="/payment/cancelled" element={<PaymentCancelled />} />
     </Routes>
   );
 }
