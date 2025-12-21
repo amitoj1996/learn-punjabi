@@ -8,9 +8,13 @@ app.http('forceCompleteAll', {
     route: 'jobs/force-complete-all',
     handler: async (request, context) => {
         try {
-            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
-            if (!clientPrincipalHeader) {
-                return { status: 401, jsonBody: { error: "Please log in" } };
+            // Require secret key to prevent unauthorized access
+            const secretKey = request.headers.get('x-autocomplete-secret') ||
+                new URL(request.url).searchParams.get('secret');
+            const expectedSecret = process.env.AUTOCOMPLETE_SECRET || 'punjabi-learn-2024';
+
+            if (secretKey !== expectedSecret) {
+                return { status: 403, jsonBody: { error: "Invalid or missing secret key" } };
             }
 
             const bookingsContainer = await getContainer("bookings");

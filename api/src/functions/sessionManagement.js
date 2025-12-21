@@ -9,6 +9,15 @@ app.http('autoCompleteSessions', {
     route: 'jobs/auto-complete',
     handler: async (request, context) => {
         try {
+            // Require secret key to prevent unauthorized access
+            const secretKey = request.headers.get('x-autocomplete-secret') ||
+                new URL(request.url).searchParams.get('secret');
+            const expectedSecret = process.env.AUTOCOMPLETE_SECRET || 'punjabi-learn-2024';
+
+            if (secretKey !== expectedSecret) {
+                return { status: 403, jsonBody: { error: "Invalid or missing secret key" } };
+            }
+
             const bookingsContainer = await getContainer("bookings");
 
             // Get current time and calculate cutoff (24 hours ago)
