@@ -24,7 +24,9 @@ app.http('getEarningsReport', {
             // Get date range from query params
             const url = new URL(request.url);
             const startDate = url.searchParams.get('startDate') || getDefaultStartDate();
-            const endDate = url.searchParams.get('endDate') || new Date().toISOString().split('T')[0];
+            const endDate = url.searchParams.get('endDate') || getDefaultEndDate();
+
+            context.log(`Fetching earnings from ${startDate} to ${endDate}`);
 
             // Get all paid bookings in date range
             const bookingsContainer = await getContainer("bookings");
@@ -38,6 +40,8 @@ app.http('getEarningsReport', {
                     ]
                 })
                 .fetchAll();
+
+            context.log(`Found ${bookings.length} paid bookings`);
 
             // Get payouts to check what's already been paid
             const payoutsContainer = await getContainer("payouts");
@@ -173,5 +177,11 @@ app.http('markTeacherPaid', {
 function getDefaultStartDate() {
     const date = new Date();
     date.setDate(date.getDate() - 30); // Last 30 days
+    return date.toISOString().split('T')[0];
+}
+
+function getDefaultEndDate() {
+    const date = new Date();
+    date.setDate(date.getDate() + 30); // Next 30 days (for future bookings)
     return date.toISOString().split('T')[0];
 }
