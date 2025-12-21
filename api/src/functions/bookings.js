@@ -326,3 +326,76 @@ app.http('updateMeetingLink', {
         }
     }
 });
+
+// PATCH - Reschedule a booking (Student only)
+app.http('rescheduleBooking', {
+    methods: ['PATCH'],
+    authLevel: 'anonymous',
+    route: 'bookings/{bookingId}/reschedule',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("utf8"));
+            const userEmail = clientPrincipal.userDetails;
+
+            const bookingId = request.params.bookingId;
+            const body = await request.json();
+            const { newDate, newTime } = body;
+
+            if (!newDate || !newTime) {
+                return { status: 400, jsonBody: { error: "New date and time are required" } };
+            }
+
+            const container = await getContainer('bookings');
+
+            // Find the booking
+            const { resources: bookings } = await container.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.id = @id",
+                    parameters: [{ name: "@id", value: bookingId }]
+                })
+                .fetchAll();
+
+            if (bookings.length === 0) {
+                return { status: 404, jsonBody: { error: "Booking not found" } };
+            }
+
+            const booking = bookings[0];
+
+            // Verify ownership
+            if (booking.studentEmail !== userEmail) {
+                return { status: 403, jsonBody: { error: "You can only reschedule your own bookings" } };
+            }
+
+            // Check if booking is in the future
+            if (new Date(booking.date) < new Date()) {
+                return { status: 400, jsonBody: { error: "Cannot reschedule past bookings" } };
+            }
+
+            // Check if booking is not cancelled
+            if (booking.status === 'cancelled') {
+                return { status: 400, jsonBody: { error: "Cannot reschedule cancelled bookings" } };
+            }
+
+            // Update the booking
+            booking.date = newDate;
+            booking.time = newTime;
+            booking.rescheduledAt = new Date().toISOString();
+
+            await container.items.upsert(booking);
+
+            context.log(`Booking ${bookingId} rescheduled to ${newDate} at ${newTime}`);
+
+            return {
+                status: 200,
+                jsonBody: { message: "Booking rescheduled successfully", booking }
+            };
+        } catch (error) {
+            context.log.error("Error rescheduling booking:", error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});

@@ -38,6 +38,10 @@ export const StudentDashboard: React.FC = () => {
     const [disputeBooking, setDisputeBooking] = useState<Booking | null>(null);
     const [rescheduleBooking, setRescheduleBooking] = useState<Booking | null>(null);
     const [disputeReason, setDisputeReason] = useState('');
+    const [rescheduleAvailability, setRescheduleAvailability] = useState<{ [day: string]: string[] }>({});
+    const [rescheduleDate, setRescheduleDate] = useState('');
+    const [rescheduleTime, setRescheduleTime] = useState('');
+    const [rescheduleLoading, setRescheduleLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -94,6 +98,64 @@ export const StudentDashboard: React.FC = () => {
             }
         } catch (err) {
             console.error('Dispute error:', err);
+        }
+    };
+
+    const DAYS_OF_WEEK = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+    const openRescheduleModal = async (booking: Booking) => {
+        setRescheduleBooking(booking);
+        setRescheduleLoading(true);
+        setRescheduleDate('');
+        setRescheduleTime('');
+        try {
+            const response = await fetch(`/api/tutors/${booking.tutorId}/availability`);
+            if (response.ok) {
+                const data = await response.json();
+                setRescheduleAvailability(data.availability || {});
+            }
+        } catch (err) {
+            console.error('Failed to fetch availability:', err);
+        } finally {
+            setRescheduleLoading(false);
+        }
+    };
+
+    const getNextDays = () => {
+        const days = [];
+        for (let i = 1; i <= 7; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() + i);
+            days.push({
+                date: date.toISOString().split('T')[0],
+                dayName: DAYS_OF_WEEK[date.getDay()],
+                display: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+            });
+        }
+        return days;
+    };
+
+    const handleReschedule = async () => {
+        if (!rescheduleBooking || !rescheduleDate || !rescheduleTime) return;
+        try {
+            const response = await fetch(`/api/bookings/${rescheduleBooking.id}/reschedule`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newDate: rescheduleDate, newTime: rescheduleTime })
+            });
+            if (response.ok) {
+                setBookings(prev => prev.map(b => b.id === rescheduleBooking.id
+                    ? { ...b, date: rescheduleDate, time: rescheduleTime } : b));
+                setRescheduleBooking(null);
+                setRescheduleDate('');
+                setRescheduleTime('');
+                alert('Session rescheduled successfully!');
+            } else {
+                const data = await response.json();
+                alert(data.error || 'Failed to reschedule');
+            }
+        } catch (err) {
+            console.error('Reschedule error:', err);
         }
     };
 
@@ -324,7 +386,7 @@ export const StudentDashboard: React.FC = () => {
                                                 )}
                                                 {/* Reschedule button - for upcoming sessions */}
                                                 {!isPast(booking) && booking.status !== 'cancelled' && (
-                                                    <Button size="sm" variant="outline" className="text-blue-500 border-blue-200 hover:bg-blue-50" onClick={() => setRescheduleBooking(booking)} title="Reschedule">
+                                                    <Button size="sm" variant="outline" className="text-blue-500 border-blue-200 hover:bg-blue-50" onClick={() => openRescheduleModal(booking)} title="Reschedule">
                                                         <RefreshCw size={14} />
                                                     </Button>
                                                 )}
@@ -441,28 +503,83 @@ export const StudentDashboard: React.FC = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                         >
-                            <Card className="w-full max-w-md p-6 bg-white" onClick={(e) => e.stopPropagation()}>
+                            <Card className="w-full max-w-lg p-6 bg-white" onClick={(e) => e.stopPropagation()}>
                                 <h2 className="text-xl font-bold text-secondary-900 mb-4 flex items-center gap-2">
                                     <RefreshCw className="text-blue-500" size={24} />
                                     Reschedule Session
                                 </h2>
-                                <p className="text-secondary-600 mb-4">
-                                    To reschedule your session with <strong>{rescheduleBooking.tutorName}</strong>, please contact them directly via messages.
-                                </p>
                                 <p className="text-sm text-secondary-500 mb-4">
-                                    Current: {rescheduleBooking.date} at {rescheduleBooking.time}
+                                    Current: <strong>{rescheduleBooking.tutorName}</strong> on {rescheduleBooking.date} at {rescheduleBooking.time}
                                 </p>
-                                <div className="flex gap-3">
-                                    <Button variant="outline" onClick={() => setRescheduleBooking(null)} className="flex-1">
-                                        Close
-                                    </Button>
-                                    <Link to={`/messages?to=${rescheduleBooking.tutorEmail || ''}`} className="flex-1">
-                                        <Button className="w-full">
-                                            <MessageCircle size={16} className="mr-2" />
-                                            Message Tutor
-                                        </Button>
-                                    </Link>
-                                </div>
+
+                                {rescheduleLoading ? (
+                                    <div className="py-8 text-center text-secondary-500">Loading availability...</div>
+                                ) : (
+                                    <>
+                                        {/* Date Selection */}
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-secondary-700 mb-2">Select New Date</label>
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {getNextDays().map(day => {
+                                                    const hasSlots = (rescheduleAvailability[day.dayName] || []).length > 0;
+                                                    return (
+                                                        <button
+                                                            key={day.date}
+                                                            disabled={!hasSlots}
+                                                            onClick={() => { setRescheduleDate(day.date); setRescheduleTime(''); }}
+                                                            className={`p-2 rounded-lg text-xs transition-all ${rescheduleDate === day.date
+                                                                ? 'bg-blue-500 text-white'
+                                                                : hasSlots
+                                                                    ? 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                                    : 'bg-secondary-50 text-secondary-300 cursor-not-allowed'
+                                                                }`}
+                                                        >
+                                                            {day.display}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Time Selection */}
+                                        {rescheduleDate && (
+                                            <div className="mb-4">
+                                                <label className="block text-sm font-medium text-secondary-700 mb-2">Select New Time</label>
+                                                {(() => {
+                                                    const dayName = DAYS_OF_WEEK[new Date(rescheduleDate + 'T12:00:00').getDay()];
+                                                    const slots = rescheduleAvailability[dayName] || [];
+                                                    return slots.length === 0 ? (
+                                                        <p className="text-secondary-500 text-sm">No slots available</p>
+                                                    ) : (
+                                                        <div className="grid grid-cols-4 gap-2">
+                                                            {slots.map(time => (
+                                                                <button
+                                                                    key={time}
+                                                                    onClick={() => setRescheduleTime(time)}
+                                                                    className={`p-2 rounded-lg text-sm transition-all ${rescheduleTime === time
+                                                                        ? 'bg-blue-500 text-white'
+                                                                        : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                                        }`}
+                                                                >
+                                                                    {time}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                        )}
+
+                                        <div className="flex gap-3">
+                                            <Button variant="outline" onClick={() => { setRescheduleBooking(null); setRescheduleDate(''); setRescheduleTime(''); }} className="flex-1">
+                                                Cancel
+                                            </Button>
+                                            <Button onClick={handleReschedule} disabled={!rescheduleDate || !rescheduleTime} className="flex-1">
+                                                Confirm Reschedule
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
                             </Card>
                         </motion.div>
                     </div>
