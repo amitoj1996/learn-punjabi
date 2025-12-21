@@ -213,7 +213,7 @@ export const AdminDashboard: React.FC = () => {
     const [earningsLoading, setEarningsLoading] = useState(false);
     const [earningsDateRange, setEarningsDateRange] = useState({
         startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0]
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     });
     const [earningsTotals, setEarningsTotals] = useState({ totalEarnings: 0, totalSessions: 0 });
 
