@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Star, Users, CheckCircle, Play, ArrowRight, Sparkles, BookOpen, Video, Award } from 'lucide-react';
+import { Star, Users, CheckCircle, ArrowRight, Sparkles, BookOpen, Video, Award } from 'lucide-react';
 import { Layout } from '../components/Layout';
 
 // Animated counter component
@@ -226,21 +226,18 @@ export const LandingPage: React.FC = () => {
                             <Link to="/tutors">
                                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                     <Button size="lg" className="group px-8 py-4 text-lg shadow-xl shadow-primary-500/25 hover:shadow-primary-500/40 transition-shadow">
-                                        Start Learning Free
+                                        Start Learning
                                         <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
                                     </Button>
                                 </motion.div>
                             </Link>
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="flex items-center gap-3 text-secondary-700 hover:text-primary-600 transition-colors group"
-                            >
-                                <span className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center group-hover:bg-primary-50 transition-colors">
-                                    <Play size={20} className="ml-1 text-primary-600" />
-                                </span>
-                                <span className="font-medium">Watch how it works</span>
-                            </motion.button>
+                            <Link to="/teach">
+                                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2 border-accent-500 text-accent-600 hover:bg-accent-50">
+                                        Become a Teacher
+                                    </Button>
+                                </motion.div>
+                            </Link>
                         </motion.div>
 
                         {/* Trust indicators */}
