@@ -137,8 +137,8 @@ app.http('getChatMessages', {
 
             // Mark messages as read (messages received by current user)
             for (const msg of messages) {
-                if (msg.to === userEmail && msg.read !== true) {
-                    msg.read = true;
+                if (msg.recipientEmail === userEmail && msg.isRead !== true) {
+                    msg.isRead = true;
                     msg.readAt = new Date().toISOString();
                     await container.items.upsert(msg);
                 }
@@ -508,10 +508,10 @@ app.http('getUnreadCount', {
 
             const container = await getContainer('messages');
 
-            // Count messages where user is recipient and read is false
+            // Count messages where user is recipient and not read
             const { resources: unreadMessages } = await container.items
                 .query({
-                    query: "SELECT c.id FROM c WHERE c.to = @email AND (c.read = false OR NOT IS_DEFINED(c.read))",
+                    query: "SELECT c.id FROM c WHERE c.recipientEmail = @email AND (c.isRead = false OR NOT IS_DEFINED(c.isRead))",
                     parameters: [{ name: "@email", value: userEmail }]
                 })
                 .fetchAll();
