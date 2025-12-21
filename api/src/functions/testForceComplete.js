@@ -3,7 +3,7 @@ const { getContainer } = require('./config/cosmos');
 
 // TEST ONLY: Force complete all paid bookings for testing
 app.http('forceCompleteAll', {
-    methods: ['POST'],
+    methods: ['POST', 'GET'],
     authLevel: 'anonymous',
     route: 'jobs/force-complete-all',
     handler: async (request, context) => {
