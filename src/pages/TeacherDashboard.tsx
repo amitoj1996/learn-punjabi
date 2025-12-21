@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import {
     MessageCircle, DollarSign, Star, Clock, Users, Calendar,
     Video, X, ChevronLeft, ChevronRight, Search, Settings,
-    BookOpen, CheckCircle, AlertCircle
+    BookOpen, CheckCircle, AlertCircle, Link2
 } from 'lucide-react';
 
 interface Application {
@@ -57,6 +57,9 @@ export const TeacherDashboard: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [linkModalBooking, setLinkModalBooking] = useState<Booking | null>(null);
+    const [meetingLinkInput, setMeetingLinkInput] = useState('');
+    const [isSubmittingLink, setIsSubmittingLink] = useState(false);
 
     useEffect(() => {
         fetchStatus();
@@ -103,6 +106,35 @@ export const TeacherDashboard: React.FC = () => {
             }
         } catch (err) {
             console.error('Cancel error:', err);
+        }
+    };
+
+    const handleAddMeetingLink = async () => {
+        if (!linkModalBooking || !meetingLinkInput) return;
+
+        setIsSubmittingLink(true);
+        try {
+            const response = await fetch(`/api/bookings/${linkModalBooking.id}/meeting-link`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ meetingLink: meetingLinkInput })
+            });
+
+            if (response.ok) {
+                setBookings(prev => prev.map(b =>
+                    b.id === linkModalBooking.id ? { ...b, meetingLink: meetingLinkInput } : b
+                ));
+                setLinkModalBooking(null);
+                setMeetingLinkInput('');
+            } else {
+                const result = await response.json();
+                alert(result.error || 'Failed to save meeting link');
+            }
+        } catch (err) {
+            console.error('Error adding meeting link:', err);
+            alert('Failed to save meeting link');
+        } finally {
+            setIsSubmittingLink(false);
         }
     };
 
@@ -323,8 +355,8 @@ export const TeacherDashboard: React.FC = () => {
                                         key={tab.id}
                                         onClick={() => { setActiveTab(tab.id); setCurrentPage(1); }}
                                         className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${activeTab === tab.id
-                                                ? 'bg-primary-600 text-white'
-                                                : 'text-secondary-600 hover:bg-secondary-100'
+                                            ? 'bg-primary-600 text-white'
+                                            : 'text-secondary-600 hover:bg-secondary-100'
                                             }`}
                                     >
                                         {tab.label}
@@ -401,8 +433,8 @@ export const TeacherDashboard: React.FC = () => {
 
                                             {/* Status Badge */}
                                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                                    booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                        'bg-yellow-100 text-yellow-700'
+                                                booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                    'bg-yellow-100 text-yellow-700'
                                                 }`}>
                                                 {booking.status}
                                             </span>
@@ -415,6 +447,11 @@ export const TeacherDashboard: React.FC = () => {
                                                             <Video size={14} /> Join
                                                         </Button>
                                                     </a>
+                                                )}
+                                                {!isPast(booking) && booking.status !== 'cancelled' && !booking.meetingLink && (
+                                                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1" onClick={() => { setLinkModalBooking(booking); setMeetingLinkInput(''); }}>
+                                                        <Link2 size={14} /> Add Link
+                                                    </Button>
                                                 )}
                                                 <Link to={`/messages?to=${booking.studentEmail}`}>
                                                     <Button size="sm" variant="outline"><MessageCircle size={14} /></Button>
@@ -450,6 +487,46 @@ export const TeacherDashboard: React.FC = () => {
                     </Card>
                 </div>
             </div>
+
+            {/* Meeting Link Modal */}
+            {linkModalBooking && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-2xl max-w-md w-full p-6"
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-secondary-900">Add Meeting Link</h3>
+                            <button onClick={() => setLinkModalBooking(null)} className="p-2 hover:bg-secondary-100 rounded-lg">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <p className="text-secondary-600 text-sm mb-4">
+                            Add your Google Meet, Zoom, or Teams link for the session with <strong>{linkModalBooking.studentEmail?.split('@')[0]}</strong> on {new Date(linkModalBooking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {linkModalBooking.time}.
+                        </p>
+                        <input
+                            type="url"
+                            placeholder="https://meet.google.com/abc-defg-hij"
+                            value={meetingLinkInput}
+                            onChange={(e) => setMeetingLinkInput(e.target.value)}
+                            className="w-full px-4 py-3 border border-secondary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 mb-4"
+                        />
+                        <div className="flex gap-3">
+                            <Button variant="outline" className="flex-1" onClick={() => setLinkModalBooking(null)}>
+                                Cancel
+                            </Button>
+                            <Button
+                                className="flex-1"
+                                onClick={handleAddMeetingLink}
+                                disabled={!meetingLinkInput || isSubmittingLink}
+                            >
+                                {isSubmittingLink ? 'Saving...' : 'Save Link'}
+                            </Button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </Layout>
     );
 };

@@ -123,7 +123,7 @@ app.http('createBooking', {
                 status: 'confirmed',
                 paymentStatus: body.paymentStatus || 'pending',
                 paymentAmount: body.paymentAmount || tutor.hourlyRate,
-                meetingLink: `https://meet.google.com/lookup/${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 4)}`,
+                meetingLink: null, // Teacher will add their own meeting link
                 createdAt: new Date().toISOString()
             };
 
@@ -256,6 +256,73 @@ app.http('cancelBooking', {
         } catch (error) {
             context.log.error("Error cancelling booking:", error);
             return { status: 500, body: JSON.stringify({ error: error.message }) };
+        }
+    }
+});
+
+// PATCH - Update meeting link (Teacher only)
+app.http('updateMeetingLink', {
+    methods: ['PATCH'],
+    authLevel: 'anonymous',
+    route: 'bookings/{bookingId}/meeting-link',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+            const userEmail = clientPrincipal.userDetails;
+            const bookingId = request.params.bookingId;
+            const body = await request.json();
+            const { meetingLink } = body;
+
+            if (!meetingLink) {
+                return { status: 400, jsonBody: { error: "Meeting link is required" } };
+            }
+
+            // Basic URL validation
+            try {
+                new URL(meetingLink);
+            } catch {
+                return { status: 400, jsonBody: { error: "Please provide a valid URL" } };
+            }
+
+            const bookingsContainer = await getContainer("bookings");
+
+            // Find the booking
+            const { resources: bookings } = await bookingsContainer.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.id = @id",
+                    parameters: [{ name: "@id", value: bookingId }]
+                })
+                .fetchAll();
+
+            if (bookings.length === 0) {
+                return { status: 404, jsonBody: { error: "Booking not found" } };
+            }
+
+            const booking = bookings[0];
+
+            // Only the teacher can add meeting link
+            if (booking.tutorEmail !== userEmail) {
+                return { status: 403, jsonBody: { error: "Only the teacher can add a meeting link" } };
+            }
+
+            // Update the meeting link
+            booking.meetingLink = meetingLink;
+            booking.meetingLinkAddedAt = new Date().toISOString();
+
+            await bookingsContainer.item(booking.id, booking.id).replace(booking);
+
+            return {
+                status: 200,
+                jsonBody: { message: "Meeting link updated successfully", meetingLink }
+            };
+        } catch (error) {
+            context.log.error("Error updating meeting link:", error);
+            return { status: 500, jsonBody: { error: error.message } };
         }
     }
 });
