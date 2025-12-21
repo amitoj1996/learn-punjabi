@@ -308,7 +308,7 @@ export const AdminDashboard: React.FC = () => {
         }
     };
 
-    const handleSuspendUser = async (email: string) => {
+    const handleSuspendUser = async (email: string, reportId?: string) => {
         setIsProcessing(true);
         try {
             const response = await fetch('/api/manager/users/suspend', {
@@ -317,6 +317,14 @@ export const AdminDashboard: React.FC = () => {
                 body: JSON.stringify({ userEmail: email, reason: 'Admin action' })
             });
             if (response.ok) {
+                // If suspension came from a report, auto-dismiss it
+                if (reportId) {
+                    await fetch('/api/manager/reports/dismiss', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reportId, resolution: 'user_suspended' })
+                    });
+                }
                 setToast({ message: 'User suspended', type: 'success' });
                 fetchData();
             } else {
@@ -818,7 +826,7 @@ export const AdminDashboard: React.FC = () => {
                     onConfirm={() => {
                         if (confirmModal.type === 'approve') handleApprove(confirmModal.id);
                         else if (confirmModal.type === 'reject') handleReject(confirmModal.id);
-                        else if (confirmModal.type === 'suspend' && confirmModal.email) handleSuspendUser(confirmModal.email);
+                        else if (confirmModal.type === 'suspend' && confirmModal.email) handleSuspendUser(confirmModal.email, confirmModal.id);
                         else if (confirmModal.type === 'reinstate' && confirmModal.email) handleReinstateUser(confirmModal.email);
                         else if (confirmModal.type === 'delete' && confirmModal.email) handleDeleteUser(confirmModal.email);
                         else if (confirmModal.type === 'dismiss') handleDismissReport(confirmModal.id);
