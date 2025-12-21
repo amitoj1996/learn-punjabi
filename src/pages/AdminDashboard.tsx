@@ -839,13 +839,18 @@ export const AdminDashboard: React.FC = () => {
                                                 setEarningsLoading(true);
                                                 try {
                                                     const response = await fetch(`/api/manager/earnings?startDate=${earningsDateRange.startDate}&endDate=${earningsDateRange.endDate}`);
+                                                    const data = await response.json();
+                                                    console.log('Earnings API response:', response.status, data);
                                                     if (response.ok) {
-                                                        const data = await response.json();
                                                         setEarnings(data.teachers || []);
-                                                        setEarningsTotals({ totalEarnings: data.totalEarnings, totalSessions: data.totalSessions });
+                                                        setEarningsTotals({ totalEarnings: data.totalEarnings || 0, totalSessions: data.totalSessions || 0 });
+                                                    } else {
+                                                        console.error('Earnings API error:', data);
+                                                        setToast({ message: data.error || 'Failed to load earnings', type: 'error' });
                                                     }
                                                 } catch (err) {
                                                     console.error('Error fetching earnings:', err);
+                                                    setToast({ message: 'Failed to load earnings report', type: 'error' });
                                                 } finally {
                                                     setEarningsLoading(false);
                                                 }
