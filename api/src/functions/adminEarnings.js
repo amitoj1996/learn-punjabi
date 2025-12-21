@@ -1,6 +1,24 @@
 const { app } = require('@azure/functions');
 const { getContainer } = require('./config/cosmos');
 
+// Helper to check if user is admin (checks database, not Azure roles)
+async function isAdmin(userEmail) {
+    try {
+        const usersContainer = await getContainer('users');
+        const { resources: users } = await usersContainer.items
+            .query({
+                query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                parameters: [{ name: '@email', value: userEmail }]
+            })
+            .fetchAll();
+
+        return users.length > 0 && users[0].role === 'admin';
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+    }
+}
+
 // Get teacher earnings report for admin
 app.http('getEarningsReport', {
     methods: ['GET'],
@@ -8,16 +26,17 @@ app.http('getEarningsReport', {
     route: 'manager/earnings',
     handler: async (request, context) => {
         try {
-            // Verify admin access
+            // Get user email from auth
             const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
             if (!clientPrincipalHeader) {
                 return { status: 401, jsonBody: { error: "Please log in" } };
             }
 
             const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
-            const userRoles = clientPrincipal.userRoles || [];
+            const userEmail = clientPrincipal.userDetails;
 
-            if (!userRoles.includes('admin')) {
+            // Check if user is admin in database
+            if (!await isAdmin(userEmail)) {
                 return { status: 403, jsonBody: { error: "Admin access required" } };
             }
 
@@ -111,16 +130,17 @@ app.http('markTeacherPaid', {
     route: 'manager/payouts',
     handler: async (request, context) => {
         try {
-            // Verify admin access
+            // Get user email from auth
             const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
             if (!clientPrincipalHeader) {
                 return { status: 401, jsonBody: { error: "Please log in" } };
             }
 
             const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
-            const userRoles = clientPrincipal.userRoles || [];
+            const userEmail = clientPrincipal.userDetails;
 
-            if (!userRoles.includes('admin')) {
+            // Check if user is admin in database
+            if (!await isAdmin(userEmail)) {
                 return { status: 403, jsonBody: { error: "Admin access required" } };
             }
 
@@ -158,7 +178,7 @@ app.http('markTeacherPaid', {
                 endDate,
                 amount,
                 paidAt: new Date().toISOString(),
-                paidBy: clientPrincipal.userDetails
+                paidBy: userEmail
             };
 
             await payoutsContainer.items.create(payout);
