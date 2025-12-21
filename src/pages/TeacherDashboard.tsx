@@ -310,11 +310,6 @@ export const TeacherDashboard: React.FC = () => {
                                 <p className="text-secondary-600 mt-1">Manage your sessions and grow your teaching practice.</p>
                             </div>
                             <div className="flex gap-3">
-                                <Link to="/messages">
-                                    <Button variant="outline" className="flex items-center gap-2">
-                                        <MessageCircle size={18} /> Messages
-                                    </Button>
-                                </Link>
                                 <Link to="/edit-profile">
                                     <Button className="flex items-center gap-2">
                                         <Settings size={18} /> Edit Profile

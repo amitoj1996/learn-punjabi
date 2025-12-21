@@ -234,11 +234,6 @@ export const StudentDashboard: React.FC = () => {
                                 <p className="text-secondary-600 mt-1">Ready to learn some Punjabi today?</p>
                             </div>
                             <div className="flex gap-3">
-                                <Link to="/messages">
-                                    <Button variant="outline" className="flex items-center gap-2">
-                                        <MessageCircle size={18} /> Messages
-                                    </Button>
-                                </Link>
                                 <Link to="/tutors">
                                     <Button className="flex items-center gap-2">
                                         <GraduationCap size={18} /> Find a Tutor
