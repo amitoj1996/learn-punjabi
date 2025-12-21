@@ -7,8 +7,8 @@ import { ReviewModal } from '../components/ReviewModal';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import {
-    MessageCircle, BookOpen, Star, DollarSign, Clock,
-    Calendar, MoreVertical, Video, X, ChevronLeft, ChevronRight,
+    MessageCircle, BookOpen, Star, DollarSign,
+    Calendar, Video, X, ChevronLeft, ChevronRight,
     Search, GraduationCap
 } from 'lucide-react';
 
@@ -27,57 +27,6 @@ interface Booking {
 }
 
 type TabType = 'upcoming' | 'completed' | 'cancelled';
-
-// Action Dropdown Component
-const ActionDropdown: React.FC<{
-    booking: Booking;
-    onCancel: () => void;
-    onReview: () => void;
-    onChat: () => void;
-}> = ({ booking, onCancel, onReview, onChat }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const isPast = new Date(booking.date) < new Date();
-    const canJoin = !isPast && booking.status === 'confirmed' && booking.meetingLink;
-    const canReview = isPast && booking.status !== 'cancelled' && !booking.reviewed;
-    const canCancel = !isPast && booking.status !== 'cancelled';
-
-    return (
-        <div className="relative">
-            <button onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-secondary-100 rounded-lg transition-colors">
-                <MoreVertical size={18} />
-            </button>
-            {isOpen && (
-                <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div className="absolute right-0 top-full mt-1 bg-white border border-secondary-200 rounded-xl shadow-xl z-50 min-w-[160px] overflow-hidden">
-                        {canJoin && (
-                            <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer"
-                                className="w-full px-4 py-2.5 text-left text-sm hover:bg-primary-50 text-primary-700 flex items-center gap-2">
-                                <Video size={16} /> Join Meeting
-                            </a>
-                        )}
-                        <button onClick={() => { onChat(); setIsOpen(false); }}
-                            className="w-full px-4 py-2.5 text-left text-sm hover:bg-secondary-50 text-secondary-700 flex items-center gap-2">
-                            <MessageCircle size={16} /> Message Tutor
-                        </button>
-                        {canReview && (
-                            <button onClick={() => { onReview(); setIsOpen(false); }}
-                                className="w-full px-4 py-2.5 text-left text-sm hover:bg-yellow-50 text-yellow-700 flex items-center gap-2">
-                                <Star size={16} /> Leave Review
-                            </button>
-                        )}
-                        {canCancel && (
-                            <button onClick={() => { onCancel(); setIsOpen(false); }}
-                                className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 border-t">
-                                <X size={16} /> Cancel Booking
-                            </button>
-                        )}
-                    </div>
-                </>
-            )}
-        </div>
-    );
-};
 
 export const StudentDashboard: React.FC = () => {
     const { user } = useAuth();
@@ -151,14 +100,11 @@ export const StudentDashboard: React.FC = () => {
     const upcomingCount = bookings.filter(b => new Date(b.date) >= now && b.status !== 'cancelled').length;
     const completedCount = bookings.filter(b => new Date(b.date) < now && b.status !== 'cancelled').length;
     const totalSpent = bookings.filter(b => b.status !== 'cancelled').reduce((sum, b) => sum + (b.hourlyRate * b.duration / 60), 0);
-    const nextLesson = bookings.filter(b => new Date(b.date) >= now && b.status !== 'cancelled')
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
 
     const stats = [
         { label: 'Total Lessons', value: completedCount, icon: BookOpen, color: 'bg-primary-500' },
         { label: 'Upcoming', value: upcomingCount, icon: Calendar, color: 'bg-green-500' },
         { label: 'Total Spent', value: `$${totalSpent.toFixed(0)}`, icon: DollarSign, color: 'bg-purple-500' },
-        { label: 'Next Lesson', value: nextLesson ? new Date(nextLesson.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'None', icon: Clock, color: 'bg-orange-500' }
     ];
 
     const tabs = [
@@ -169,6 +115,9 @@ export const StudentDashboard: React.FC = () => {
 
     // Pending reviews
     const pendingReviews = bookings.filter(b => new Date(b.date) < now && b.status !== 'cancelled' && !b.reviewed);
+
+    // Helper to check booking state
+    const isPast = (booking: Booking) => new Date(booking.date) < new Date();
 
     return (
         <Layout>
@@ -207,7 +156,7 @@ export const StudentDashboard: React.FC = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+                        className="grid grid-cols-3 gap-4 mb-8"
                     >
                         {stats.map((stat, i) => (
                             <Card key={i} className="p-4 hover:shadow-lg transition-shadow">
@@ -234,13 +183,8 @@ export const StudentDashboard: React.FC = () => {
                             <Card className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-yellow-100 rounded-lg">
-                                            <Star size={20} className="text-yellow-600" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-secondary-900">{pendingReviews.length} lesson{pendingReviews.length > 1 ? 's' : ''} waiting for your review</p>
-                                            <p className="text-sm text-secondary-600">Help your tutors by leaving feedback!</p>
-                                        </div>
+                                        <Star size={20} className="text-yellow-600" />
+                                        <p className="font-medium text-secondary-900">{pendingReviews.length} lesson{pendingReviews.length > 1 ? 's' : ''} waiting for your review</p>
                                     </div>
                                     <Button size="sm" onClick={() => setReviewBooking(pendingReviews[0])}>
                                         Review Now
@@ -295,7 +239,7 @@ export const StudentDashboard: React.FC = () => {
                         </div>
                     </Card>
 
-                    {/* Bookings Table */}
+                    {/* Bookings List */}
                     {isLoading ? (
                         <Card className="p-12 text-center">
                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600 mx-auto"></div>
@@ -317,61 +261,72 @@ export const StudentDashboard: React.FC = () => {
                         </Card>
                     ) : (
                         <>
-                            <Card className="overflow-hidden">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-secondary-50">
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Tutor</th>
-                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Date & Time</th>
-                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Duration</th>
-                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Price</th>
-                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Status</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-secondary-700">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-secondary-100">
-                                            {paginatedBookings.map(booking => (
-                                                <tr key={booking.id} className="hover:bg-secondary-50 transition-colors">
-                                                    <td className="px-4 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
-                                                                {booking.tutorName?.charAt(0) || 'T'}
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-medium text-secondary-900">{booking.tutorName}</p>
-                                                                <p className="text-xs text-secondary-500">{booking.tutorEmail || ''}</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        <p className="text-secondary-900">{new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
-                                                        <p className="text-sm text-secondary-500">{booking.time}</p>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-secondary-700">{booking.duration} min</td>
-                                                    <td className="px-4 py-4 font-medium text-secondary-900">${(booking.hourlyRate * booking.duration / 60).toFixed(0)}</td>
-                                                    <td className="px-4 py-4">
-                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                                                booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                                    'bg-yellow-100 text-yellow-700'
-                                                            }`}>
-                                                            {booking.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-right">
-                                                        <ActionDropdown
-                                                            booking={booking}
-                                                            onCancel={() => handleCancelBooking(booking.id)}
-                                                            onReview={() => setReviewBooking(booking)}
-                                                            onChat={() => window.location.href = `/messages?to=${booking.tutorEmail || ''}`}
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </Card>
+                            <div className="space-y-3">
+                                {paginatedBookings.map(booking => (
+                                    <Card key={booking.id} className="p-4 hover:shadow-md transition-shadow">
+                                        <div className="flex items-center justify-between gap-4">
+                                            {/* Tutor Info */}
+                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold flex-shrink-0">
+                                                    {booking.tutorName?.charAt(0) || 'T'}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="font-semibold text-secondary-900 truncate">{booking.tutorName}</p>
+                                                    <p className="text-sm text-secondary-500">
+                                                        {new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.time}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Details */}
+                                            <div className="hidden md:flex items-center gap-6 text-sm">
+                                                <div className="text-center">
+                                                    <p className="text-secondary-500">Duration</p>
+                                                    <p className="font-medium text-secondary-900">{booking.duration} min</p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-secondary-500">Price</p>
+                                                    <p className="font-medium text-secondary-900">${(booking.hourlyRate * booking.duration / 60).toFixed(0)}</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Status */}
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                                    booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                        'bg-yellow-100 text-yellow-700'
+                                                }`}>
+                                                {booking.status}
+                                            </span>
+
+                                            {/* Actions - visible buttons instead of dropdown */}
+                                            <div className="flex items-center gap-2">
+                                                {!isPast(booking) && booking.status !== 'cancelled' && booking.meetingLink && (
+                                                    <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer">
+                                                        <Button size="sm" className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
+                                                            <Video size={14} /> Join
+                                                        </Button>
+                                                    </a>
+                                                )}
+                                                <Link to={`/messages?to=${booking.tutorEmail || ''}`}>
+                                                    <Button size="sm" variant="outline" className="flex items-center gap-1">
+                                                        <MessageCircle size={14} />
+                                                    </Button>
+                                                </Link>
+                                                {isPast(booking) && booking.status !== 'cancelled' && !booking.reviewed && (
+                                                    <Button size="sm" variant="outline" className="flex items-center gap-1 text-yellow-600 border-yellow-300" onClick={() => setReviewBooking(booking)}>
+                                                        <Star size={14} /> Review
+                                                    </Button>
+                                                )}
+                                                {!isPast(booking) && booking.status !== 'cancelled' && (
+                                                    <Button size="sm" variant="outline" className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleCancelBooking(booking.id)}>
+                                                        <X size={14} />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
 
                             {/* Pagination */}
                             {totalPages > 1 && (
@@ -393,46 +348,25 @@ export const StudentDashboard: React.FC = () => {
                         </>
                     )}
 
-                    {/* Quick Links */}
+                    {/* Quick Link - Apply as Tutor */}
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 }}
-                        className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                        className="mt-8"
                     >
-                        <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => window.location.href = '/tutors'}>
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 bg-primary-100 rounded-xl text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors">
-                                    <GraduationCap size={24} />
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-secondary-900">Find a Tutor</p>
-                                    <p className="text-sm text-secondary-500">Browse available teachers</p>
-                                </div>
-                            </div>
-                        </Card>
-                        <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => window.location.href = '/messages'}>
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 bg-green-100 rounded-xl text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                                    <MessageCircle size={24} />
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-secondary-900">Messages</p>
-                                    <p className="text-sm text-secondary-500">Chat with your tutors</p>
-                                </div>
-                            </div>
-                        </Card>
-                        <Link to="/teach" className="sm:col-span-2 lg:col-span-1">
-                            <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer group bg-gradient-to-r from-accent-50 to-orange-50">
+                        <Link to="/teach">
+                            <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-r from-accent-50 to-orange-50 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-3 bg-accent-100 rounded-xl text-accent-600 group-hover:bg-accent-600 group-hover:text-white transition-colors">
+                                    <div className="p-3 bg-accent-100 rounded-xl text-accent-600">
                                         <Star size={24} />
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-secondary-900">Become a Teacher</p>
-                                        <p className="text-sm text-secondary-500">Share your knowledge</p>
+                                        <p className="font-semibold text-secondary-900">Want to teach?</p>
+                                        <p className="text-sm text-secondary-500">Apply to become a Punjabi teacher</p>
                                     </div>
                                 </div>
+                                <Button variant="outline">Apply Now</Button>
                             </Card>
                         </Link>
                     </motion.div>
