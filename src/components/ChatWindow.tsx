@@ -40,6 +40,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const [showMenu, setShowMenu] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const prevMessagesLengthRef = useRef(0);
+    const isInitialLoadRef = useRef(true);
 
     useEffect(() => {
         fetchMessages();
@@ -48,7 +50,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     }, [partnerEmail]);
 
     useEffect(() => {
-        scrollToBottom();
+        // Only scroll to bottom on initial load or when new messages arrive
+        if (isInitialLoadRef.current || messages.length > prevMessagesLengthRef.current) {
+            scrollToBottom();
+            isInitialLoadRef.current = false;
+        }
+        prevMessagesLengthRef.current = messages.length;
     }, [messages]);
 
     const scrollToBottom = () => {
