@@ -356,7 +356,7 @@ export const StudentDashboard: React.FC = () => {
                                                 <div className="min-w-0">
                                                     <p className="font-medium text-secondary-900 truncate">{booking.tutorName}</p>
                                                     <p className="text-sm text-secondary-500">
-                                                        {new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.time}
+                                                        {new Date(booking.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {convertUtcToLocal(booking.time, booking.date)} {getTimezoneAbbr()}
                                                     </p>
                                                 </div>
                                             </div>
