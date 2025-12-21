@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import {
     MessageCircle, DollarSign, Star, Clock, Users, Calendar,
     Video, X, ChevronLeft, ChevronRight, Search, Settings,
-    MoreVertical, BookOpen, TrendingUp, CheckCircle, AlertCircle
+    MoreVertical, BookOpen, CheckCircle, AlertCircle
 } from 'lucide-react';
 
 interface Application {
@@ -366,8 +366,8 @@ export const TeacherDashboard: React.FC = () => {
                                         key={tab.id}
                                         onClick={() => { setActiveTab(tab.id); setCurrentPage(1); }}
                                         className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${activeTab === tab.id
-                                                ? 'bg-primary-600 text-white'
-                                                : 'text-secondary-600 hover:bg-secondary-100'
+                                            ? 'bg-primary-600 text-white'
+                                            : 'text-secondary-600 hover:bg-secondary-100'
                                             }`}
                                     >
                                         {tab.label}
@@ -449,8 +449,8 @@ export const TeacherDashboard: React.FC = () => {
                                                     <td className="px-4 py-4 font-medium text-green-600">${(booking.hourlyRate * booking.duration / 60).toFixed(0)}</td>
                                                     <td className="px-4 py-4">
                                                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                                                booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                                    'bg-yellow-100 text-yellow-700'
+                                                            booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                                'bg-yellow-100 text-yellow-700'
                                                             }`}>
                                                             {booking.status}
                                                         </span>
