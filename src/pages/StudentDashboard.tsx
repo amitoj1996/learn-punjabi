@@ -103,6 +103,26 @@ export const StudentDashboard: React.FC = () => {
 
     const DAYS_OF_WEEK = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
+    // Timezone helpers
+    const getTimezoneAbbr = (): string => {
+        const date = new Date();
+        const timeString = date.toLocaleTimeString('en-US', { timeZoneName: 'short' });
+        const parts = timeString.split(' ');
+        return parts[parts.length - 1]; // e.g., 'PST'
+    };
+
+    // Convert UTC time (e.g., '14:00') to local time for display on a specific date
+    const convertUtcToLocal = (utcTime: string, dateStr: string): string => {
+        const [hours, minutes] = utcTime.split(':').map(Number);
+        const date = new Date(dateStr + 'T00:00:00Z');
+        date.setUTCHours(hours, minutes, 0, 0);
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
+
     const openRescheduleModal = async (booking: Booking) => {
         setRescheduleBooking(booking);
         setRescheduleLoading(true);
@@ -544,14 +564,15 @@ export const StudentDashboard: React.FC = () => {
                                         {/* Time Selection */}
                                         {rescheduleDate && (
                                             <div className="mb-4">
-                                                <label className="block text-sm font-medium text-secondary-700 mb-2">Select New Time</label>
+                                                <label className="block text-sm font-medium text-secondary-700 mb-1">Select New Time</label>
+                                                <p className="text-xs text-secondary-500 mb-2">🌍 Times shown in your timezone ({getTimezoneAbbr()})</p>
                                                 {(() => {
                                                     const dayName = DAYS_OF_WEEK[new Date(rescheduleDate + 'T12:00:00').getDay()];
                                                     const slots = rescheduleAvailability[dayName] || [];
                                                     return slots.length === 0 ? (
                                                         <p className="text-secondary-500 text-sm">No slots available</p>
                                                     ) : (
-                                                        <div className="grid grid-cols-4 gap-2">
+                                                        <div className="grid grid-cols-3 gap-2">
                                                             {slots.map(time => (
                                                                 <button
                                                                     key={time}
@@ -561,7 +582,7 @@ export const StudentDashboard: React.FC = () => {
                                                                         : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
                                                                         }`}
                                                                 >
-                                                                    {time}
+                                                                    {convertUtcToLocal(time, rescheduleDate)}
                                                                 </button>
                                                             ))}
                                                         </div>
