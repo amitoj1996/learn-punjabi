@@ -109,6 +109,15 @@ export const AvailabilitySettings: React.FC = () => {
                 <header className="mb-8">
                     <h1 className="text-3xl font-display font-bold text-secondary-900">Set Your Availability</h1>
                     <p className="text-secondary-600 mt-2">Click on time slots when you're available to teach.</p>
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-blue-800 font-medium">🌍 All times are in UTC (Coordinated Universal Time)</p>
+                        <p className="text-blue-600 text-sm mt-1">
+                            Current UTC time: {new Date().toLocaleTimeString('en-US', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' })} UTC
+                        </p>
+                        <p className="text-blue-600 text-sm mt-1">
+                            Students will see these times converted to their local timezone.
+                        </p>
+                    </div>
                 </header>
 
                 {success && <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-6">✅ {success}</div>}
@@ -135,8 +144,8 @@ export const AvailabilitySettings: React.FC = () => {
                                                 <button
                                                     onClick={() => toggleSlot(day, time)}
                                                     className={`w-full h-10 rounded-lg transition-all text-sm ${isSelected
-                                                            ? 'bg-primary-500 text-white hover:bg-primary-600'
-                                                            : 'bg-secondary-100 text-secondary-400 hover:bg-secondary-200'
+                                                        ? 'bg-primary-500 text-white hover:bg-primary-600'
+                                                        : 'bg-secondary-100 text-secondary-400 hover:bg-secondary-200'
                                                         }`}
                                                 >
                                                     {isSelected ? '✓' : ''}
@@ -158,7 +167,7 @@ export const AvailabilitySettings: React.FC = () => {
                 </div>
 
                 <p className="text-sm text-secondary-500 mt-4">
-                    💡 Tip: Students will see these time slots when booking. All times are shown in your local timezone.
+                    💡 Tip: If you're in India (IST = UTC+5:30), selecting 14:00 UTC means 7:30 PM IST.
                 </p>
             </div>
         </Layout>

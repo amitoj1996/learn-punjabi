@@ -19,6 +19,29 @@ interface Availability {
 
 const DAYS_OF_WEEK = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
+// Get short timezone abbreviation (e.g., 'PST', 'IST')
+const getTimezoneAbbr = (): string => {
+    const date = new Date();
+    const timeString = date.toLocaleTimeString('en-US', { timeZoneName: 'short' });
+    const parts = timeString.split(' ');
+    return parts[parts.length - 1]; // e.g., 'PST'
+};
+
+// Convert UTC time (e.g., '14:00') to local time for display on a specific date
+const convertUtcToLocal = (utcTime: string, dateStr: string): string => {
+    // Create a date object with the UTC time
+    const [hours, minutes] = utcTime.split(':').map(Number);
+    const date = new Date(dateStr + 'T00:00:00Z');
+    date.setUTCHours(hours, minutes, 0, 0);
+
+    // Format to local time
+    return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+};
+
 export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSuccess: _onSuccess }) => {
     const [step, setStep] = useState<'select' | 'confirm' | 'processing'>('select');
     const [availability, setAvailability] = useState<Availability>({});
@@ -185,11 +208,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
 
                                 {selectedDate && (
                                     <div className="mb-6">
-                                        <label className="block text-sm font-medium text-secondary-700 mb-2">Select a Time</label>
+                                        <label className="block text-sm font-medium text-secondary-700 mb-1">Select a Time</label>
+                                        <p className="text-xs text-secondary-500 mb-2">🌍 Times shown in your timezone ({getTimezoneAbbr()})</p>
                                         {availableSlots.length === 0 ? (
                                             <p className="text-secondary-500 text-sm">No slots available</p>
                                         ) : (
-                                            <div className="grid grid-cols-4 gap-2">
+                                            <div className="grid grid-cols-3 gap-2">
                                                 {availableSlots.map(time => (
                                                     <button
                                                         key={time}
@@ -199,7 +223,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                                             : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
                                                             }`}
                                                     >
-                                                        {time}
+                                                        {convertUtcToLocal(time, selectedDate)}
                                                     </button>
                                                 ))}
                                             </div>
