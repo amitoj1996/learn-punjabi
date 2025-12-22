@@ -17,12 +17,7 @@ async function getContainer(containerName) {
 
     // Database name: 'punjabi-db'
     const database = client.database("punjabi-db");
-
-    // Create container if it doesn't exist
-    const { container } = await database.containers.createIfNotExists({
-        id: containerName,
-        partitionKey: { paths: ["/id"] }
-    });
+    const container = database.container(containerName);
 
     return container;
 }
