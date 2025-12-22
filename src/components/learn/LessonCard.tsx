@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Lock, CheckCircle, Crown } from 'lucide-react';
+import { Lock, CheckCircle, Star } from 'lucide-react';
 import type { Lesson } from '../../data/lessons';
 
 interface LessonCardProps {
@@ -19,93 +19,82 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, status, onClick,
             onClick={isLocked ? undefined : onClick}
             disabled={isLocked}
             className={`
-                relative group flex flex-col items-center
-                ${isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
+                relative group flex flex-col items-center w-full max-w-[140px]
+                ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={!isLocked ? { scale: 1.08 } : {}}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.08 }}
+            whileHover={!isLocked ? { y: -4 } : {}}
             whileTap={!isLocked ? { scale: 0.95 } : {}}
         >
-            {/* Connector line to previous node */}
-            {index > 0 && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-1 h-8 bg-gradient-to-b from-secondary-200 to-secondary-300 rounded-full" />
-            )}
-
             {/* Main circle */}
             <motion.div
                 className={`
-                    relative w-20 h-20 rounded-full flex items-center justify-center text-3xl
-                    shadow-lg transition-shadow duration-300
+                    relative w-24 h-24 rounded-full flex items-center justify-center text-4xl
+                    border-4 transition-all duration-300
                     ${isCompleted
-                        ? 'bg-gradient-to-br from-green-400 to-emerald-500 shadow-green-200'
+                        ? 'bg-gradient-to-br from-emerald-400 to-green-500 border-emerald-300 shadow-lg shadow-emerald-200/50'
                         : isLocked
-                            ? 'bg-gradient-to-br from-gray-200 to-gray-300 shadow-gray-100'
-                            : 'bg-gradient-to-br from-primary-400 via-purple-500 to-indigo-500 shadow-purple-200'
+                            ? 'bg-secondary-100 border-secondary-200'
+                            : 'bg-gradient-to-br from-primary-400 to-primary-600 border-primary-300 shadow-lg shadow-primary-200/50'
                     }
-                    ${!isLocked && 'group-hover:shadow-xl'}
+                    ${!isLocked && 'group-hover:shadow-xl group-hover:scale-105'}
                 `}
             >
                 {isLocked ? (
-                    <Lock className="w-8 h-8 text-gray-500" />
+                    <Lock className="w-10 h-10 text-secondary-400" />
                 ) : isCompleted ? (
-                    <CheckCircle className="w-10 h-10 text-white" />
+                    <CheckCircle className="w-12 h-12 text-white drop-shadow-md" />
                 ) : (
                     <span className="drop-shadow-md">{lesson.icon}</span>
                 )}
 
-                {/* Crown for mastered lessons */}
+                {/* Star badge for completed */}
                 {isCompleted && (
                     <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-2 -right-2"
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", delay: 0.2 }}
+                        className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-1 shadow-md"
                     >
-                        <Crown className="w-6 h-6 text-yellow-400 fill-yellow-400 drop-shadow-md" />
+                        <Star className="w-4 h-4 text-white fill-white" />
                     </motion.div>
-                )}
-
-                {/* XP Badge */}
-                {!isLocked && (
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
-                        <div className={`
-                            px-2 py-0.5 rounded-full text-xs font-bold
-                            ${isCompleted
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-purple-100 text-purple-700'
-                            }
-                        `}>
-                            +{lesson.xpReward} XP
-                        </div>
-                    </div>
                 )}
             </motion.div>
 
-            {/* Label */}
-            <div className="mt-4 text-center max-w-[120px]">
+            {/* Label & XP */}
+            <div className="mt-3 text-center">
                 <p className={`
-                    text-sm font-semibold leading-tight
-                    ${isLocked ? 'text-gray-400' : 'text-secondary-800'}
+                    text-sm font-semibold leading-tight mb-1
+                    ${isLocked ? 'text-secondary-400' : 'text-secondary-800'}
                 `}>
                     {lesson.title}
                 </p>
-                <p className="text-xs text-secondary-400 mt-0.5">{lesson.duration}</p>
+                <div className="flex items-center justify-center gap-1">
+                    <span className={`
+                        text-xs font-bold px-2 py-0.5 rounded-full
+                        ${isCompleted
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : isLocked
+                                ? 'bg-secondary-100 text-secondary-400'
+                                : 'bg-primary-100 text-primary-700'
+                        }
+                    `}>
+                        {isCompleted ? '✓' : '⚡'} {lesson.xpReward} XP
+                    </span>
+                </div>
             </div>
 
-            {/* Hover tooltip */}
+            {/* Hover glow effect */}
             {!isLocked && (
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileHover={{ opacity: 1, y: 0 }}
-                    className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 
-                               bg-secondary-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg
-                               whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                >
-                    {lesson.description}
-                    <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 
-                                    w-2 h-2 bg-secondary-800 rotate-45" />
-                </motion.div>
+                <div className={`
+                    absolute -inset-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity -z-10
+                    ${isCompleted
+                        ? 'bg-gradient-to-br from-emerald-200/30 to-green-200/30 blur-xl'
+                        : 'bg-gradient-to-br from-primary-200/30 to-orange-200/30 blur-xl'
+                    }
+                `} />
             )}
         </motion.button>
     );

@@ -29,21 +29,27 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="relative py-8"
+            className="relative"
         >
-            {/* Background path decoration */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-2 bg-gradient-to-b from-primary-100 via-purple-100 to-indigo-100 rounded-full transform -translate-x-1/2 -z-10" />
-
-            {/* Lesson nodes */}
-            <div className="flex flex-col items-center gap-12">
+            {/* Responsive grid layout - wraps on mobile, spreads on desktop */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
                 {lessons.map((lesson, index) => (
-                    <LessonCard
-                        key={lesson.id}
-                        lesson={lesson}
-                        status={getLessonStatus(lesson)}
-                        onClick={() => onLessonSelect(lesson)}
-                        index={index}
-                    />
+                    <div key={lesson.id} className="relative">
+                        {/* Connector arrow to next (only show on larger screens) */}
+                        {index < lessons.length - 1 && (
+                            <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                                <svg width="16" height="16" viewBox="0 0 16 16" className="text-secondary-300">
+                                    <path d="M4 8H12M12 8L8 4M12 8L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                </svg>
+                            </div>
+                        )}
+                        <LessonCard
+                            lesson={lesson}
+                            status={getLessonStatus(lesson)}
+                            onClick={() => onLessonSelect(lesson)}
+                            index={index}
+                        />
+                    </div>
                 ))}
             </div>
 
@@ -52,12 +58,11 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="flex flex-col items-center mt-12"
+                className="flex justify-center mt-10"
             >
-                <div className="w-1 h-8 bg-gradient-to-b from-secondary-200 to-transparent rounded-full" />
-                <div className="mt-4 px-6 py-3 bg-secondary-100 rounded-full">
-                    <span className="text-sm font-medium text-secondary-500">
-                        🚀 More lessons coming soon!
+                <div className="px-6 py-3 bg-gradient-to-r from-secondary-50 to-secondary-100 border border-secondary-200 rounded-full">
+                    <span className="text-sm font-medium text-secondary-600">
+                        🚀 Module 2 coming soon!
                     </span>
                 </div>
             </motion.div>
