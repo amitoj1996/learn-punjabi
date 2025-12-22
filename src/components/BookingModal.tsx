@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
-import { CreditCard, Lock } from 'lucide-react';
+import { CreditCard, Lock, Sparkles } from 'lucide-react';
 
 interface BookingModalProps {
     tutor: {
@@ -15,6 +15,12 @@ interface BookingModalProps {
 
 interface Availability {
     [day: string]: string[];
+}
+
+interface TrialStatus {
+    eligible: boolean;
+    hasUsedTrial: boolean;
+    trialPrice: number;
 }
 
 const DAYS_OF_WEEK = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -49,6 +55,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
     const [selectedTime, setSelectedTime] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [trialStatus, setTrialStatus] = useState<TrialStatus | null>(null);
+    const [useTrial, setUseTrial] = useState(false);
 
     const getNextDays = () => {
         const days = [];
@@ -68,7 +76,24 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
 
     useEffect(() => {
         fetchAvailability();
+        fetchTrialStatus();
     }, [tutor.id]);
+
+    const fetchTrialStatus = async () => {
+        try {
+            const response = await fetch('/api/users/trial-status');
+            if (response.ok) {
+                const data = await response.json();
+                setTrialStatus(data);
+                // Auto-select trial if eligible
+                if (data.eligible) {
+                    setUseTrial(true);
+                }
+            }
+        } catch (err) {
+            console.log('Could not fetch trial status:', err);
+        }
+    };
 
     const fetchAvailability = async () => {
         try {
@@ -133,7 +158,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
             const checkoutResponse = await fetch('/api/checkout/create-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bookingId })
+                body: JSON.stringify({
+                    bookingId,
+                    isTrial: useTrial && trialStatus?.eligible  // Pass trial flag
+                })
             });
 
             if (!checkoutResponse.ok) {
@@ -245,6 +273,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                 {/* Step: Confirm & Pay */}
                 {step === 'confirm' && (
                     <>
+                        {/* Trial Banner */}
+                        {useTrial && trialStatus?.eligible && (
+                            <div className="bg-gradient-to-r from-amber-100 to-yellow-50 border border-amber-200 rounded-xl p-4 mb-4 flex items-center gap-3">
+                                <Sparkles className="text-amber-500" size={24} />
+                                <div>
+                                    <p className="font-bold text-amber-800">🎉 First Lesson Special!</p>
+                                    <p className="text-sm text-amber-700">Try your first lesson for only $5</p>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="bg-primary-50 rounded-xl p-4 mb-6">
                             <h3 className="font-bold text-primary-900 mb-3">Booking Summary</h3>
                             <div className="space-y-2 text-sm">
@@ -266,9 +305,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                     <span className="text-primary-700">Duration</span>
                                     <span className="font-medium text-primary-900">1 hour</span>
                                 </div>
-                                <div className="border-t border-primary-200 pt-2 mt-2 flex justify-between">
+                                <div className="border-t border-primary-200 pt-2 mt-2 flex justify-between items-center">
                                     <span className="font-bold text-primary-900">Total</span>
-                                    <span className="font-bold text-primary-900 text-lg">${tutor.hourlyRate}</span>
+                                    {useTrial && trialStatus?.eligible ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-secondary-400 line-through">${tutor.hourlyRate}</span>
+                                            <span className="font-bold text-green-600 text-lg">${trialStatus.trialPrice}</span>
+                                        </div>
+                                    ) : (
+                                        <span className="font-bold text-primary-900 text-lg">${tutor.hourlyRate}</span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -287,7 +333,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                         <div className="flex gap-3">
                             <Button variant="outline" onClick={() => setStep('select')} className="flex-1">Back</Button>
                             <Button onClick={handleConfirmAndPay} className="flex-1 bg-green-600 hover:bg-green-700">
-                                Pay ${tutor.hourlyRate}
+                                Pay ${useTrial && trialStatus?.eligible ? trialStatus.trialPrice : tutor.hourlyRate}
                             </Button>
                         </div>
                     </>

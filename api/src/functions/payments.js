@@ -16,13 +16,16 @@ app.http('createCheckoutSession', {
             }
 
             const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+            const userId = clientPrincipal.userId;
             const userEmail = clientPrincipal.userDetails;
             const body = await request.json();
-            const { bookingId } = body;
+            const { bookingId, isTrial } = body;  // Accept isTrial flag from frontend
 
             if (!bookingId) {
                 return { status: 400, jsonBody: { error: "Booking ID is required" } };
             }
+
+            const TRIAL_PRICE = 500;  // $5 in cents
 
             // Get booking details
             const bookingsContainer = await getContainer("bookings");
@@ -49,8 +52,28 @@ app.http('createCheckoutSession', {
                 return { status: 400, jsonBody: { error: "This booking is already paid" } };
             }
 
-            // Calculate amount in cents
-            const amount = Math.round((booking.hourlyRate * booking.duration / 60) * 100);
+            // Check trial eligibility if requesting trial price
+            let applyTrial = false;
+            let amount = Math.round((booking.hourlyRate * booking.duration / 60) * 100);
+
+            if (isTrial) {
+                const usersContainer = await getContainer("users");
+                const { resources: users } = await usersContainer.items
+                    .query({
+                        query: "SELECT * FROM c WHERE c.userId = @userId",
+                        parameters: [{ name: "@userId", value: userId }]
+                    })
+                    .fetchAll();
+
+                const user = users[0];
+                if (user && user.hasUsedTrial !== true) {
+                    applyTrial = true;
+                    amount = TRIAL_PRICE;  // Flat $5 for trials
+                    context.log('Applying trial price for user:', userEmail);
+                } else {
+                    context.log('User not eligible for trial:', userEmail);
+                }
+            }
 
             // Get base URL from request
             const origin = request.headers.get('origin') || 'https://learn-punjabi.azurestaticapps.net';
@@ -64,8 +87,12 @@ app.http('createCheckoutSession', {
                     price_data: {
                         currency: 'usd',
                         product_data: {
-                            name: `Punjabi Lesson with ${booking.tutorName}`,
-                            description: `${booking.duration} minute session on ${booking.date} at ${booking.time}`
+                            name: applyTrial
+                                ? `🎉 Trial Lesson with ${booking.tutorName}`
+                                : `Punjabi Lesson with ${booking.tutorName}`,
+                            description: applyTrial
+                                ? `First lesson special! ${booking.duration} minute session on ${booking.date} at ${booking.time}`
+                                : `${booking.duration} minute session on ${booking.date} at ${booking.time}`
                         },
                         unit_amount: amount
                     },
@@ -74,7 +101,9 @@ app.http('createCheckoutSession', {
                 metadata: {
                     bookingId: booking.id,
                     studentEmail: userEmail,
-                    tutorEmail: booking.tutorEmail
+                    tutorEmail: booking.tutorEmail,
+                    isTrial: applyTrial ? 'true' : 'false',
+                    userId: userId  // For marking trial used
                 },
                 success_url: `${origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&booking_id=${bookingId}`,
                 cancel_url: `${origin}/payment/cancelled?booking_id=${bookingId}`
@@ -83,6 +112,7 @@ app.http('createCheckoutSession', {
             // Update booking with pending payment info
             booking.stripeSessionId = session.id;
             booking.paymentStatus = 'pending';
+            booking.isTrial = applyTrial;  // Store trial status on booking
             await bookingsContainer.item(booking.id, booking.id).replace(booking);
 
             return {
@@ -160,6 +190,29 @@ app.http('stripeWebhook', {
                         } catch (emailError) {
                             // Log but don't fail the webhook
                             context.log.error('Failed to send confirmation email:', emailError.message);
+                        }
+
+                        // Mark trial as used if this was a trial booking
+                        if (session.metadata?.isTrial === 'true' && session.metadata?.userId) {
+                            try {
+                                const usersContainer = await getContainer("users");
+                                const { resources: users } = await usersContainer.items
+                                    .query({
+                                        query: "SELECT * FROM c WHERE c.userId = @userId",
+                                        parameters: [{ name: "@userId", value: session.metadata.userId }]
+                                    })
+                                    .fetchAll();
+
+                                if (users.length > 0) {
+                                    const user = users[0];
+                                    user.hasUsedTrial = true;
+                                    user.trialUsedAt = new Date().toISOString();
+                                    await usersContainer.item(user.id, user.userId).replace(user);
+                                    context.log('Marked trial as used for user:', session.metadata.userId);
+                                }
+                            } catch (trialError) {
+                                context.log.error('Failed to mark trial as used:', trialError.message);
+                            }
                         }
                     }
                 }

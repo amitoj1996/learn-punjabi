@@ -59,6 +59,7 @@ app.http('getUserProfile', {
                     userDetails: userEmail,
                     identityProvider: clientPrincipal.identityProvider,
                     role: role,
+                    hasUsedTrial: false,  // New users are eligible for trial
                     createdAt: new Date().toISOString()
                 };
                 const { resource: createdUser } = await usersContainer.items.create(newUser);
@@ -72,13 +73,60 @@ app.http('getUserProfile', {
                 }
             }
 
+            // Include trial eligibility in response
+            const response = {
+                ...user,
+                trialEligible: user.hasUsedTrial !== true  // Eligible if hasn't used trial
+            };
+
             return {
                 status: 200,
-                body: JSON.stringify(user)
+                body: JSON.stringify(response)
             };
         } catch (error) {
             context.log.error("Error in getUserProfile:", error);
             return { status: 500, body: "Internal Server Error" };
+        }
+    }
+});
+
+// Get trial eligibility status for current user
+app.http('getTrialStatus', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'users/trial-status',
+    handler: async (request, context) => {
+        const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+        if (!clientPrincipalHeader) {
+            return { status: 401, jsonBody: { error: "Please log in" } };
+        }
+
+        const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+        const userId = clientPrincipal.userId;
+
+        try {
+            const usersContainer = await getContainer("users");
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.userId = @userId",
+                    parameters: [{ name: "@userId", value: userId }]
+                })
+                .fetchAll();
+
+            const user = users[0];
+            const hasUsedTrial = user?.hasUsedTrial === true;
+
+            return {
+                status: 200,
+                jsonBody: {
+                    eligible: !hasUsedTrial,
+                    hasUsedTrial: hasUsedTrial,
+                    trialPrice: 5  // Flat $5 trial price
+                }
+            };
+        } catch (error) {
+            context.log.error("Error checking trial status:", error);
+            return { status: 500, jsonBody: { error: error.message } };
         }
     }
 });
