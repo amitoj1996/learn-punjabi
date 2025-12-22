@@ -14,22 +14,38 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
     const prevUnreadCountRef = useRef(0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const isFirstLoadRef = useRef(true);
 
     // Initialize audio on mount
     useEffect(() => {
-        // Create audio element for notification sound
-        audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp2ZkYd8d3yCi5OXlpCIgHp3e4KKkJKQioN9eXp9g4mNjo2Ig3t3d3p/hoyPj42Hf3l2d3p/hYqNjYuGgHp2dnh8goeLi4mFf3p2dnh7gIWIiYeFgHt3dnd6foOGiIeFgX14dnd5fIGEhoaEgX14dnZ4e3+ChYWEgX54dXV3eX1/goODgX54dXR2eHt+gIGBf3x4dXR1d3p8fn9/fnx4dXR1dnl7fX5+fXt4dXR0dnh6fH19fHp3dXR0dXd5e3x8e3p3dXN0dXd5ent7enl2dHN0dXd4ent7enh2dHN0dHZ4ent7eXh1dHN0dHZ3eXp6eXh2dHNzdHV3eHp6eXd2dHNzdHV2eHl5eHd1dHJzdHV2eHh4d3Z0dHJzdHV2d3h4d3Z0c3JydHV2d3d3dnV0c3JydHV2dnZ2dXR0cnJzdHV2dnZ1dHRzcnJzdHV1dXV1dHNzcnJydHR1dXV0dHNycnJydHR0dHR0c3NycnJyc3R0dHRzc3JycnJyc3Nzc3Nzc3JycXJyc3Nzc3NycnJxcXJyc3Nzc3JycnFxcXJyc3NzcnJycXFxcXJyc3NycnJxcXFxcnJycnJycXFxcXFxcnJycnJxcXFxcXFxcnJycXFxcXFxcXFxcXJxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXE=');
-        audioRef.current.volume = 0.5;
+        // Create audio element with a cleaner notification sound
+        // This is a higher quality "ding" sound
+        audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audioRef.current.volume = 0.4;
+
+        // Initialize prev count from sessionStorage to prevent sound on page refresh
+        const storedCount = sessionStorage.getItem('lastUnreadCount');
+        if (storedCount) {
+            prevUnreadCountRef.current = parseInt(storedCount, 10);
+        }
     }, []);
 
-    // Play notification sound
+    // Play notification sound with cooldown
     const playNotificationSound = () => {
+        // Check cooldown - don't play if played in last 10 seconds
+        const lastPlayed = sessionStorage.getItem('lastSoundPlayed');
+        const now = Date.now();
+        if (lastPlayed && now - parseInt(lastPlayed, 10) < 10000) {
+            return; // Skip - played recently
+        }
+
         if (audioRef.current) {
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(e => {
                 // Browser might block autoplay, that's okay
                 console.log('Could not play notification sound:', e);
             });
+            sessionStorage.setItem('lastSoundPlayed', now.toString());
         }
     };
 
@@ -42,12 +58,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 const data = await response.json();
                 const newCount = data.count || 0;
 
-                // Play sound if count increased (new message received)
-                if (newCount > prevUnreadCountRef.current && prevUnreadCountRef.current >= 0) {
+                // Play sound if count increased (new message received), but not on first load
+                if (!isFirstLoadRef.current && newCount > prevUnreadCountRef.current) {
                     playNotificationSound();
                 }
 
+                isFirstLoadRef.current = false;
                 prevUnreadCountRef.current = newCount;
+                sessionStorage.setItem('lastUnreadCount', newCount.toString());
                 setUnreadCount(newCount);
             }
         } catch (err) {
