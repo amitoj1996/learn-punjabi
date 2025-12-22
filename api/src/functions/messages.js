@@ -383,7 +383,26 @@ app.http('getChatPartners', {
                 }
             }
 
+            // Get unread count per partner
+            const messagesContainer = await getContainer('messages');
             const partners = Array.from(partnersMap.values());
+
+            for (const partner of partners) {
+                const { resources: unreadMsgs } = await messagesContainer.items
+                    .query({
+                        query: "SELECT c.id FROM c WHERE LOWER(c.senderEmail) = LOWER(@partnerEmail) AND LOWER(c.recipientEmail) = LOWER(@userEmail) AND (c.isRead = false OR NOT IS_DEFINED(c.isRead))",
+                        parameters: [
+                            { name: "@partnerEmail", value: partner.email },
+                            { name: "@userEmail", value: userEmail }
+                        ]
+                    })
+                    .fetchAll();
+                partner.unreadCount = unreadMsgs.length;
+            }
+
+            // Sort by unread count (partners with unread messages first)
+            partners.sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0));
+
             context.log('Found partners:', partners.length);
             return { jsonBody: partners };
         } catch (error) {

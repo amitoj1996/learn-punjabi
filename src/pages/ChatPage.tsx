@@ -9,6 +9,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 interface ChatPartner {
     email: string;
     name: string;
+    unreadCount?: number;
 }
 
 export const ChatPage: React.FC = () => {
@@ -164,12 +165,22 @@ export const ChatPage: React.FC = () => {
                                                         : 'border-l-4 border-l-transparent hover:border-l-primary-200'
                                                         }`}
                                                 >
-                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-md relative">
                                                         {partner.name.charAt(0).toUpperCase()}
+                                                        {partner.unreadCount && partner.unreadCount > 0 && (
+                                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center px-1">
+                                                                {partner.unreadCount}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <div className="flex-1 text-left min-w-0">
                                                         <h3 className="font-medium text-secondary-900 truncate">{partner.name}</h3>
-                                                        <p className="text-sm text-secondary-500 truncate">{partner.email}</p>
+                                                        <p className="text-sm text-secondary-500 truncate">
+                                                            {partner.unreadCount && partner.unreadCount > 0
+                                                                ? <span className="text-primary-600 font-medium">{partner.unreadCount} new message{partner.unreadCount > 1 ? 's' : ''}</span>
+                                                                : partner.email
+                                                            }
+                                                        </p>
                                                     </div>
                                                 </motion.button>
                                             ))}
