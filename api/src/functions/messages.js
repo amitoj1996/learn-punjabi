@@ -170,7 +170,7 @@ app.http('deleteChat', {
 
             const principal = JSON.parse(Buffer.from(clientPrincipal, 'base64').toString());
             const userEmail = principal.userDetails.toLowerCase();
-            const partnerEmail = decodeURIComponent(request.params.partnerEmail);
+            const partnerEmail = decodeURIComponent(request.params.partnerEmail).toLowerCase();
 
             const conversationId = makeConversationId(userEmail, partnerEmail);
             context.log('Soft-deleting conversation:', conversationId, 'for user:', userEmail);
@@ -203,6 +203,17 @@ app.http('deleteChat', {
                     deletedCount++;
                 }
             }
+
+            // Store a deleted conversation record to hide from partners list
+            const deletedConvsContainer = await getContainer('deletedConversations');
+            const deletedRecord = {
+                id: `${userEmail}_${partnerEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
+                userEmail: userEmail,
+                partnerEmail: partnerEmail,
+                conversationId: conversationId,
+                deletedAt: new Date().toISOString()
+            };
+            await deletedConvsContainer.items.upsert(deletedRecord);
 
             context.log('Soft-deleted', deletedCount, 'messages');
             return {
@@ -400,11 +411,34 @@ app.http('getChatPartners', {
                 partner.unreadCount = unreadMsgs.length;
             }
 
-            // Sort by unread count (partners with unread messages first)
-            partners.sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0));
+            // Filter out deleted conversations (unless they have new unread messages)
+            let filteredPartners = partners;
+            try {
+                const deletedConvsContainer = await getContainer('deletedConversations');
+                const { resources: deletedConvs } = await deletedConvsContainer.items
+                    .query({
+                        query: "SELECT * FROM c WHERE LOWER(c.userEmail) = LOWER(@email)",
+                        parameters: [{ name: "@email", value: userEmail }]
+                    })
+                    .fetchAll();
 
-            context.log('Found partners:', partners.length);
-            return { jsonBody: partners };
+                // Create a set of deleted partner emails
+                const deletedPartners = new Set(deletedConvs.map(d => d.partnerEmail.toLowerCase()));
+
+                // Filter: keep partners that are NOT deleted OR have unread messages
+                filteredPartners = partners.filter(p =>
+                    !deletedPartners.has(p.email.toLowerCase()) || (p.unreadCount && p.unreadCount > 0)
+                );
+            } catch (e) {
+                // If deletedConversations container doesn't exist yet, use all partners
+                context.log('No deletedConversations container yet, showing all partners');
+            }
+
+            // Sort by unread count (partners with unread messages first)
+            filteredPartners.sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0));
+
+            context.log('Found partners:', filteredPartners.length);
+            return { jsonBody: filteredPartners };
         } catch (error) {
             context.error('Error getting chat partners:', error);
             return { status: 500, jsonBody: { error: error.message } };
