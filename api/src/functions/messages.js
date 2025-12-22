@@ -527,3 +527,82 @@ app.http('getUnreadCount', {
         }
     }
 });
+
+// Debug: Get unread messages details
+app.http('getUnreadDetails', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    route: 'messages/unread-details',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("utf8"));
+            const userEmail = clientPrincipal.userDetails;
+
+            const container = await getContainer('messages');
+
+            // Get full details of unread messages
+            const { resources: unreadMessages } = await container.items
+                .query({
+                    query: "SELECT c.id, c.senderEmail, c.recipientEmail, c.content, c.timestamp, c.isRead, c.conversationId FROM c WHERE LOWER(c.recipientEmail) = LOWER(@email) AND (c.isRead = false OR NOT IS_DEFINED(c.isRead))",
+                    parameters: [{ name: "@email", value: userEmail }]
+                })
+                .fetchAll();
+
+            return {
+                jsonBody: {
+                    userEmail,
+                    count: unreadMessages.length,
+                    messages: unreadMessages
+                }
+            };
+        } catch (error) {
+            context.error('Error getting unread details:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
+
+// Mark all messages as read for user
+app.http('markAllAsRead', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'messages/mark-all-read',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("utf8"));
+            const userEmail = clientPrincipal.userDetails;
+
+            const container = await getContainer('messages');
+
+            // Get all unread messages for user
+            const { resources: unreadMessages } = await container.items
+                .query({
+                    query: "SELECT * FROM c WHERE LOWER(c.recipientEmail) = LOWER(@email) AND (c.isRead = false OR NOT IS_DEFINED(c.isRead))",
+                    parameters: [{ name: "@email", value: userEmail }]
+                })
+                .fetchAll();
+
+            // Mark them all as read
+            let markedCount = 0;
+            for (const msg of unreadMessages) {
+                msg.isRead = true;
+                msg.readAt = new Date().toISOString();
+                await container.items.upsert(msg);
+                markedCount++;
+            }
+
+            return { jsonBody: { message: `Marked ${markedCount} messages as read` } };
+        } catch (error) {
+            context.error('Error marking all as read:', error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
