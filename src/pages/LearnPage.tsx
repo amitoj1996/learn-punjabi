@@ -41,7 +41,7 @@ const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, del
                 >
                     <div className="flex items-center gap-3 mb-2">
                         <span className="text-4xl font-bold">{word.gurmukhi}</span>
-                        <AudioButton text={word.gurmukhi} size="sm" />
+                        <AudioButton text={word.pronunciation || word.gurmukhi} size="sm" />
                     </div>
                     <span className="text-white/70 text-sm">Tap to reveal • 🔊 for audio</span>
                 </div>
@@ -52,7 +52,7 @@ const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, del
                 >
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-xl font-bold">{word.transliteration}</span>
-                        <AudioButton text={word.gurmukhi} size="sm" />
+                        <AudioButton text={word.pronunciation || word.gurmukhi} size="sm" />
                     </div>
                     <span className="text-white/90">{word.english}</span>
                 </div>

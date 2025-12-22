@@ -2,9 +2,10 @@
 // Module 1: Getting Started
 
 export interface VocabularyWord {
-    gurmukhi: string;
-    transliteration: string;
-    english: string;
+    gurmukhi: string; // Punjabi script
+    transliteration: string; // Romanized version
+    english: string; // English meaning
+    pronunciation?: string; // Optional: text for TTS (defaults to gurmukhi)
     audio?: string; // Optional audio file path
 }
 
@@ -55,14 +56,14 @@ export const modules: Module[] = [
                 difficulty: 'beginner',
                 unlockRequirements: [],
                 vocabulary: [
-                    { gurmukhi: 'ੳ', transliteration: 'Ura', english: 'First letter (vowel carrier)' },
-                    { gurmukhi: 'ਅ', transliteration: 'Aira', english: 'Second letter (vowel carrier)' },
-                    { gurmukhi: 'ੲ', transliteration: 'Eeri', english: 'Third letter (vowel carrier)' },
-                    { gurmukhi: 'ਸ', transliteration: 'Sussa', english: 'S sound' },
-                    { gurmukhi: 'ਹ', transliteration: 'Haaha', english: 'H sound' },
-                    { gurmukhi: 'ਕ', transliteration: 'Kakka', english: 'K sound' },
-                    { gurmukhi: 'ਖ', transliteration: 'Khakha', english: 'Kh sound' },
-                    { gurmukhi: 'ਗ', transliteration: 'Gagga', english: 'G sound' },
+                    { gurmukhi: 'ੳ', transliteration: 'Ura', english: 'First letter (vowel carrier)', pronunciation: 'ਊੜਾ' },
+                    { gurmukhi: 'ਅ', transliteration: 'Aira', english: 'Second letter (vowel carrier)', pronunciation: 'ਐੜਾ' },
+                    { gurmukhi: 'ੲ', transliteration: 'Eeri', english: 'Third letter (vowel carrier)', pronunciation: 'ਈੜੀ' },
+                    { gurmukhi: 'ਸ', transliteration: 'Sussa', english: 'S sound', pronunciation: 'ਸੱਸਾ' },
+                    { gurmukhi: 'ਹ', transliteration: 'Haaha', english: 'H sound', pronunciation: 'ਹਾਹਾ' },
+                    { gurmukhi: 'ਕ', transliteration: 'Kakka', english: 'K sound', pronunciation: 'ਕੱਕਾ' },
+                    { gurmukhi: 'ਖ', transliteration: 'Khakha', english: 'Kh sound', pronunciation: 'ਖੱਖਾ' },
+                    { gurmukhi: 'ਗ', transliteration: 'Gagga', english: 'G sound', pronunciation: 'ਗੱਗਾ' },
                 ],
                 content: `
 # The Gurmukhi Alphabet
