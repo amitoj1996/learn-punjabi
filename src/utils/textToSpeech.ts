@@ -1,132 +1,92 @@
 /**
  * Text-to-Speech utility for Punjabi pronunciation
- * Uses Web Speech API with Punjabi language support
+ * Uses Google Translate TTS for reliable Punjabi audio
  */
 
-// Check if speech synthesis is available
+// Create an audio element for playback
+let audioElement: HTMLAudioElement | null = null;
+
+// Get Google Translate TTS URL for Punjabi
+const getTTSUrl = (text: string): string => {
+    const encodedText = encodeURIComponent(text);
+    // Google Translate TTS endpoint - supports Punjabi (pa)
+    return `https://translate.google.com/translate_tts?ie=UTF-8&tl=pa&client=tw-ob&q=${encodedText}`;
+};
+
+// Check if audio is supported
 export const isSpeechSupported = (): boolean => {
-    return typeof window !== 'undefined' && 'speechSynthesis' in window;
+    return typeof window !== 'undefined' && typeof Audio !== 'undefined';
 };
 
-// Store voices once loaded
-let cachedVoices: SpeechSynthesisVoice[] = [];
-let voicesLoaded = false;
-
-// Initialize voices (call this early in the app)
-export const initVoices = (): Promise<SpeechSynthesisVoice[]> => {
-    return new Promise((resolve) => {
-        if (!isSpeechSupported()) {
-            resolve([]);
-            return;
-        }
-
-        const loadVoices = () => {
-            cachedVoices = window.speechSynthesis.getVoices();
-            voicesLoaded = true;
-            resolve(cachedVoices);
-        };
-
-        // Try to get voices immediately
-        cachedVoices = window.speechSynthesis.getVoices();
-
-        if (cachedVoices.length > 0) {
-            voicesLoaded = true;
-            resolve(cachedVoices);
-        } else {
-            // Wait for voices to load (Chrome loads them async)
-            window.speechSynthesis.onvoiceschanged = loadVoices;
-
-            // Fallback timeout - some browsers don't fire the event
-            setTimeout(() => {
-                if (!voicesLoaded) {
-                    loadVoices();
-                }
-            }, 1000);
-        }
-    });
-};
-
-// Get the best available voice for Punjabi
-const getBestVoice = (): SpeechSynthesisVoice | undefined => {
-    if (cachedVoices.length === 0) {
-        cachedVoices = window.speechSynthesis.getVoices();
-    }
-
-    // Priority order: Punjabi > Hindi > any available
-    const punjabiVoice = cachedVoices.find(v => v.lang.startsWith('pa'));
-    if (punjabiVoice) return punjabiVoice;
-
-    const hindiVoice = cachedVoices.find(v => v.lang.startsWith('hi'));
-    if (hindiVoice) return hindiVoice;
-
-    // Fallback to first available voice
-    return cachedVoices[0];
-};
-
-// Speak text in Punjabi
+// Speak text in Punjabi using Google Translate TTS
 export const speakPunjabi = (text: string, onEnd?: () => void): void => {
     if (!isSpeechSupported()) {
-        console.warn('Speech synthesis not supported');
+        console.warn('Audio not supported');
         onEnd?.();
         return;
     }
 
-    // Cancel any ongoing speech
+    // Stop any currently playing audio
+    stopSpeaking();
+
+    try {
+        const url = getTTSUrl(text);
+        audioElement = new Audio(url);
+
+        audioElement.onended = () => {
+            onEnd?.();
+        };
+
+        audioElement.onerror = (e) => {
+            console.error('Audio playback error:', e);
+            // Fallback to Web Speech API
+            fallbackToWebSpeech(text, onEnd);
+        };
+
+        audioElement.play().catch((e) => {
+            console.error('Play error:', e);
+            // Fallback to Web Speech API
+            fallbackToWebSpeech(text, onEnd);
+        });
+    } catch (e) {
+        console.error('TTS error:', e);
+        fallbackToWebSpeech(text, onEnd);
+    }
+};
+
+// Fallback to Web Speech API if Google TTS fails
+const fallbackToWebSpeech = (text: string, onEnd?: () => void): void => {
+    if (!('speechSynthesis' in window)) {
+        console.warn('No TTS available');
+        onEnd?.();
+        return;
+    }
+
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-
-    // Get the best available voice
-    const voice = getBestVoice();
-    if (voice) {
-        utterance.voice = voice;
-        utterance.lang = voice.lang;
-    } else {
-        // Default to Hindi language tag even without a specific voice
-        utterance.lang = 'hi-IN';
-    }
-
-    utterance.rate = 0.85; // Slightly slower for learning
-    utterance.pitch = 1;
-    utterance.volume = 1;
+    utterance.lang = 'hi-IN'; // Hindi as fallback
+    utterance.rate = 0.8;
 
     utterance.onend = () => onEnd?.();
-    utterance.onerror = (e) => {
-        console.error('Speech error:', e);
-        onEnd?.();
-    };
-
-    // Chrome bug: need to call resume sometimes
-    window.speechSynthesis.resume();
+    utterance.onerror = () => onEnd?.();
 
     window.speechSynthesis.speak(utterance);
-
-    // Chrome bug workaround: speech stops after ~15 seconds of no activity
-    // Keep-alive by pausing/resuming
-    const keepAlive = setInterval(() => {
-        if (!window.speechSynthesis.speaking) {
-            clearInterval(keepAlive);
-        } else {
-            window.speechSynthesis.pause();
-            window.speechSynthesis.resume();
-        }
-    }, 10000);
 };
 
 // Stop speaking
 export const stopSpeaking = (): void => {
-    if (isSpeechSupported()) {
+    if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        audioElement = null;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
     }
 };
 
-// Debug: get all available voices
-export const getAvailableVoices = (): SpeechSynthesisVoice[] => {
-    if (!isSpeechSupported()) return [];
-    return window.speechSynthesis.getVoices();
+// Initialize (no-op, kept for compatibility)
+export const initVoices = (): Promise<void> => {
+    return Promise.resolve();
 };
-
-// Initialize on module load
-if (typeof window !== 'undefined') {
-    initVoices();
-}
