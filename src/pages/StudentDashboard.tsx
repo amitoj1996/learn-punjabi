@@ -274,48 +274,77 @@ export const StudentDashboard: React.FC = () => {
                         {/* Next Lesson Hero Card */}
                         <div className="lg:col-span-2 flex">
                             {nextLesson ? (
-                                <Card className="flex-1 p-5 bg-white shadow-sm">
-                                    <div className="flex flex-col h-full">
-                                        <div className="flex items-center gap-2 text-secondary-500 text-sm mb-3">
-                                            <Calendar size={16} className="text-primary-500" />
-                                            <span className="font-medium text-secondary-700">Your Next Lesson</span>
-                                            <span className="ml-auto bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-xs font-medium">
-                                                {getTimeUntil(nextLesson.date, nextLesson.time)}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-4 flex-1">
-                                            <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-lg font-bold text-primary-600">
-                                                {nextLesson.tutorName?.charAt(0) || 'T'}
+                                <motion.div
+                                    className="flex-1"
+                                    initial={{ opacity: 0, scale: 0.98 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <Card className="p-6 bg-gradient-to-br from-white via-purple-50/40 to-primary-50/50 border border-purple-100/50 shadow-lg shadow-purple-100/30 overflow-hidden relative">
+                                        {/* Decorative background elements */}
+                                        <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br from-primary-200/30 to-purple-200/20 rounded-full blur-2xl"></div>
+                                        <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-purple-200/20 to-primary-100/20 rounded-full blur-xl"></div>
+
+                                        <div className="relative flex flex-col h-full">
+                                            {/* Header row */}
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <motion.div
+                                                    animate={{ rotate: [0, 5, -5, 0] }}
+                                                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                                                >
+                                                    <Calendar size={18} className="text-primary-500" />
+                                                </motion.div>
+                                                <span className="font-semibold text-secondary-800">Your Next Lesson</span>
+                                                <motion.span
+                                                    className="ml-auto bg-gradient-to-r from-primary-500 to-purple-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-md"
+                                                    animate={{ scale: [1, 1.03, 1] }}
+                                                    transition={{ duration: 2, repeat: Infinity }}
+                                                >
+                                                    {getTimeUntil(nextLesson.date, nextLesson.time)}
+                                                </motion.span>
                                             </div>
-                                            <div className="flex-1">
-                                                <h2 className="text-lg font-bold text-secondary-900">{nextLesson.tutorName}</h2>
-                                                <p className="text-secondary-500 text-sm">
-                                                    {new Date(nextLesson.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} • {convertUtcToLocal(nextLesson.time, nextLesson.date)} {getTimezoneAbbr()}
-                                                </p>
+
+                                            {/* Tutor info */}
+                                            <div className="flex items-center gap-4 flex-1">
+                                                <motion.div
+                                                    className="w-14 h-14 bg-gradient-to-br from-primary-400 to-purple-500 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-primary-200/50"
+                                                    whileHover={{ scale: 1.1, rotate: -5 }}
+                                                    transition={{ type: "spring", stiffness: 400 }}
+                                                >
+                                                    {nextLesson.tutorName?.charAt(0) || 'T'}
+                                                </motion.div>
+                                                <div className="flex-1">
+                                                    <h2 className="text-xl font-bold text-secondary-900">{nextLesson.tutorName}</h2>
+                                                    <p className="text-secondary-500 text-sm mt-0.5">
+                                                        {new Date(nextLesson.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} • {convertUtcToLocal(nextLesson.time, nextLesson.date)} {getTimezoneAbbr()}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-secondary-100">
-                                            {nextLesson.meetingLink && (
-                                                <a href={nextLesson.meetingLink} target="_blank" rel="noopener noreferrer">
-                                                    <Button size="sm" className="flex items-center gap-2">
-                                                        <Video size={16} /> Join Lesson
+
+                                            {/* Actions */}
+                                            <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-purple-100/50">
+                                                {nextLesson.meetingLink && (
+                                                    <a href={nextLesson.meetingLink} target="_blank" rel="noopener noreferrer">
+                                                        <Button size="sm" className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-md flex items-center gap-2">
+                                                            <Video size={16} /> Join Lesson
+                                                        </Button>
+                                                    </a>
+                                                )}
+                                                <Link to={`/messages?to=${nextLesson.tutorEmail}`}>
+                                                    <Button size="sm" variant="outline" className="flex items-center gap-2 hover:bg-purple-50">
+                                                        <MessageCircle size={16} /> Message
                                                     </Button>
-                                                </a>
-                                            )}
-                                            <Link to={`/messages?to=${nextLesson.tutorEmail}`}>
-                                                <Button size="sm" variant="outline" className="flex items-center gap-2">
-                                                    <MessageCircle size={16} /> Message
+                                                </Link>
+                                                <Button size="sm" variant="outline" className="flex items-center gap-2 hover:bg-purple-50" onClick={() => openRescheduleModal(nextLesson)}>
+                                                    <RefreshCw size={16} /> Reschedule
                                                 </Button>
-                                            </Link>
-                                            <Button size="sm" variant="outline" className="flex items-center gap-2" onClick={() => openRescheduleModal(nextLesson)}>
-                                                <RefreshCw size={16} /> Reschedule
-                                            </Button>
-                                            <Button size="sm" variant="outline" className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleCancelBooking(nextLesson.id)}>
-                                                <X size={16} /> Cancel
-                                            </Button>
+                                                <Button size="sm" variant="outline" className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleCancelBooking(nextLesson.id)}>
+                                                    <X size={16} /> Cancel
+                                                </Button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
+                                    </Card>
+                                </motion.div>
                             ) : (
                                 <Card className="p-8 bg-gradient-to-br from-secondary-50 to-white border-dashed border-2 border-secondary-200 text-center">
                                     <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
