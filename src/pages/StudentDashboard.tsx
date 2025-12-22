@@ -337,17 +337,29 @@ export const StudentDashboard: React.FC = () => {
                             {/* Stats Grid */}
                             <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
                                 {stats.map((stat, i) => (
-                                    <Card key={i} className="p-4 hover:shadow-md transition-shadow">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`p-2.5 rounded-xl ${stat.color} text-white`}>
-                                                <stat.icon size={18} />
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.2 + i * 0.1, duration: 0.4 }}
+                                        whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                                    >
+                                        <Card className="p-4 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                                            <div className="flex items-center gap-3">
+                                                <motion.div
+                                                    className={`p-2.5 rounded-xl ${stat.color} text-white`}
+                                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                                    transition={{ type: "spring", stiffness: 400 }}
+                                                >
+                                                    <stat.icon size={18} />
+                                                </motion.div>
+                                                <div>
+                                                    <p className="text-xl font-bold text-secondary-900">{stat.value}</p>
+                                                    <p className="text-xs text-secondary-500 group-hover:text-secondary-700 transition-colors">{stat.label}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-xl font-bold text-secondary-900">{stat.value}</p>
-                                                <p className="text-xs text-secondary-500">{stat.label}</p>
-                                            </div>
-                                        </div>
-                                    </Card>
+                                        </Card>
+                                    </motion.div>
                                 ))}
                             </div>
 
