@@ -31,8 +31,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         if (!user) return;
 
         fetchUnreadCount();
-        // Poll every 15 seconds for new messages
-        const interval = setInterval(fetchUnreadCount, 15000);
+        // Poll every 5 seconds for new messages (more responsive)
+        const interval = setInterval(fetchUnreadCount, 5000);
 
         // Listen for custom event when messages are read
         const handleMessagesRead = () => {
