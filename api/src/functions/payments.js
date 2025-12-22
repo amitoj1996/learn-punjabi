@@ -1,6 +1,7 @@
 const { app } = require('@azure/functions');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { getContainer } = require('./config/cosmos');
+const { sendBookingConfirmation } = require('./config/email');
 
 // Create Stripe checkout session for booking payment
 app.http('createCheckoutSession', {
@@ -146,6 +147,20 @@ app.http('stripeWebhook', {
                         booking.stripePaymentIntentId = session.payment_intent;
                         await bookingsContainer.item(booking.id, booking.id).replace(booking);
                         context.log('Booking updated to paid:', bookingId);
+
+                        // Send booking confirmation email
+                        try {
+                            await sendBookingConfirmation(booking.studentEmail, {
+                                tutorName: booking.tutorName,
+                                date: booking.date,
+                                time: booking.time,
+                                duration: booking.duration
+                            });
+                            context.log('Booking confirmation email sent to:', booking.studentEmail);
+                        } catch (emailError) {
+                            // Log but don't fail the webhook
+                            context.log.error('Failed to send confirmation email:', emailError.message);
+                        }
                     }
                 }
             } catch (dbError) {
