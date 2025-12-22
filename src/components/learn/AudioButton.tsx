@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, Loader2 } from 'lucide-react';
 import { speakPunjabi, stopSpeaking, isSpeechSupported, initVoices } from '../../utils/textToSpeech';
@@ -16,10 +16,17 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
 }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isReady, setIsReady] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Initialize voices on mount
     useEffect(() => {
         initVoices().then(() => setIsReady(true));
+
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
     }, []);
 
     const sizeClasses = {
@@ -35,7 +42,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
     };
 
     const handleClick = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent flip card from flipping
+        e.stopPropagation();
         e.preventDefault();
 
         if (!isSpeechSupported()) {
@@ -46,9 +53,23 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
         if (isPlaying) {
             stopSpeaking();
             setIsPlaying(false);
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
         } else {
             setIsPlaying(true);
-            speakPunjabi(text, () => setIsPlaying(false));
+
+            // Fallback timeout - reset spinner after 5 seconds max
+            timeoutRef.current = setTimeout(() => {
+                setIsPlaying(false);
+            }, 5000);
+
+            speakPunjabi(text, () => {
+                setIsPlaying(false);
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                }
+            });
         }
     };
 

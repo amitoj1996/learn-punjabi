@@ -232,10 +232,12 @@ export const LearnPage: React.FC = () => {
                                     <div className="relative flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <motion.div
-                                                className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-4xl shadow-lg"
+                                                className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg overflow-hidden"
                                                 whileHover={{ scale: 1.1, rotate: 5 }}
                                             >
-                                                {selectedLesson.icon}
+                                                <span className={selectedLesson.icon.length > 2 ? 'text-lg font-bold' : 'text-4xl'}>
+                                                    {selectedLesson.icon}
+                                                </span>
                                             </motion.div>
                                             <div>
                                                 <h2 className="text-2xl font-bold tracking-tight">{selectedLesson.title}</h2>
