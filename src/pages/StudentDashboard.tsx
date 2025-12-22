@@ -208,6 +208,12 @@ export const StudentDashboard: React.FC = () => {
             case 'cancelled': return b.status === 'cancelled';
             default: return true;
         }
+    }).sort((a, b) => {
+        // Sort upcoming by date ascending (closest first), completed by date descending (most recent first)
+        if (activeTab === 'upcoming') {
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+        }
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
 
     // Pagination
