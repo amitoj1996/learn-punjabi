@@ -274,7 +274,7 @@ export const StudentDashboard: React.FC = () => {
                         {/* Next Lesson Hero Card */}
                         <div className="lg:col-span-2 flex">
                             {nextLesson ? (
-                                <Card className="flex-1 p-5 border-l-4 border-l-primary-500 bg-white">
+                                <Card className="flex-1 p-5 bg-white shadow-sm">
                                     <div className="flex flex-col h-full">
                                         <div className="flex items-center gap-2 text-secondary-500 text-sm mb-3">
                                             <Calendar size={16} className="text-primary-500" />
@@ -420,12 +420,16 @@ export const StudentDashboard: React.FC = () => {
                                     <Calendar size={28} className="text-primary-600" />
                                 </div>
                                 <h3 className="text-lg font-bold text-secondary-900 mb-2">
-                                    {activeTab === 'upcoming' ? 'No upcoming lessons' : activeTab === 'completed' ? 'No completed lessons yet' : 'No cancelled lessons'}
+                                    {activeTab === 'upcoming'
+                                        ? (nextLesson ? 'No additional upcoming lessons' : 'No upcoming lessons')
+                                        : activeTab === 'completed' ? 'No completed lessons yet' : 'No cancelled lessons'}
                                 </h3>
                                 <p className="text-secondary-500 mb-4">
-                                    {activeTab === 'upcoming' ? 'Book your first lesson to get started!' : 'Your lesson history will appear here.'}
+                                    {activeTab === 'upcoming'
+                                        ? (nextLesson ? 'Your next lesson is shown above.' : 'Book your first lesson to get started!')
+                                        : 'Your lesson history will appear here.'}
                                 </p>
-                                {activeTab === 'upcoming' && (
+                                {activeTab === 'upcoming' && !nextLesson && (
                                     <Link to="/tutors"><Button size="sm">Find a Tutor</Button></Link>
                                 )}
                             </div>
