@@ -101,6 +101,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </Link>
                     <div className="flex-grow"></div>
                     <div className="flex items-center gap-4">
+                        <Link to="/learn" className="text-sm font-medium text-secondary-600 hover:text-primary-600">
+                            Learn Free
+                        </Link>
                         {isLoading ? (
                             <span className="text-sm text-secondary-400">Loading...</span>
                         ) : user ? (
