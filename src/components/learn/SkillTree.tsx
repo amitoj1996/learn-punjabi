@@ -17,12 +17,19 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
     const getLessonStatus = (lesson: Lesson): 'locked' | 'available' | 'completed' => {
         if (completedLessons.includes(lesson.id)) return 'completed';
 
-        // Check if all required lessons are completed
         if (lesson.unlockRequirements.length === 0) return 'available';
         const allRequirementsMet = lesson.unlockRequirements.every(
             req => completedLessons.includes(req)
         );
         return allRequirementsMet ? 'available' : 'locked';
+    };
+
+    // Check if segment between two lessons should be "completed" (both lessons done)
+    const isSegmentCompleted = (index: number): boolean => {
+        if (index >= lessons.length - 1) return false;
+        const current = completedLessons.includes(lessons[index].id);
+        const next = completedLessons.includes(lessons[index + 1].id);
+        return current && next;
     };
 
     return (
@@ -31,17 +38,22 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
             animate={{ opacity: 1 }}
             className="relative"
         >
-            {/* Responsive grid layout - wraps on mobile, spreads on desktop */}
+            {/* Responsive grid layout */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
                 {lessons.map((lesson, index) => (
                     <div key={lesson.id} className="relative">
-                        {/* Connector arrow to next (only show on larger screens) */}
+                        {/* Connector line to next - spans the gap between cards */}
                         {index < lessons.length - 1 && (
-                            <div className="hidden md:block absolute top-12 -right-4 transform -translate-y-1/2">
-                                <svg width="16" height="16" viewBox="0 0 16 16" className="text-secondary-300">
-                                    <path d="M4 8H12M12 8L8 4M12 8L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                                </svg>
-                            </div>
+                            <div
+                                className={`
+                                    hidden md:block absolute top-12 left-full w-6 h-1 rounded-full
+                                    transform -translate-y-1/2
+                                    ${isSegmentCompleted(index)
+                                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                                        : 'bg-secondary-200'
+                                    }
+                                `}
+                            />
                         )}
                         <LessonCard
                             lesson={lesson}
