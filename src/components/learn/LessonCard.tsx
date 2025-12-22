@@ -47,7 +47,7 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, status, onClick,
                 ) : isCompleted ? (
                     <CheckCircle className="w-12 h-12 text-white drop-shadow-md" />
                 ) : (
-                    <span className="drop-shadow-md">{lesson.icon}</span>
+                    <span className="text-2xl text-white font-bold drop-shadow-md">{lesson.icon}</span>
                 )}
 
                 {/* Star badge for completed */}
