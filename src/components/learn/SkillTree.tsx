@@ -24,13 +24,11 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
         return allRequirementsMet ? 'available' : 'locked';
     };
 
-    // Check if segment between two lessons should be "completed" (both lessons done)
-    const isSegmentCompleted = (index: number): boolean => {
-        if (index >= lessons.length - 1) return false;
-        const current = completedLessons.includes(lessons[index].id);
-        const next = completedLessons.includes(lessons[index + 1].id);
-        return current && next;
-    };
+    // Calculate how many lessons are completed for the progress line
+    const completedCount = lessons.filter(l => completedLessons.includes(l.id)).length;
+    const progressPercent = lessons.length > 1
+        ? (completedCount / (lessons.length - 1)) * 100
+        : 0;
 
     return (
         <motion.div
@@ -38,30 +36,29 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
             animate={{ opacity: 1 }}
             className="relative"
         >
-            {/* Responsive grid layout */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
+            {/* Continuous connecting line - runs behind all circles */}
+            <div className="hidden md:block absolute top-12 left-0 right-0 h-1 mx-auto" style={{ width: 'calc(100% - 120px)', marginLeft: '60px' }}>
+                {/* Background line (gray) */}
+                <div className="absolute inset-0 bg-secondary-200 rounded-full" />
+                {/* Progress line (green) - grows based on completion */}
+                <motion.div
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPercent}%` }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+            </div>
+
+            {/* Lesson cards in grid */}
+            <div className="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
                 {lessons.map((lesson, index) => (
-                    <div key={lesson.id} className="relative">
-                        {/* Connector line to next - spans the gap between cards */}
-                        {index < lessons.length - 1 && (
-                            <div
-                                className={`
-                                    hidden md:block absolute top-12 left-full w-6 h-1 rounded-full
-                                    transform -translate-y-1/2
-                                    ${isSegmentCompleted(index)
-                                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                                        : 'bg-secondary-200'
-                                    }
-                                `}
-                            />
-                        )}
-                        <LessonCard
-                            lesson={lesson}
-                            status={getLessonStatus(lesson)}
-                            onClick={() => onLessonSelect(lesson)}
-                            index={index}
-                        />
-                    </div>
+                    <LessonCard
+                        key={lesson.id}
+                        lesson={lesson}
+                        status={getLessonStatus(lesson)}
+                        onClick={() => onLessonSelect(lesson)}
+                        index={index}
+                    />
                 ))}
             </div>
 
