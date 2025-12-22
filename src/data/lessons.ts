@@ -432,6 +432,384 @@ Try reading: ਕਾ, ਕੀ, ਕੂ, ਕੇ, ਕੋ
                 ]
             }
         ]
+    },
+    {
+        id: 'daily-essentials',
+        title: 'Daily Essentials',
+        description: 'Everyday vocabulary for food, colors, time, and more',
+        icon: '☀️',
+        lessons: [
+            {
+                id: 'food-drink',
+                moduleId: 'daily-essentials',
+                title: 'Food & Drinks',
+                description: 'Learn common food and beverage words',
+                icon: '🍽️',
+                duration: '12 min',
+                xpReward: 20,
+                difficulty: 'beginner',
+                unlockRequirements: ['vowel-sounds'],
+                vocabulary: [
+                    { gurmukhi: 'ਰੋਟੀ', transliteration: 'Roti', english: 'Bread/Chapati', pronunciation: 'ਰੋਟੀ' },
+                    { gurmukhi: 'ਪਾਣੀ', transliteration: 'Paani', english: 'Water', pronunciation: 'ਪਾਣੀ' },
+                    { gurmukhi: 'ਚਾਹ', transliteration: 'Chaa', english: 'Tea', pronunciation: 'ਚਾਹ' },
+                    { gurmukhi: 'ਦੁੱਧ', transliteration: 'Duddh', english: 'Milk', pronunciation: 'ਦੁੱਧ' },
+                    { gurmukhi: 'ਸਬਜ਼ੀ', transliteration: 'Sabzi', english: 'Vegetables', pronunciation: 'ਸਬਜ਼ੀ' },
+                    { gurmukhi: 'ਫਲ', transliteration: 'Phal', english: 'Fruit', pronunciation: 'ਫਲ' },
+                    { gurmukhi: 'ਚਾਵਲ', transliteration: 'Chaaval', english: 'Rice', pronunciation: 'ਚਾਵਲ' },
+                    { gurmukhi: 'ਦਾਲ', transliteration: 'Daal', english: 'Lentils', pronunciation: 'ਦਾਲ' },
+                ],
+                content: `
+# Food & Drinks in Punjabi
+
+Punjab is known for its rich cuisine! Let's learn common food and drink words.
+
+## Essential Words
+
+| Punjabi | Pronunciation | Meaning |
+|---------|---------------|---------|
+| ਰੋਟੀ | Roti | Bread/Chapati |
+| ਪਾਣੀ | Paani | Water |
+| ਚਾਹ | Chaa | Tea |
+| ਦੁੱਧ | Duddh | Milk |
+
+## At a Restaurant
+
+Useful phrases:
+- **ਮੈਨੂੰ ਭੁੱਖ ਲੱਗੀ ਹੈ** (Mainu bhukh laggi hai) - I'm hungry
+- **ਮੈਨੂੰ ਪਿਆਸ ਲੱਗੀ ਹੈ** (Mainu pyaas laggi hai) - I'm thirsty
+
+## Punjabi Specialties
+
+Punjab is famous for:
+- **ਮੱਕੀ ਦੀ ਰੋਟੀ** - Corn bread
+- **ਸਰ੍ਹੋਂ ਦਾ ਸਾਗ** - Mustard greens
+- **ਲੱਸੀ** - Yogurt drink
+                `,
+                quiz: [
+                    {
+                        question: 'What is "Paani" in English?',
+                        options: ['Milk', 'Tea', 'Water', 'Bread'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'How do you say "Tea" in Punjabi?',
+                        options: ['ਚਾਵਲ', 'ਚਾਹ', 'ਦੁੱਧ', 'ਦਾਲ'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'What does "ਰੋਟੀ" mean?',
+                        options: ['Rice', 'Vegetables', 'Bread', 'Fruit'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'Which drink is Punjab famous for?',
+                        options: ['Coffee', 'Lassi', 'Soda', 'Juice'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'What is "Sabzi"?',
+                        options: ['Meat', 'Fruit', 'Vegetables', 'Spices'],
+                        correctIndex: 2
+                    }
+                ]
+            },
+            {
+                id: 'colors',
+                moduleId: 'daily-essentials',
+                title: 'Colors',
+                description: 'Learn the basic colors in Punjabi',
+                icon: '🌈',
+                duration: '10 min',
+                xpReward: 15,
+                difficulty: 'beginner',
+                unlockRequirements: ['food-drink'],
+                vocabulary: [
+                    { gurmukhi: 'ਲਾਲ', transliteration: 'Laal', english: 'Red', pronunciation: 'ਲਾਲ' },
+                    { gurmukhi: 'ਨੀਲਾ', transliteration: 'Neela', english: 'Blue', pronunciation: 'ਨੀਲਾ' },
+                    { gurmukhi: 'ਹਰਾ', transliteration: 'Hara', english: 'Green', pronunciation: 'ਹਰਾ' },
+                    { gurmukhi: 'ਪੀਲਾ', transliteration: 'Peela', english: 'Yellow', pronunciation: 'ਪੀਲਾ' },
+                    { gurmukhi: 'ਚਿੱਟਾ', transliteration: 'Chitta', english: 'White', pronunciation: 'ਚਿੱਟਾ' },
+                    { gurmukhi: 'ਕਾਲਾ', transliteration: 'Kaala', english: 'Black', pronunciation: 'ਕਾਲਾ' },
+                    { gurmukhi: 'ਸੰਤਰੀ', transliteration: 'Santri', english: 'Orange', pronunciation: 'ਸੰਤਰੀ' },
+                    { gurmukhi: 'ਗੁਲਾਬੀ', transliteration: 'Gulaabi', english: 'Pink', pronunciation: 'ਗੁਲਾਬੀ' },
+                ],
+                content: `
+# Colors in Punjabi
+
+Colors add beauty to our world! Let's learn how to say them in Punjabi.
+
+## Primary Colors
+
+| Punjabi | Pronunciation | Color |
+|---------|---------------|-------|
+| ਲਾਲ | Laal | Red |
+| ਨੀਲਾ | Neela | Blue |
+| ਪੀਲਾ | Peela | Yellow |
+| ਹਰਾ | Hara | Green |
+
+## More Colors
+
+- **ਚਿੱਟਾ** (Chitta) - White
+- **ਕਾਲਾ** (Kaala) - Black
+- **ਸੰਤਰੀ** (Santri) - Orange
+- **ਗੁਲਾਬੀ** (Gulaabi) - Pink
+
+## Using Colors
+
+To describe something's color:
+- **ਲਾਲ ਫੁੱਲ** - Red flower
+- **ਨੀਲਾ ਅਸਮਾਨ** - Blue sky
+- **ਹਰਾ ਘਾਹ** - Green grass
+                `,
+                quiz: [
+                    {
+                        question: 'What color is "Laal"?',
+                        options: ['Blue', 'Yellow', 'Red', 'Green'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'How do you say "Green" in Punjabi?',
+                        options: ['ਨੀਲਾ', 'ਪੀਲਾ', 'ਲਾਲ', 'ਹਰਾ'],
+                        correctIndex: 3
+                    },
+                    {
+                        question: 'What does "ਕਾਲਾ" mean?',
+                        options: ['White', 'Black', 'Brown', 'Grey'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: '"Neela" refers to which color?',
+                        options: ['Red', 'Blue', 'Yellow', 'Pink'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'How do you say "Pink" in Punjabi?',
+                        options: ['ਸੰਤਰੀ', 'ਗੁਲਾਬੀ', 'ਚਿੱਟਾ', 'ਪੀਲਾ'],
+                        correctIndex: 1
+                    }
+                ]
+            },
+            {
+                id: 'days-week',
+                moduleId: 'daily-essentials',
+                title: 'Days of the Week',
+                description: 'Learn the seven days in Punjabi',
+                icon: '📅',
+                duration: '10 min',
+                xpReward: 15,
+                difficulty: 'beginner',
+                unlockRequirements: ['colors'],
+                vocabulary: [
+                    { gurmukhi: 'ਸੋਮਵਾਰ', transliteration: 'Somvaar', english: 'Monday', pronunciation: 'ਸੋਮਵਾਰ' },
+                    { gurmukhi: 'ਮੰਗਲਵਾਰ', transliteration: 'Mangalvaar', english: 'Tuesday', pronunciation: 'ਮੰਗਲਵਾਰ' },
+                    { gurmukhi: 'ਬੁੱਧਵਾਰ', transliteration: 'Budhvaar', english: 'Wednesday', pronunciation: 'ਬੁੱਧਵਾਰ' },
+                    { gurmukhi: 'ਵੀਰਵਾਰ', transliteration: 'Veervaar', english: 'Thursday', pronunciation: 'ਵੀਰਵਾਰ' },
+                    { gurmukhi: 'ਸ਼ੁੱਕਰਵਾਰ', transliteration: 'Shukarvaar', english: 'Friday', pronunciation: 'ਸ਼ੁੱਕਰਵਾਰ' },
+                    { gurmukhi: 'ਸ਼ਨਿੱਚਰਵਾਰ', transliteration: 'Shanicharvaar', english: 'Saturday', pronunciation: 'ਸ਼ਨਿੱਚਰਵਾਰ' },
+                    { gurmukhi: 'ਐਤਵਾਰ', transliteration: 'Aitvaar', english: 'Sunday', pronunciation: 'ਐਤਵਾਰ' },
+                ],
+                content: `
+# Days of the Week
+
+Learn how to talk about days in Punjabi!
+
+## The Seven Days
+
+| Punjabi | Pronunciation | English |
+|---------|---------------|---------|
+| ਸੋਮਵਾਰ | Somvaar | Monday |
+| ਮੰਗਲਵਾਰ | Mangalvaar | Tuesday |
+| ਬੁੱਧਵਾਰ | Budhvaar | Wednesday |
+| ਵੀਰਵਾਰ | Veervaar | Thursday |
+| ਸ਼ੁੱਕਰਵਾਰ | Shukarvaar | Friday |
+| ਸ਼ਨਿੱਚਰਵਾਰ | Shanicharvaar | Saturday |
+| ਐਤਵਾਰ | Aitvaar | Sunday |
+
+## Time Expressions
+
+- **ਅੱਜ** (Ajj) - Today
+- **ਕੱਲ੍ਹ** (Kal) - Tomorrow / Yesterday
+- **ਹਫ਼ਤਾ** (Hafta) - Week
+                `,
+                quiz: [
+                    {
+                        question: 'What day is "Somvaar"?',
+                        options: ['Sunday', 'Monday', 'Saturday', 'Friday'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'How do you say "Friday" in Punjabi?',
+                        options: ['ਵੀਰਵਾਰ', 'ਸ਼ੁੱਕਰਵਾਰ', 'ਐਤਵਾਰ', 'ਸੋਮਵਾਰ'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'What day is "Aitvaar"?',
+                        options: ['Monday', 'Wednesday', 'Sunday', 'Thursday'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'What does "ਅੱਜ" mean?',
+                        options: ['Tomorrow', 'Yesterday', 'Week', 'Today'],
+                        correctIndex: 3
+                    },
+                    {
+                        question: 'Which day comes after Mangalvaar?',
+                        options: ['Somvaar', 'Veervaar', 'Budhvaar', 'Shukarvaar'],
+                        correctIndex: 2
+                    }
+                ]
+            },
+            {
+                id: 'body-parts',
+                moduleId: 'daily-essentials',
+                title: 'Body Parts',
+                description: 'Learn the parts of the body in Punjabi',
+                icon: '🙋',
+                duration: '12 min',
+                xpReward: 18,
+                difficulty: 'beginner',
+                unlockRequirements: ['days-week'],
+                vocabulary: [
+                    { gurmukhi: 'ਸਿਰ', transliteration: 'Sir', english: 'Head', pronunciation: 'ਸਿਰ' },
+                    { gurmukhi: 'ਅੱਖਾਂ', transliteration: 'Akkhaan', english: 'Eyes', pronunciation: 'ਅੱਖਾਂ' },
+                    { gurmukhi: 'ਕੰਨ', transliteration: 'Kann', english: 'Ears', pronunciation: 'ਕੰਨ' },
+                    { gurmukhi: 'ਨੱਕ', transliteration: 'Nakk', english: 'Nose', pronunciation: 'ਨੱਕ' },
+                    { gurmukhi: 'ਮੂੰਹ', transliteration: 'Munh', english: 'Mouth', pronunciation: 'ਮੂੰਹ' },
+                    { gurmukhi: 'ਹੱਥ', transliteration: 'Hatth', english: 'Hand', pronunciation: 'ਹੱਥ' },
+                    { gurmukhi: 'ਪੈਰ', transliteration: 'Pair', english: 'Foot/Leg', pronunciation: 'ਪੈਰ' },
+                    { gurmukhi: 'ਦਿਲ', transliteration: 'Dil', english: 'Heart', pronunciation: 'ਦਿਲ' },
+                ],
+                content: `
+# Body Parts in Punjabi
+
+Let's learn the names of body parts - useful for health and everyday conversation!
+
+## Head & Face
+
+| Punjabi | Pronunciation | English |
+|---------|---------------|---------|
+| ਸਿਰ | Sir | Head |
+| ਅੱਖਾਂ | Akkhaan | Eyes |
+| ਕੰਨ | Kann | Ears |
+| ਨੱਕ | Nakk | Nose |
+| ਮੂੰਹ | Munh | Mouth |
+
+## Body
+
+- **ਹੱਥ** (Hatth) - Hand
+- **ਪੈਰ** (Pair) - Foot/Leg
+- **ਦਿਲ** (Dil) - Heart
+
+## Health Phrases
+
+- **ਮੇਰਾ ਸਿਰ ਦੁਖਦਾ ਹੈ** - My head hurts
+- **ਮੈਂ ਠੀਕ ਹਾਂ** - I am fine
+                `,
+                quiz: [
+                    {
+                        question: 'What is "Sir" in English?',
+                        options: ['Hand', 'Foot', 'Head', 'Heart'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'How do you say "Eyes" in Punjabi?',
+                        options: ['ਕੰਨ', 'ਨੱਕ', 'ਅੱਖਾਂ', 'ਮੂੰਹ'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'What does "ਦਿਲ" mean?',
+                        options: ['Head', 'Heart', 'Hand', 'Foot'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: '"Hatth" refers to which body part?',
+                        options: ['Foot', 'Head', 'Hand', 'Ear'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'How do you say "Nose" in Punjabi?',
+                        options: ['ਕੰਨ', 'ਨੱਕ', 'ਮੂੰਹ', 'ਸਿਰ'],
+                        correctIndex: 1
+                    }
+                ]
+            },
+            {
+                id: 'common-verbs',
+                moduleId: 'daily-essentials',
+                title: 'Common Verbs',
+                description: 'Essential action words for daily life',
+                icon: '🏃',
+                duration: '15 min',
+                xpReward: 25,
+                difficulty: 'intermediate',
+                unlockRequirements: ['body-parts'],
+                vocabulary: [
+                    { gurmukhi: 'ਖਾਣਾ', transliteration: 'Khaana', english: 'To eat', pronunciation: 'ਖਾਣਾ' },
+                    { gurmukhi: 'ਪੀਣਾ', transliteration: 'Peena', english: 'To drink', pronunciation: 'ਪੀਣਾ' },
+                    { gurmukhi: 'ਸੌਣਾ', transliteration: 'Sauna', english: 'To sleep', pronunciation: 'ਸੌਣਾ' },
+                    { gurmukhi: 'ਜਾਣਾ', transliteration: 'Jaana', english: 'To go', pronunciation: 'ਜਾਣਾ' },
+                    { gurmukhi: 'ਆਉਣਾ', transliteration: 'Aauna', english: 'To come', pronunciation: 'ਆਉਣਾ' },
+                    { gurmukhi: 'ਬੋਲਣਾ', transliteration: 'Bolna', english: 'To speak', pronunciation: 'ਬੋਲਣਾ' },
+                    { gurmukhi: 'ਸੁਣਨਾ', transliteration: 'Sunna', english: 'To listen', pronunciation: 'ਸੁਣਨਾ' },
+                    { gurmukhi: 'ਦੇਖਣਾ', transliteration: 'Dekhna', english: 'To see/watch', pronunciation: 'ਦੇਖਣਾ' },
+                ],
+                content: `
+# Common Verbs in Punjabi
+
+Verbs are action words - they're essential for making sentences!
+
+## Basic Actions
+
+| Punjabi | Pronunciation | Meaning |
+|---------|---------------|---------|
+| ਖਾਣਾ | Khaana | To eat |
+| ਪੀਣਾ | Peena | To drink |
+| ਸੌਣਾ | Sauna | To sleep |
+| ਜਾਣਾ | Jaana | To go |
+| ਆਉਣਾ | Aauna | To come |
+
+## Communication Verbs
+
+- **ਬੋਲਣਾ** (Bolna) - To speak
+- **ਸੁਣਨਾ** (Sunna) - To listen
+- **ਦੇਖਣਾ** (Dekhna) - To see/watch
+
+## Example Sentences
+
+- **ਮੈਂ ਖਾਣਾ ਖਾਂਦਾ ਹਾਂ** - I eat food (male)
+- **ਮੈਂ ਖਾਣਾ ਖਾਂਦੀ ਹਾਂ** - I eat food (female)
+- **ਤੁਸੀਂ ਕਿੱਥੇ ਜਾਂਦੇ ਹੋ?** - Where do you go?
+                `,
+                quiz: [
+                    {
+                        question: 'What does "Khaana" mean?',
+                        options: ['To drink', 'To eat', 'To sleep', 'To go'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'How do you say "To go" in Punjabi?',
+                        options: ['ਆਉਣਾ', 'ਜਾਣਾ', 'ਖਾਣਾ', 'ਸੌਣਾ'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'What is "Bolna"?',
+                        options: ['To listen', 'To see', 'To speak', 'To come'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: '"ਸੌਣਾ" means:',
+                        options: ['To eat', 'To drink', 'To go', 'To sleep'],
+                        correctIndex: 3
+                    },
+                    {
+                        question: 'How do you say "To listen" in Punjabi?',
+                        options: ['ਦੇਖਣਾ', 'ਬੋਲਣਾ', 'ਸੁਣਨਾ', 'ਆਉਣਾ'],
+                        correctIndex: 2
+                    }
+                ]
+            }
+        ]
     }
 ];
 

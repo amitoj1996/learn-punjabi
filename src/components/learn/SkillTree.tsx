@@ -73,7 +73,7 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
             >
                 <div className="px-6 py-3 bg-gradient-to-r from-secondary-50 to-secondary-100 border border-secondary-200 rounded-full">
                     <span className="text-sm font-medium text-secondary-600">
-                        🚀 Module 2 coming soon!
+                        🚀 Module 3 coming soon!
                     </span>
                 </div>
             </motion.div>

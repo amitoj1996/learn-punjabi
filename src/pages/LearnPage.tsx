@@ -4,7 +4,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Layout } from '../components/Layout';
 import { Link } from 'react-router-dom';
-import { Clock, X, Check, RotateCcw, Sparkles } from 'lucide-react';
+import { Clock, X, Check, RotateCcw } from 'lucide-react';
 import { modules } from '../data/lessons';
 import type { Lesson, VocabularyWord } from '../data/lessons';
 import ReactMarkdown from 'react-markdown';
@@ -89,8 +89,7 @@ export const LearnPage: React.FC = () => {
         }
     }, [isDailyGoalMet, hasShownGoalCelebration]);
 
-    // Get all lessons flattened
-    const allLessons = modules.flatMap(m => m.lessons);
+
 
     const openLesson = (lesson: Lesson) => {
         setSelectedLesson(lesson);
@@ -159,24 +158,26 @@ export const LearnPage: React.FC = () => {
                         dailyGoal={dailyGoal}
                     />
 
-                    {/* Skill Tree */}
-                    <Card className="p-8 bg-white/60 backdrop-blur-sm">
-                        <div className="text-center mb-6">
-                            <h2 className="text-xl font-bold text-secondary-800 flex items-center justify-center gap-2">
-                                <Sparkles className="w-5 h-5 text-primary-500" />
-                                Module 1: Getting Started
-                            </h2>
-                            <p className="text-secondary-500 text-sm mt-1">
-                                Master the basics of Punjabi language
-                            </p>
-                        </div>
+                    {/* Skill Trees for each module */}
+                    {modules.map((module, moduleIndex) => (
+                        <Card key={module.id} className="p-8 bg-white/60 backdrop-blur-sm">
+                            <div className="text-center mb-6">
+                                <h2 className="text-xl font-bold text-secondary-800 flex items-center justify-center gap-2">
+                                    <span className="text-2xl">{module.icon}</span>
+                                    Module {moduleIndex + 1}: {module.title}
+                                </h2>
+                                <p className="text-secondary-500 text-sm mt-1">
+                                    {module.description}
+                                </p>
+                            </div>
 
-                        <SkillTree
-                            lessons={allLessons}
-                            completedLessons={completedLessons}
-                            onLessonSelect={openLesson}
-                        />
-                    </Card>
+                            <SkillTree
+                                lessons={module.lessons}
+                                completedLessons={completedLessons}
+                                onLessonSelect={openLesson}
+                            />
+                        </Card>
+                    ))}
 
                     {/* CTA for booking */}
                     <motion.div
