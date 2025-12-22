@@ -16,7 +16,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
 }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isReady, setIsReady] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Initialize voices on mount
     useEffect(() => {

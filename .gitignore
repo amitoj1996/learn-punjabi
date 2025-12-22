@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+**/node_modules
+api/node_modules
+api/.oryx_prod_node_modules
 dist
 dist-ssr
 *.local
