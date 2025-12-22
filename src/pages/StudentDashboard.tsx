@@ -267,46 +267,46 @@ export const StudentDashboard: React.FC = () => {
                     {/* Hero Section: Next Lesson + Stats */}
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                         {/* Next Lesson Hero Card */}
-                        <div className="lg:col-span-2">
+                        <div className="lg:col-span-2 flex">
                             {nextLesson ? (
-                                <Card className="p-6 bg-gradient-to-br from-primary-500 to-primary-700 text-white overflow-hidden relative">
-                                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
-                                    <div className="relative">
-                                        <div className="flex items-center gap-2 text-primary-100 text-sm mb-3">
+                                <Card className="flex-1 p-6 bg-gradient-to-br from-indigo-600 via-purple-600 to-violet-700 text-white overflow-hidden relative">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                                    <div className="relative h-full flex flex-col">
+                                        <div className="flex items-center gap-2 text-indigo-200 text-sm mb-4">
                                             <Calendar size={16} />
                                             <span>Your Next Lesson</span>
                                             <span className="ml-auto bg-white/20 px-3 py-1 rounded-full text-xs font-medium">
                                                 {getTimeUntil(nextLesson.date, nextLesson.time)}
                                             </span>
                                         </div>
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl font-bold backdrop-blur-sm">
+                                        <div className="flex items-center gap-4 flex-1">
+                                            <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-xl font-bold backdrop-blur-sm">
                                                 {nextLesson.tutorName?.charAt(0) || 'T'}
                                             </div>
                                             <div className="flex-1">
-                                                <h2 className="text-2xl font-bold mb-1">{nextLesson.tutorName}</h2>
-                                                <p className="text-primary-100 text-sm mb-4">
-                                                    {new Date(nextLesson.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {convertUtcToLocal(nextLesson.time, nextLesson.date)} {getTimezoneAbbr()}
+                                                <h2 className="text-xl font-bold mb-0.5">{nextLesson.tutorName}</h2>
+                                                <p className="text-indigo-200 text-sm">
+                                                    {new Date(nextLesson.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} • {convertUtcToLocal(nextLesson.time, nextLesson.date)} {getTimezoneAbbr()}
                                                 </p>
-                                                <div className="flex flex-wrap gap-3">
-                                                    {nextLesson.meetingLink && (
-                                                        <a href={nextLesson.meetingLink} target="_blank" rel="noopener noreferrer">
-                                                            <Button size="sm" className="bg-white text-primary-700 hover:bg-primary-50 flex items-center gap-2">
-                                                                <Video size={16} /> Join Lesson
-                                                            </Button>
-                                                        </a>
-                                                    )}
-                                                    <Link to={`/messages?to=${nextLesson.tutorEmail}`}>
-                                                        <Button size="sm" variant="ghost" className="text-white border-white/30 hover:bg-white/10 flex items-center gap-2">
-                                                            <MessageCircle size={16} /> Message
-                                                        </Button>
-                                                    </Link>
-                                                    <Button size="sm" variant="ghost" className="text-white border-white/30 hover:bg-white/10 flex items-center gap-2" onClick={() => openRescheduleModal(nextLesson)}>
-                                                        <RefreshCw size={16} /> Reschedule
-                                                    </Button>
-                                                </div>
                                             </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 mt-4">
+                                            {nextLesson.meetingLink && (
+                                                <a href={nextLesson.meetingLink} target="_blank" rel="noopener noreferrer">
+                                                    <Button size="sm" className="bg-white text-indigo-700 hover:bg-indigo-50 flex items-center gap-2">
+                                                        <Video size={16} /> Join Lesson
+                                                    </Button>
+                                                </a>
+                                            )}
+                                            <Link to={`/messages?to=${nextLesson.tutorEmail}`}>
+                                                <Button size="sm" variant="ghost" className="text-white border-white/30 hover:bg-white/10 flex items-center gap-2">
+                                                    <MessageCircle size={16} /> Message
+                                                </Button>
+                                            </Link>
+                                            <Button size="sm" variant="ghost" className="text-white border-white/30 hover:bg-white/10 flex items-center gap-2" onClick={() => openRescheduleModal(nextLesson)}>
+                                                <RefreshCw size={16} /> Reschedule
+                                            </Button>
                                         </div>
                                     </div>
                                 </Card>
