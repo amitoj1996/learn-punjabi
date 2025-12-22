@@ -10,8 +10,47 @@ import {
     Award, Clock, X, Check, RotateCcw
 } from 'lucide-react';
 import { modules } from '../data/lessons';
-import type { Lesson } from '../data/lessons';
+import type { Lesson, VocabularyWord } from '../data/lessons';
 import ReactMarkdown from 'react-markdown';
+
+// Interactive Flip Card Component
+const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, delay }) => {
+    const [isFlipped, setIsFlipped] = useState(false);
+
+    return (
+        <motion.div
+            className="perspective-1000 h-36 cursor-pointer"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay }}
+            onClick={() => setIsFlipped(!isFlipped)}
+        >
+            <motion.div
+                className="relative w-full h-full"
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.6, type: "spring", damping: 20 }}
+                style={{ transformStyle: "preserve-3d" }}
+            >
+                {/* Front - Gurmukhi */}
+                <div
+                    className="absolute inset-0 bg-gradient-to-br from-primary-500 via-purple-500 to-indigo-600 rounded-2xl p-6 flex flex-col items-center justify-center text-white shadow-lg shadow-purple-200"
+                    style={{ backfaceVisibility: "hidden" }}
+                >
+                    <span className="text-4xl font-bold mb-2">{word.gurmukhi}</span>
+                    <span className="text-white/70 text-sm">Tap to reveal</span>
+                </div>
+                {/* Back - English */}
+                <div
+                    className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 flex flex-col items-center justify-center text-white shadow-lg shadow-emerald-200"
+                    style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                >
+                    <span className="text-xl font-bold mb-1">{word.transliteration}</span>
+                    <span className="text-white/90">{word.english}</span>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
 
 interface UserProgress {
     lessonId: string;
@@ -266,174 +305,291 @@ export const LearnPage: React.FC = () => {
                     </motion.div>
                 </div>
 
-                {/* Lesson Viewer Modal */}
+                {/* Premium Lesson Viewer Modal */}
                 <AnimatePresence>
                     {selectedLesson && (
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+                            className="fixed inset-0 bg-gradient-to-br from-black/60 to-purple-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                             onClick={closeLesson}
                         >
                             <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.9, opacity: 0 }}
-                                className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl"
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                                className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl shadow-purple-500/20"
                                 onClick={e => e.stopPropagation()}
                             >
-                                {/* Modal Header */}
-                                <div className="bg-gradient-to-r from-primary-500 to-purple-600 text-white p-6">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-3xl">{selectedLesson.icon}</span>
+                                {/* Premium Header with glassmorphism */}
+                                <div className="relative bg-gradient-to-r from-primary-600 via-purple-600 to-indigo-600 text-white p-8 overflow-hidden">
+                                    {/* Decorative circles */}
+                                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+
+                                    <div className="relative flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <motion.div
+                                                className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-4xl shadow-lg"
+                                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                            >
+                                                {selectedLesson.icon}
+                                            </motion.div>
                                             <div>
-                                                <h2 className="text-xl font-bold">{selectedLesson.title}</h2>
-                                                <p className="text-primary-100 text-sm">{selectedLesson.duration}</p>
+                                                <h2 className="text-2xl font-bold tracking-tight">{selectedLesson.title}</h2>
+                                                <div className="flex items-center gap-3 mt-1">
+                                                    <span className="flex items-center gap-1 text-white/80 text-sm">
+                                                        <Clock size={14} />
+                                                        {selectedLesson.duration}
+                                                    </span>
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                                                    <span className="text-white/80 text-sm">{selectedLesson.vocabulary.length} words</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <button
+                                        <motion.button
                                             onClick={closeLesson}
-                                            className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                                            className="p-3 hover:bg-white/20 rounded-full transition-all backdrop-blur-sm"
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.95 }}
                                         >
                                             <X size={24} />
-                                        </button>
+                                        </motion.button>
                                     </div>
 
-                                    {/* Tabs */}
-                                    <div className="flex gap-2 mt-4">
-                                        {['content', 'vocabulary', 'quiz'].map((tab) => (
-                                            <button
-                                                key={tab}
-                                                onClick={() => setCurrentView(tab as 'content' | 'vocabulary' | 'quiz')}
-                                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${currentView === tab
-                                                    ? 'bg-white text-primary-600'
-                                                    : 'bg-white/20 text-white hover:bg-white/30'
+                                    {/* Premium Tabs */}
+                                    <div className="relative flex gap-2 mt-6">
+                                        {[
+                                            { id: 'content', label: '📖 Learn' },
+                                            { id: 'vocabulary', label: '🔤 Practice' },
+                                            { id: 'quiz', label: '✨ Quiz' }
+                                        ].map((tab) => (
+                                            <motion.button
+                                                key={tab.id}
+                                                onClick={() => setCurrentView(tab.id as 'content' | 'vocabulary' | 'quiz')}
+                                                className={`relative px-6 py-3 rounded-2xl text-sm font-semibold transition-all ${currentView === tab.id
+                                                    ? 'bg-white text-primary-600 shadow-lg shadow-white/20'
+                                                    : 'bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm'
                                                     }`}
+                                                whileHover={{ y: -2 }}
+                                                whileTap={{ scale: 0.97 }}
                                             >
-                                                {tab === 'content' && '📖 Lesson'}
-                                                {tab === 'vocabulary' && `🔤 Words (${selectedLesson.vocabulary.length})`}
-                                                {tab === 'quiz' && `✅ Quiz (${selectedLesson.quiz.length})`}
-                                            </button>
+                                                {tab.label}
+                                                {currentView === tab.id && (
+                                                    <motion.div
+                                                        layoutId="activeTab"
+                                                        className="absolute inset-0 bg-white rounded-2xl -z-10"
+                                                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                                                    />
+                                                )}
+                                            </motion.button>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* Modal Content */}
-                                <div className="p-6 overflow-y-auto max-h-[60vh]">
-                                    {currentView === 'content' && (
-                                        <div className="prose prose-secondary max-w-none">
-                                            <ReactMarkdown
-                                                components={{
-                                                    h1: ({ children }) => <h1 className="text-2xl font-bold text-secondary-900 mb-4 pb-2 border-b border-secondary-200">{children}</h1>,
-                                                    h2: ({ children }) => <h2 className="text-xl font-semibold text-secondary-800 mt-6 mb-3">{children}</h2>,
-                                                    h3: ({ children }) => <h3 className="text-lg font-semibold text-secondary-700 mt-4 mb-2">{children}</h3>,
-                                                    p: ({ children }) => <p className="text-secondary-600 mb-4 leading-relaxed">{children}</p>,
-                                                    strong: ({ children }) => <strong className="text-secondary-800 font-semibold">{children}</strong>,
-                                                    ul: ({ children }) => <ul className="list-disc list-inside space-y-2 mb-4 text-secondary-600">{children}</ul>,
-                                                    li: ({ children }) => <li className="text-secondary-600">{children}</li>,
-                                                    table: ({ children }) => <div className="overflow-x-auto mb-4"><table className="min-w-full border-collapse">{children}</table></div>,
-                                                    thead: ({ children }) => <thead className="bg-primary-50">{children}</thead>,
-                                                    th: ({ children }) => <th className="border border-secondary-200 px-4 py-2 text-left font-semibold text-secondary-800">{children}</th>,
-                                                    td: ({ children }) => <td className="border border-secondary-200 px-4 py-2 text-secondary-700">{children}</td>,
-                                                }}
+                                {/* Modal Content with premium styling */}
+                                <div className="p-8 overflow-y-auto max-h-[55vh] bg-gradient-to-b from-secondary-50/50 to-white">
+                                    <AnimatePresence mode="wait">
+                                        {currentView === 'content' && (
+                                            <motion.div
+                                                key="content"
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                className="prose prose-secondary max-w-none"
                                             >
-                                                {selectedLesson.content}
-                                            </ReactMarkdown>
-                                        </div>
-                                    )}
+                                                <ReactMarkdown
+                                                    components={{
+                                                        h1: ({ children }) => (
+                                                            <h1 className="text-2xl font-bold text-secondary-900 mb-6 pb-3 border-b-2 border-primary-100 flex items-center gap-3">
+                                                                <span className="w-2 h-8 bg-gradient-to-b from-primary-500 to-purple-500 rounded-full" />
+                                                                {children}
+                                                            </h1>
+                                                        ),
+                                                        h2: ({ children }) => (
+                                                            <h2 className="text-xl font-bold text-secondary-800 mt-8 mb-4 flex items-center gap-2">
+                                                                <span className="text-primary-500">✦</span>
+                                                                {children}
+                                                            </h2>
+                                                        ),
+                                                        h3: ({ children }) => <h3 className="text-lg font-semibold text-secondary-700 mt-5 mb-3">{children}</h3>,
+                                                        p: ({ children }) => <p className="text-secondary-600 mb-4 leading-relaxed text-base">{children}</p>,
+                                                        strong: ({ children }) => <strong className="text-primary-700 font-bold">{children}</strong>,
+                                                        ul: ({ children }) => <ul className="space-y-2 mb-5">{children}</ul>,
+                                                        li: ({ children }) => (
+                                                            <li className="flex items-start gap-2 text-secondary-600">
+                                                                <span className="text-primary-400 mt-1">▸</span>
+                                                                <span>{children}</span>
+                                                            </li>
+                                                        ),
+                                                        table: ({ children }) => (
+                                                            <div className="overflow-x-auto mb-6 rounded-xl border border-secondary-200 shadow-sm">
+                                                                <table className="min-w-full">{children}</table>
+                                                            </div>
+                                                        ),
+                                                        thead: ({ children }) => <thead className="bg-gradient-to-r from-primary-50 to-purple-50">{children}</thead>,
+                                                        th: ({ children }) => <th className="px-5 py-3 text-left font-bold text-secondary-800 border-b border-secondary-200">{children}</th>,
+                                                        td: ({ children }) => <td className="px-5 py-3 text-secondary-700 border-b border-secondary-100">{children}</td>,
+                                                    }}
+                                                >
+                                                    {selectedLesson.content}
+                                                </ReactMarkdown>
 
-                                    {currentView === 'vocabulary' && (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {selectedLesson.vocabulary.map((word, i) => (
+                                                {/* Next step prompt */}
                                                 <motion.div
-                                                    key={i}
+                                                    className="mt-8 p-6 bg-gradient-to-r from-primary-50 to-purple-50 rounded-2xl border border-primary-100"
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: i * 0.05 }}
-                                                    className="p-4 bg-gradient-to-br from-primary-50 to-purple-50 rounded-xl border border-primary-100"
+                                                    transition={{ delay: 0.3 }}
                                                 >
-                                                    <div className="text-3xl font-bold text-primary-700 mb-1">{word.gurmukhi}</div>
-                                                    <div className="text-lg text-secondary-700 font-medium">{word.transliteration}</div>
-                                                    <div className="text-sm text-secondary-500">{word.english}</div>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {currentView === 'quiz' && (
-                                        <div className="space-y-6">
-                                            {quizSubmitted && (
-                                                <div className={`p-4 rounded-xl text-center ${getQuizScore()!.percentage >= 80 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                                    }`}>
-                                                    <p className="text-2xl font-bold">{getQuizScore()!.percentage}%</p>
-                                                    <p>{getQuizScore()!.correct} out of {getQuizScore()!.total} correct</p>
-                                                    {getQuizScore()!.percentage >= 80 ? (
-                                                        <p className="mt-1">🎉 Great job! Lesson completed!</p>
-                                                    ) : (
-                                                        <button
-                                                            onClick={retakeQuiz}
-                                                            className="mt-2 flex items-center gap-2 mx-auto text-sm font-medium hover:underline"
-                                                        >
-                                                            <RotateCcw size={14} /> Try again
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            )}
-                                            {selectedLesson.quiz.map((question, qIndex) => (
-                                                <div key={qIndex} className="p-4 bg-secondary-50 rounded-xl">
-                                                    <p className="font-medium text-secondary-900 mb-3">
-                                                        {qIndex + 1}. {question.question}
+                                                    <p className="text-secondary-700 font-medium flex items-center gap-2">
+                                                        <span className="text-2xl">👆</span>
+                                                        Ready to practice? Click <strong className="text-primary-600">"🔤 Practice"</strong> to learn the vocabulary!
                                                     </p>
-                                                    <div className="space-y-2">
-                                                        {question.options.map((option, oIndex) => {
-                                                            const isSelected = quizAnswers[qIndex] === oIndex;
-                                                            const isCorrect = quizSubmitted && oIndex === question.correctIndex;
-                                                            const isWrong = quizSubmitted && isSelected && oIndex !== question.correctIndex;
-                                                            return (
-                                                                <button
-                                                                    key={oIndex}
-                                                                    onClick={() => handleQuizAnswer(qIndex, oIndex)}
-                                                                    disabled={quizSubmitted}
-                                                                    className={`w-full p-3 rounded-lg text-left transition-all flex items-center gap-3 ${isCorrect ? 'bg-green-100 border-2 border-green-400' :
-                                                                        isWrong ? 'bg-red-100 border-2 border-red-400' :
-                                                                            isSelected ? 'bg-primary-100 border-2 border-primary-400' :
-                                                                                'bg-white border-2 border-secondary-200 hover:border-primary-300'
-                                                                        }`}
-                                                                >
-                                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${isCorrect ? 'bg-green-500 text-white' :
-                                                                        isWrong ? 'bg-red-500 text-white' :
-                                                                            isSelected ? 'bg-primary-500 text-white' :
-                                                                                'bg-secondary-200 text-secondary-600'
-                                                                        }`}>
-                                                                        {isCorrect ? <Check size={14} /> : isWrong ? <X size={14} /> : String.fromCharCode(65 + oIndex)}
-                                                                    </span>
-                                                                    <span className="text-secondary-800">{option}</span>
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                </motion.div>
+                                            </motion.div>
+                                        )}
 
-                                            {!quizSubmitted && (
-                                                <Button
-                                                    onClick={submitQuiz}
-                                                    disabled={quizAnswers.length < selectedLesson.quiz.length}
-                                                    className="w-full"
+                                        {currentView === 'vocabulary' && (
+                                            <motion.div
+                                                key="vocabulary"
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                            >
+                                                <div className="text-center mb-6">
+                                                    <h3 className="text-xl font-bold text-secondary-800">Tap cards to flip!</h3>
+                                                    <p className="text-secondary-500">Learn each word, then test yourself with the quiz</p>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {selectedLesson.vocabulary.map((word, i) => (
+                                                        <FlipCard key={i} word={word} delay={i * 0.05} />
+                                                    ))}
+                                                </div>
+
+                                                <motion.div
+                                                    className="mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-100"
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.5 }}
                                                 >
-                                                    Submit Quiz
-                                                </Button>
-                                            )}
-                                        </div>
-                                    )}
+                                                    <p className="text-secondary-700 font-medium flex items-center gap-2">
+                                                        <span className="text-2xl">🎯</span>
+                                                        Ready to test yourself? Click <strong className="text-green-600">"✨ Quiz"</strong> to prove your knowledge!
+                                                    </p>
+                                                </motion.div>
+                                            </motion.div>
+                                        )}
+
+                                        {currentView === 'quiz' && (
+                                            <motion.div
+                                                key="quiz"
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                className="space-y-6"
+                                            >
+                                                {quizSubmitted && (
+                                                    <motion.div
+                                                        className={`p-8 rounded-2xl text-center ${getQuizScore()!.percentage >= 80
+                                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-200'
+                                                            : 'bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-200'
+                                                            }`}
+                                                        initial={{ scale: 0.9, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                    >
+                                                        <motion.div
+                                                            className="text-6xl mb-3"
+                                                            animate={{ rotate: [0, -10, 10, -10, 0] }}
+                                                            transition={{ duration: 0.5 }}
+                                                        >
+                                                            {getQuizScore()!.percentage >= 80 ? '🎉' : '💪'}
+                                                        </motion.div>
+                                                        <p className="text-4xl font-bold text-secondary-800">{getQuizScore()!.percentage}%</p>
+                                                        <p className="text-secondary-600 mt-1">{getQuizScore()!.correct} out of {getQuizScore()!.total} correct</p>
+                                                        {getQuizScore()!.percentage >= 80 ? (
+                                                            <p className="mt-3 text-green-700 font-semibold">Lesson completed! Well done!</p>
+                                                        ) : (
+                                                            <Button onClick={retakeQuiz} variant="outline" className="mt-4">
+                                                                <RotateCcw size={16} className="mr-2" /> Try Again
+                                                            </Button>
+                                                        )}
+                                                    </motion.div>
+                                                )}
+
+                                                {selectedLesson.quiz.map((question, qIndex) => (
+                                                    <motion.div
+                                                        key={qIndex}
+                                                        className="p-6 bg-white rounded-2xl border border-secondary-200 shadow-sm"
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: qIndex * 0.1 }}
+                                                    >
+                                                        <p className="font-bold text-secondary-900 text-lg mb-4 flex items-center gap-3">
+                                                            <span className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                                                                {qIndex + 1}
+                                                            </span>
+                                                            {question.question}
+                                                        </p>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                            {question.options.map((option, oIndex) => {
+                                                                const isSelected = quizAnswers[qIndex] === oIndex;
+                                                                const isCorrect = quizSubmitted && oIndex === question.correctIndex;
+                                                                const isWrong = quizSubmitted && isSelected && oIndex !== question.correctIndex;
+                                                                return (
+                                                                    <motion.button
+                                                                        key={oIndex}
+                                                                        onClick={() => handleQuizAnswer(qIndex, oIndex)}
+                                                                        disabled={quizSubmitted}
+                                                                        className={`p-4 rounded-xl text-left transition-all flex items-center gap-3 ${isCorrect ? 'bg-green-100 border-2 border-green-400 shadow-lg shadow-green-100' :
+                                                                            isWrong ? 'bg-red-100 border-2 border-red-400' :
+                                                                                isSelected ? 'bg-primary-100 border-2 border-primary-400 shadow-lg shadow-primary-100' :
+                                                                                    'bg-secondary-50 border-2 border-transparent hover:border-primary-200 hover:bg-primary-50'
+                                                                            }`}
+                                                                        whileHover={!quizSubmitted ? { scale: 1.02 } : {}}
+                                                                        whileTap={!quizSubmitted ? { scale: 0.98 } : {}}
+                                                                    >
+                                                                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${isCorrect ? 'bg-green-500 text-white' :
+                                                                            isWrong ? 'bg-red-500 text-white' :
+                                                                                isSelected ? 'bg-primary-500 text-white' :
+                                                                                    'bg-secondary-200 text-secondary-600'
+                                                                            }`}>
+                                                                            {isCorrect ? <Check size={16} /> : isWrong ? <X size={16} /> : String.fromCharCode(65 + oIndex)}
+                                                                        </span>
+                                                                        <span className="text-secondary-800 font-medium">{option}</span>
+                                                                    </motion.button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+
+                                                {!quizSubmitted && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: 0.3 }}
+                                                    >
+                                                        <Button
+                                                            onClick={submitQuiz}
+                                                            disabled={quizAnswers.filter(a => a !== undefined).length < selectedLesson.quiz.length}
+                                                            className="w-full py-4 text-lg bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600"
+                                                        >
+                                                            ✨ Submit Quiz
+                                                        </Button>
+                                                    </motion.div>
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </motion.div>
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
-        </Layout>
+        </Layout >
     );
 };
