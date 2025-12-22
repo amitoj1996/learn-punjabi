@@ -130,6 +130,84 @@ const FloatingShapes: React.FC = () => (
     </div>
 );
 
+// Glitch text component - scrambles between English and Punjabi
+const GlitchText: React.FC<{
+    englishText: string;
+    punjabiText: string;
+    className?: string;
+}> = ({ englishText, punjabiText, className = '' }) => {
+    const [displayText, setDisplayText] = useState(englishText);
+    const [isHovered, setIsHovered] = useState(false);
+    const [isScrambling, setIsScrambling] = useState(false);
+
+    const glitchChars = 'ੳਅੲਸਹਕਖਗਘਙਚਛਜਝਞਟਠਡਢਣਤਥਦਧਨਪਫਬਭਮਯਰਲ਼ਵੜ';
+
+    const scrambleText = (targetText: string) => {
+        if (isScrambling) return;
+        setIsScrambling(true);
+
+        const duration = 600; // Total animation time
+        const steps = 15; // Number of scramble iterations
+        const stepTime = duration / steps;
+        let currentStep = 0;
+
+        const animate = () => {
+            currentStep++;
+            const progress = currentStep / steps;
+
+            // Mix of random chars and target chars based on progress
+            const newText = targetText.split('').map((char, i) => {
+                if (char === ' ') return ' ';
+                if (Math.random() < progress) {
+                    return char;
+                }
+                return glitchChars[Math.floor(Math.random() * glitchChars.length)];
+            }).join('');
+
+            setDisplayText(newText);
+
+            if (currentStep < steps) {
+                setTimeout(animate, stepTime);
+            } else {
+                setDisplayText(targetText);
+                setIsScrambling(false);
+            }
+        };
+
+        animate();
+    };
+
+    const handleMouseEnter = () => {
+        if (!isHovered && !isScrambling) {
+            setIsHovered(true);
+            scrambleText(punjabiText);
+        }
+    };
+
+    const handleMouseLeave = () => {
+        if (isHovered && !isScrambling) {
+            setIsHovered(false);
+            scrambleText(englishText);
+        }
+    };
+
+    return (
+        <motion.span
+            className={`cursor-pointer select-none ${className}`}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            style={{
+                textShadow: isScrambling ? '0 0 8px rgba(255, 102, 0, 0.6), 0 0 20px rgba(255, 102, 0, 0.3)' : 'none',
+                transition: 'text-shadow 0.3s ease'
+            }}
+        >
+            {displayText}
+        </motion.span>
+    );
+};
+
 export const LandingPage: React.FC = () => {
     const { scrollY } = useScroll();
     const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
@@ -175,34 +253,18 @@ export const LandingPage: React.FC = () => {
                             <span>Connect with your heritage</span>
                         </motion.div>
 
-                        {/* Main Heading with gradient */}
+                        {/* Main Heading with glitch effect */}
                         <motion.h1
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.1 }}
                             className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-8 leading-tight"
                         >
-                            <span className="text-secondary-900">Learn </span>
-                            <span className="bg-gradient-to-r from-primary-500 via-primary-600 to-accent-500 bg-clip-text text-transparent">
-                                Punjabi
-                            </span>
-                            <br />
-                            <span className="text-secondary-900">the </span>
-                            <motion.span
-                                className="relative inline-block"
-                                whileHover={{ scale: 1.05 }}
-                            >
-                                <span className="bg-gradient-to-r from-accent-500 to-orange-500 bg-clip-text text-transparent">
-                                    Modern
-                                </span>
-                                <motion.span
-                                    className="absolute -bottom-2 left-0 w-full h-2 bg-gradient-to-r from-primary-400 to-accent-400 rounded-full"
-                                    initial={{ scaleX: 0 }}
-                                    animate={{ scaleX: 1 }}
-                                    transition={{ duration: 0.8, delay: 0.8 }}
-                                />
-                            </motion.span>
-                            <span className="text-secondary-900"> Way</span>
+                            <GlitchText
+                                englishText="Learn Punjabi the Modern Way"
+                                punjabiText="ਪੰਜਾਬੀ ਸਿੱਖੋ ਆਧੁਨਿਕ ਤਰੀਕੇ ਨਾਲ"
+                                className="bg-gradient-to-r from-primary-500 via-accent-500 to-orange-500 bg-clip-text text-transparent"
+                            />
                         </motion.h1>
 
                         <motion.p
