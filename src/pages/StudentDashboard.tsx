@@ -547,7 +547,58 @@ export const StudentDashboard: React.FC = () => {
                                                         <AlertTriangle size={14} />
                                                     </Button>
                                                 )}
-                                                {/* Three-dot menu for upcoming sessions */}
+                                                {/* Calendar button for upcoming sessions */}
+                                                {!isPast(booking) && booking.status !== 'cancelled' && (
+                                                    <div className="relative">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="flex items-center gap-1"
+                                                            onClick={() => setOpenMenuId(openMenuId === `cal-${booking.id}` ? null : `cal-${booking.id}`)}
+                                                        >
+                                                            <Calendar size={14} />
+                                                        </Button>
+                                                        {openMenuId === `cal-${booking.id}` && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, y: -10 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-20 min-w-[160px]"
+                                                            >
+                                                                <button
+                                                                    onClick={() => {
+                                                                        window.open(generateGoogleCalendarUrl(booking), '_blank');
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm"
+                                                                >
+                                                                    <Calendar size={14} className="text-primary-500" />
+                                                                    Google
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        window.open(generateOutlookCalendarUrl(booking), '_blank');
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm border-t border-secondary-50"
+                                                                >
+                                                                    <Calendar size={14} className="text-blue-500" />
+                                                                    Outlook
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        downloadIcsFile(booking);
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm border-t border-secondary-50"
+                                                                >
+                                                                    <Calendar size={14} className="text-secondary-500" />
+                                                                    Download .ics
+                                                                </button>
+                                                            </motion.div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {/* Three-dot menu for upcoming sessions - Reschedule/Cancel only */}
                                                 {!isPast(booking) && booking.status !== 'cancelled' && (
                                                     <div className="relative">
                                                         <Button
@@ -562,39 +613,8 @@ export const StudentDashboard: React.FC = () => {
                                                             <motion.div
                                                                 initial={{ opacity: 0, y: -10 }}
                                                                 animate={{ opacity: 1, y: 0 }}
-                                                                className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-20 min-w-[180px]"
+                                                                className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-20 min-w-[150px]"
                                                             >
-                                                                <button
-                                                                    onClick={() => {
-                                                                        window.open(generateGoogleCalendarUrl(booking), '_blank');
-                                                                        setOpenMenuId(null);
-                                                                    }}
-                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm"
-                                                                >
-                                                                    <Calendar size={14} className="text-primary-500" />
-                                                                    Google Calendar
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        window.open(generateOutlookCalendarUrl(booking), '_blank');
-                                                                        setOpenMenuId(null);
-                                                                    }}
-                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm border-t border-secondary-50"
-                                                                >
-                                                                    <Calendar size={14} className="text-blue-500" />
-                                                                    Outlook Calendar
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        downloadIcsFile(booking);
-                                                                        setOpenMenuId(null);
-                                                                    }}
-                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm border-t border-secondary-50"
-                                                                >
-                                                                    <Calendar size={14} className="text-secondary-500" />
-                                                                    Download .ics
-                                                                </button>
-                                                                <div className="border-t border-secondary-100"></div>
                                                                 <button
                                                                     onClick={() => {
                                                                         openRescheduleModal(booking);
@@ -610,7 +630,7 @@ export const StudentDashboard: React.FC = () => {
                                                                         handleCancelBooking(booking.id);
                                                                         setOpenMenuId(null);
                                                                     }}
-                                                                    className="w-full text-left px-4 py-2.5 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600"
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600 border-t border-secondary-100"
                                                                 >
                                                                     <X size={14} />
                                                                     Cancel Lesson
