@@ -644,7 +644,7 @@ export const StudentDashboard: React.FC = () => {
                                                             <motion.div
                                                                 initial={{ opacity: 0, y: -10 }}
                                                                 animate={{ opacity: 1, y: 0 }}
-                                                                className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-20 min-w-[160px]"
+                                                                className="absolute right-0 bottom-full mb-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-50 min-w-[160px]"
                                                             >
                                                                 <button
                                                                     onClick={() => {
@@ -695,7 +695,7 @@ export const StudentDashboard: React.FC = () => {
                                                             <motion.div
                                                                 initial={{ opacity: 0, y: -10 }}
                                                                 animate={{ opacity: 1, y: 0 }}
-                                                                className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-20 min-w-[150px]"
+                                                                className="absolute right-0 bottom-full mb-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-50 min-w-[150px]"
                                                             >
                                                                 <button
                                                                     onClick={() => {
