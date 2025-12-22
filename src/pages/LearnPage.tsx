@@ -8,6 +8,7 @@ import { Clock, X, Check, RotateCcw, Sparkles } from 'lucide-react';
 import { modules } from '../data/lessons';
 import type { Lesson, VocabularyWord } from '../data/lessons';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useGamification } from '../hooks/useGamification';
 import { ProgressHeader } from '../components/learn/ProgressHeader';
 import { SkillTree } from '../components/learn/SkillTree';
@@ -272,6 +273,7 @@ export const LearnPage: React.FC = () => {
                                                 className="prose prose-secondary max-w-none"
                                             >
                                                 <ReactMarkdown
+                                                    remarkPlugins={[remarkGfm]}
                                                     components={{
                                                         h1: ({ children }) => (
                                                             <h1 className="text-2xl font-bold text-secondary-900 mb-6 pb-3 border-b-2 border-primary-100 flex items-center gap-3">
