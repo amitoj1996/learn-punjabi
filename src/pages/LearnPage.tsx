@@ -13,6 +13,7 @@ import { useGamification } from '../hooks/useGamification';
 import { ProgressHeader } from '../components/learn/ProgressHeader';
 import { SkillTree } from '../components/learn/SkillTree';
 import { XPNotification } from '../components/learn/XPNotification';
+import { ConfettiCelebration } from '../components/learn/ConfettiCelebration';
 
 // Interactive Flip Card Component
 const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, delay }) => {
@@ -58,6 +59,8 @@ export const LearnPage: React.FC = () => {
     const [currentView, setCurrentView] = useState<'content' | 'vocabulary' | 'quiz'>('content');
     const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
     const [quizSubmitted, setQuizSubmitted] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [hasShownGoalCelebration, setHasShownGoalCelebration] = useState(false);
 
     // Gamification hook
     const {
@@ -68,7 +71,16 @@ export const LearnPage: React.FC = () => {
         completedLessons,
         addXP,
         showXPNotification,
+        isDailyGoalMet,
     } = useGamification();
+
+    // Show confetti when daily goal is first reached
+    React.useEffect(() => {
+        if (isDailyGoalMet && !hasShownGoalCelebration) {
+            setShowConfetti(true);
+            setHasShownGoalCelebration(true);
+        }
+    }, [isDailyGoalMet, hasShownGoalCelebration]);
 
     // Get all lessons flattened
     const allLessons = modules.flatMap(m => m.lessons);
@@ -180,6 +192,12 @@ export const LearnPage: React.FC = () => {
 
                 {/* XP Notification Toast */}
                 <XPNotification amount={showXPNotification} />
+
+                {/* Confetti Celebration */}
+                <ConfettiCelebration
+                    show={showConfetti}
+                    onComplete={() => setShowConfetti(false)}
+                />
 
                 {/* Lesson Viewer Modal */}
                 <AnimatePresence>

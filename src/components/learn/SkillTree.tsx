@@ -26,8 +26,10 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
 
     // Calculate how many lessons are completed for the progress line
     const completedCount = lessons.filter(l => completedLessons.includes(l.id)).length;
+    // Progress goes from first circle center to last circle center
+    // When all lessons done, show 100% (capped)
     const progressPercent = lessons.length > 1
-        ? (completedCount / (lessons.length - 1)) * 100
+        ? Math.min((completedCount / lessons.length) * 100, 100)
         : 0;
 
     return (
