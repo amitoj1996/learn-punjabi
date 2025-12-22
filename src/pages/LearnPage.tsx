@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { modules } from '../data/lessons';
 import type { Lesson } from '../data/lessons';
+import ReactMarkdown from 'react-markdown';
 
 interface UserProgress {
     lessonId: string;
@@ -323,7 +324,23 @@ export const LearnPage: React.FC = () => {
                                 <div className="p-6 overflow-y-auto max-h-[60vh]">
                                     {currentView === 'content' && (
                                         <div className="prose prose-secondary max-w-none">
-                                            <div dangerouslySetInnerHTML={{ __html: selectedLesson.content.replace(/\n/g, '<br/>') }} />
+                                            <ReactMarkdown
+                                                components={{
+                                                    h1: ({ children }) => <h1 className="text-2xl font-bold text-secondary-900 mb-4 pb-2 border-b border-secondary-200">{children}</h1>,
+                                                    h2: ({ children }) => <h2 className="text-xl font-semibold text-secondary-800 mt-6 mb-3">{children}</h2>,
+                                                    h3: ({ children }) => <h3 className="text-lg font-semibold text-secondary-700 mt-4 mb-2">{children}</h3>,
+                                                    p: ({ children }) => <p className="text-secondary-600 mb-4 leading-relaxed">{children}</p>,
+                                                    strong: ({ children }) => <strong className="text-secondary-800 font-semibold">{children}</strong>,
+                                                    ul: ({ children }) => <ul className="list-disc list-inside space-y-2 mb-4 text-secondary-600">{children}</ul>,
+                                                    li: ({ children }) => <li className="text-secondary-600">{children}</li>,
+                                                    table: ({ children }) => <div className="overflow-x-auto mb-4"><table className="min-w-full border-collapse">{children}</table></div>,
+                                                    thead: ({ children }) => <thead className="bg-primary-50">{children}</thead>,
+                                                    th: ({ children }) => <th className="border border-secondary-200 px-4 py-2 text-left font-semibold text-secondary-800">{children}</th>,
+                                                    td: ({ children }) => <td className="border border-secondary-200 px-4 py-2 text-secondary-700">{children}</td>,
+                                                }}
+                                            >
+                                                {selectedLesson.content}
+                                            </ReactMarkdown>
                                         </div>
                                     )}
 
