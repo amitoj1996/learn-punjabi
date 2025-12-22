@@ -280,10 +280,64 @@ async function sendTeacherRejected(teacherEmail, teacherName) {
     await sendEmail(teacherEmail, subject, htmlBody);
 }
 
+/**
+ * Send new message notification email
+ */
+async function sendNewMessageNotification(recipientEmail, senderName, messagePreview) {
+    const subject = `New message from ${senderName} 💬`;
+
+    // Truncate message preview
+    const preview = messagePreview.length > 100
+        ? messagePreview.substring(0, 100) + '...'
+        : messagePreview;
+
+    const htmlBody = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1E293B; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { background: #ffffff; padding: 30px; border: 1px solid #E2E8F0; border-top: none; }
+        .message-box { background: #F8FAFC; border-left: 4px solid #8B5CF6; padding: 15px 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+        .sender { font-weight: 600; color: #8B5CF6; margin-bottom: 5px; }
+        .cta-button { display: inline-block; background: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px; }
+        .footer { text-align: center; padding: 20px; color: #94A3B8; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 New Message</h1>
+        </div>
+        <div class="content">
+            <p>You have a new message on PunjabiLearn!</p>
+            
+            <div class="message-box">
+                <div class="sender">${senderName}</div>
+                <p style="margin: 0; color: #64748B;">"${preview}"</p>
+            </div>
+            
+            <a href="https://punjabilearn.com/messages" class="cta-button">View Message</a>
+        </div>
+        <div class="footer">
+            <p>PunjabiLearn - Connecting roots to future</p>
+        </div>
+    </div>
+</body>
+</html>
+    `;
+
+    await sendEmail(recipientEmail, subject, htmlBody);
+}
+
 module.exports = {
     sendEmail,
     sendBookingConfirmation,
     sendLessonReminder,
     sendTeacherApproved,
-    sendTeacherRejected
+    sendTeacherRejected,
+    sendNewMessageNotification
 };

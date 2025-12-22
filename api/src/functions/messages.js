@@ -1,5 +1,6 @@
 const { app } = require('@azure/functions');
 const { getContainer } = require('./config/cosmos');
+const { sendNewMessageNotification } = require('./config/email');
 
 // Content moderation - blocked words for a tutoring platform
 const BLOCKED_KEYWORDS = [
@@ -333,6 +334,15 @@ app.http('sendChatMessage', {
 
             await messagesContainer.items.create(message);
             context.log('Message created successfully:', message.id);
+
+            // Send email notification to recipient (async, don't wait)
+            try {
+                await sendNewMessageNotification(recipientEmail, senderName, content);
+                context.log('Email notification sent to:', recipientEmail);
+            } catch (emailError) {
+                // Log but don't fail the message send
+                context.log.error('Failed to send email notification:', emailError.message);
+            }
 
             return {
                 jsonBody: {
