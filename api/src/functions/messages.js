@@ -136,15 +136,18 @@ app.http('getChatMessages', {
                 .fetchAll();
 
             // Mark messages as read (messages received by current user)
+            let markedCount = 0;
             for (const msg of messages) {
-                if (msg.recipientEmail === userEmail && msg.isRead !== true) {
+                // Case-insensitive email comparison
+                if (msg.recipientEmail?.toLowerCase() === userEmail.toLowerCase() && msg.isRead !== true) {
                     msg.isRead = true;
                     msg.readAt = new Date().toISOString();
                     await container.items.upsert(msg);
+                    markedCount++;
                 }
             }
 
-            context.log('Found messages:', messages.length);
+            context.log('Found messages:', messages.length, 'Marked as read:', markedCount);
             return { jsonBody: messages };
         } catch (error) {
             context.error('Error getting messages:', error);
@@ -508,14 +511,15 @@ app.http('getUnreadCount', {
 
             const container = await getContainer('messages');
 
-            // Count messages where user is recipient and not read
+            // Count messages where user is recipient and not read (case-insensitive)
             const { resources: unreadMessages } = await container.items
                 .query({
-                    query: "SELECT c.id FROM c WHERE c.recipientEmail = @email AND (c.isRead = false OR NOT IS_DEFINED(c.isRead))",
+                    query: "SELECT c.id FROM c WHERE LOWER(c.recipientEmail) = LOWER(@email) AND (c.isRead = false OR NOT IS_DEFINED(c.isRead))",
                     parameters: [{ name: "@email", value: userEmail }]
                 })
                 .fetchAll();
 
+            context.log('Unread count for', userEmail, ':', unreadMessages.length);
             return { jsonBody: { count: unreadMessages.length } };
         } catch (error) {
             context.error('Error getting unread count:', error);
