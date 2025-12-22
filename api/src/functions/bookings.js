@@ -109,6 +109,27 @@ app.http('createBooking', {
                 };
             }
 
+            // Check for double-booking (same tutor, same date, same time)
+            const { resources: existingBookings } = await bookingsContainer.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.tutorId = @tutorId AND c.date = @date AND c.time = @time AND c.status != 'cancelled'",
+                    parameters: [
+                        { name: "@tutorId", value: tutorId },
+                        { name: "@date", value: date },
+                        { name: "@time", value: time }
+                    ]
+                })
+                .fetchAll();
+
+            if (existingBookings.length > 0) {
+                return {
+                    status: 409,
+                    body: JSON.stringify({
+                        error: "This time slot is no longer available. Please choose a different time."
+                    })
+                };
+            }
+
             const booking = {
                 id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 tutorId: tutor.id,
