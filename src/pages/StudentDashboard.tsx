@@ -280,10 +280,10 @@ export const StudentDashboard: React.FC = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.5 }}
                                 >
-                                    <Card className="h-full p-6 bg-gradient-to-br from-white via-purple-50/40 to-primary-50/50 border border-purple-100/50 shadow-lg shadow-purple-100/30 overflow-hidden relative">
+                                    <Card className="h-full p-6 bg-gradient-to-br from-white via-accent-50/40 to-primary-50/50 border border-accent-100/50 shadow-lg shadow-accent-100/30 overflow-hidden relative">
                                         {/* Decorative background elements */}
-                                        <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br from-primary-200/30 to-purple-200/20 rounded-full blur-2xl"></div>
-                                        <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-purple-200/20 to-primary-100/20 rounded-full blur-xl"></div>
+                                        <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br from-primary-200/30 to-accent-200/20 rounded-full blur-2xl"></div>
+                                        <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-accent-200/20 to-primary-100/20 rounded-full blur-xl"></div>
 
                                         <div className="relative flex flex-col h-full">
                                             {/* Header row */}
@@ -296,7 +296,7 @@ export const StudentDashboard: React.FC = () => {
                                                 </motion.div>
                                                 <span className="font-semibold text-secondary-800">Your Next Lesson</span>
                                                 <motion.span
-                                                    className="ml-auto bg-gradient-to-r from-primary-500 to-purple-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-md"
+                                                    className="ml-auto bg-gradient-to-r from-primary-500 to-accent-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-md"
                                                     animate={{ scale: [1, 1.03, 1] }}
                                                     transition={{ duration: 2, repeat: Infinity }}
                                                 >
@@ -307,7 +307,7 @@ export const StudentDashboard: React.FC = () => {
                                             {/* Tutor info */}
                                             <div className="flex items-center gap-4 flex-1">
                                                 <motion.div
-                                                    className="w-14 h-14 bg-gradient-to-br from-primary-400 to-purple-500 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-primary-200/50"
+                                                    className="w-14 h-14 bg-gradient-to-br from-primary-400 to-accent-500 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-primary-200/50"
                                                     whileHover={{ scale: 1.1, rotate: -5 }}
                                                     transition={{ type: "spring", stiffness: 400 }}
                                                 >
@@ -322,7 +322,7 @@ export const StudentDashboard: React.FC = () => {
                                             </div>
 
                                             {/* Actions */}
-                                            <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-purple-100/50">
+                                            <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-accent-100/50">
                                                 {nextLesson.meetingLink && (
                                                     <a href={nextLesson.meetingLink} target="_blank" rel="noopener noreferrer">
                                                         <Button size="sm" className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-md flex items-center gap-2">
@@ -331,11 +331,11 @@ export const StudentDashboard: React.FC = () => {
                                                     </a>
                                                 )}
                                                 <Link to={`/messages?to=${nextLesson.tutorEmail}`}>
-                                                    <Button size="sm" variant="outline" className="flex items-center gap-2 hover:bg-purple-50">
+                                                    <Button size="sm" variant="outline" className="flex items-center gap-2 hover:bg-accent-50">
                                                         <MessageCircle size={16} /> Message
                                                     </Button>
                                                 </Link>
-                                                <Button size="sm" variant="outline" className="flex items-center gap-2 hover:bg-purple-50" onClick={() => openRescheduleModal(nextLesson)}>
+                                                <Button size="sm" variant="outline" className="flex items-center gap-2 hover:bg-accent-50" onClick={() => openRescheduleModal(nextLesson)}>
                                                     <RefreshCw size={16} /> Reschedule
                                                 </Button>
                                                 <Button size="sm" variant="outline" className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleCancelBooking(nextLesson.id)}>
