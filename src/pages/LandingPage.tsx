@@ -169,10 +169,22 @@ export const LandingPage: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5 }}
-                            className="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium mb-8"
+                            className="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium mb-4"
                         >
                             <Sparkles size={16} className="animate-pulse" />
                             <span>Connect with your heritage</span>
+                        </motion.div>
+
+                        {/* Trial Offer Badge */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="block mb-8"
+                        >
+                            <span className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-yellow-50 border border-amber-300 text-amber-800 px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-amber-200/50">
+                                🎉 First Lesson Only $5!
+                            </span>
                         </motion.div>
 
                         {/* Main Heading with gradient */}
@@ -249,15 +261,15 @@ export const LandingPage: React.FC = () => {
                         >
                             <div className="flex items-center gap-2">
                                 <CheckCircle size={18} className="text-green-500" />
+                                <span>First lesson just $5</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={18} className="text-green-500" />
                                 <span>No subscription required</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <CheckCircle size={18} className="text-green-500" />
                                 <span>Flexible scheduling</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle size={18} className="text-green-500" />
-                                <span>Money-back guarantee</span>
                             </div>
                         </motion.div>
                     </motion.div>
