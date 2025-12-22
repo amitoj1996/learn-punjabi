@@ -15,9 +15,14 @@ async function getContainer(containerName) {
         client = new CosmosClient(connectionString);
     }
 
-    // Database name: 'punjabi-db' (we will need to create this)
+    // Database name: 'punjabi-db'
     const database = client.database("punjabi-db");
-    const container = database.container(containerName);
+
+    // Create container if it doesn't exist
+    const { container } = await database.containers.createIfNotExists({
+        id: containerName,
+        partitionKey: { paths: ["/id"] }
+    });
 
     return container;
 }
