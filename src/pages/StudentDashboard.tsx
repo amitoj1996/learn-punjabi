@@ -181,13 +181,23 @@ export const StudentDashboard: React.FC = () => {
 
     // Filter bookings
     const now = new Date();
+
+    // Get next upcoming lesson first (needed for filter below)
+    const upcomingLessons = bookings
+        .filter(b => new Date(b.date) >= now && b.status !== 'cancelled')
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const nextLesson = upcomingLessons[0] || null;
+
     const filteredBookings = bookings.filter(b => {
         const bookingDate = new Date(b.date);
         const matchesSearch = b.tutorName?.toLowerCase().includes(searchTerm.toLowerCase());
         if (!matchesSearch) return false;
 
         switch (activeTab) {
-            case 'upcoming': return bookingDate >= now && b.status !== 'cancelled';
+            case 'upcoming':
+                // Exclude the next lesson since it's shown in the hero card
+                if (nextLesson && b.id === nextLesson.id) return false;
+                return bookingDate >= now && b.status !== 'cancelled';
             case 'completed': return bookingDate < now && b.status !== 'cancelled';
             case 'cancelled': return b.status === 'cancelled';
             default: return true;
@@ -200,6 +210,7 @@ export const StudentDashboard: React.FC = () => {
 
     // Stats
     const upcomingCount = bookings.filter(b => new Date(b.date) >= now && b.status !== 'cancelled').length;
+    const upcomingListCount = nextLesson ? upcomingCount - 1 : upcomingCount; // Exclude next lesson from tab count
     const completedCount = bookings.filter(b => new Date(b.date) < now && b.status !== 'cancelled').length;
     const totalSpent = bookings.filter(b => b.status !== 'cancelled').reduce((sum, b) => sum + (b.hourlyRate * b.duration / 60), 0);
     const cancelledCount = bookings.filter(b => b.status === 'cancelled').length;
@@ -211,7 +222,7 @@ export const StudentDashboard: React.FC = () => {
     ];
 
     const tabs = [
-        { id: 'upcoming' as TabType, label: 'Upcoming', count: upcomingCount },
+        { id: 'upcoming' as TabType, label: 'Upcoming', count: upcomingListCount },
         { id: 'completed' as TabType, label: 'Completed', count: completedCount },
         { id: 'cancelled' as TabType, label: 'Cancelled', count: cancelledCount }
     ];
@@ -219,12 +230,6 @@ export const StudentDashboard: React.FC = () => {
     // Pending reviews
     const pendingReviews = bookings.filter(b => new Date(b.date) < now && b.status !== 'cancelled' && !b.reviewed);
     const isPast = (booking: Booking) => new Date(booking.date) < new Date();
-
-    // Get next upcoming lesson (for hero card)
-    const upcomingLessons = bookings
-        .filter(b => new Date(b.date) >= now && b.status !== 'cancelled')
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const nextLesson = upcomingLessons[0] || null;
 
     // Calculate time until next lesson
     const getTimeUntil = (dateStr: string, timeStr: string) => {
@@ -269,43 +274,44 @@ export const StudentDashboard: React.FC = () => {
                         {/* Next Lesson Hero Card */}
                         <div className="lg:col-span-2 flex">
                             {nextLesson ? (
-                                <Card className="flex-1 p-6 bg-gradient-to-br from-indigo-600 via-purple-600 to-violet-700 text-white overflow-hidden relative">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
-                                    <div className="relative h-full flex flex-col">
-                                        <div className="flex items-center gap-2 text-indigo-200 text-sm mb-4">
-                                            <Calendar size={16} />
-                                            <span>Your Next Lesson</span>
-                                            <span className="ml-auto bg-white/20 px-3 py-1 rounded-full text-xs font-medium">
+                                <Card className="flex-1 p-5 border-l-4 border-l-primary-500 bg-white">
+                                    <div className="flex flex-col h-full">
+                                        <div className="flex items-center gap-2 text-secondary-500 text-sm mb-3">
+                                            <Calendar size={16} className="text-primary-500" />
+                                            <span className="font-medium text-secondary-700">Your Next Lesson</span>
+                                            <span className="ml-auto bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-xs font-medium">
                                                 {getTimeUntil(nextLesson.date, nextLesson.time)}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-4 flex-1">
-                                            <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-xl font-bold backdrop-blur-sm">
+                                            <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-lg font-bold text-primary-600">
                                                 {nextLesson.tutorName?.charAt(0) || 'T'}
                                             </div>
                                             <div className="flex-1">
-                                                <h2 className="text-xl font-bold mb-0.5">{nextLesson.tutorName}</h2>
-                                                <p className="text-indigo-200 text-sm">
+                                                <h2 className="text-lg font-bold text-secondary-900">{nextLesson.tutorName}</h2>
+                                                <p className="text-secondary-500 text-sm">
                                                     {new Date(nextLesson.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} • {convertUtcToLocal(nextLesson.time, nextLesson.date)} {getTimezoneAbbr()}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex flex-wrap gap-2 mt-4">
+                                        <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-secondary-100">
                                             {nextLesson.meetingLink && (
                                                 <a href={nextLesson.meetingLink} target="_blank" rel="noopener noreferrer">
-                                                    <Button size="sm" className="bg-white text-indigo-700 hover:bg-indigo-50 flex items-center gap-2">
+                                                    <Button size="sm" className="flex items-center gap-2">
                                                         <Video size={16} /> Join Lesson
                                                     </Button>
                                                 </a>
                                             )}
                                             <Link to={`/messages?to=${nextLesson.tutorEmail}`}>
-                                                <Button size="sm" variant="ghost" className="text-white border-white/30 hover:bg-white/10 flex items-center gap-2">
+                                                <Button size="sm" variant="outline" className="flex items-center gap-2">
                                                     <MessageCircle size={16} /> Message
                                                 </Button>
                                             </Link>
-                                            <Button size="sm" variant="ghost" className="text-white border-white/30 hover:bg-white/10 flex items-center gap-2" onClick={() => openRescheduleModal(nextLesson)}>
+                                            <Button size="sm" variant="outline" className="flex items-center gap-2" onClick={() => openRescheduleModal(nextLesson)}>
                                                 <RefreshCw size={16} /> Reschedule
+                                            </Button>
+                                            <Button size="sm" variant="outline" className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleCancelBooking(nextLesson.id)}>
+                                                <X size={16} /> Cancel
                                             </Button>
                                         </div>
                                     </div>
