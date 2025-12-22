@@ -264,7 +264,12 @@ app.http('getPaymentStatus', {
                 status: 200,
                 jsonBody: {
                     paymentStatus: booking.paymentStatus || 'pending',
-                    paidAt: booking.paidAt
+                    paidAt: booking.paidAt,
+                    // Include booking details for calendar integration
+                    tutorName: booking.tutorName,
+                    date: booking.date,
+                    time: booking.time,
+                    duration: booking.duration || 60
                 }
             };
         } catch (error) {

@@ -1,14 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Layout } from '../components/Layout';
-import { CheckCircle, Calendar } from 'lucide-react';
+import { CheckCircle, Calendar, ChevronDown } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import {
+    generateGoogleCalendarUrl,
+    generateOutlookCalendarUrl,
+    downloadIcsFile
+} from '../utils/calendarLinks';
+
+interface BookingDetails {
+    tutorName: string;
+    date: string;
+    time: string;
+    duration: number;
+}
 
 export const PaymentSuccess: React.FC = () => {
     const [searchParams] = useSearchParams();
     const [isVerifying, setIsVerifying] = useState(true);
     const [paymentStatus, setPaymentStatus] = useState<'paid' | 'pending' | 'error'>('pending');
+    const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
+    const [showCalendarMenu, setShowCalendarMenu] = useState(false);
 
     const bookingId = searchParams.get('booking_id');
 
@@ -27,6 +41,15 @@ export const PaymentSuccess: React.FC = () => {
                     if (data.paymentStatus === 'paid') {
                         setPaymentStatus('paid');
                         setIsVerifying(false);
+                        // Store booking details for calendar
+                        if (data.tutorName && data.date && data.time) {
+                            setBookingDetails({
+                                tutorName: data.tutorName,
+                                date: data.date,
+                                time: data.time,
+                                duration: data.duration || 60
+                            });
+                        }
                     }
                 }
             } catch (err) {
@@ -45,6 +68,27 @@ export const PaymentSuccess: React.FC = () => {
 
         return () => clearInterval(interval);
     }, [bookingId]);
+
+    const handleAddToGoogleCalendar = () => {
+        if (bookingDetails) {
+            window.open(generateGoogleCalendarUrl(bookingDetails), '_blank');
+            setShowCalendarMenu(false);
+        }
+    };
+
+    const handleAddToOutlook = () => {
+        if (bookingDetails) {
+            window.open(generateOutlookCalendarUrl(bookingDetails), '_blank');
+            setShowCalendarMenu(false);
+        }
+    };
+
+    const handleDownloadIcs = () => {
+        if (bookingDetails) {
+            downloadIcsFile(bookingDetails);
+            setShowCalendarMenu(false);
+        }
+    };
 
     return (
         <Layout>
@@ -88,6 +132,50 @@ export const PaymentSuccess: React.FC = () => {
                                         <li>• Join your lesson at the scheduled time</li>
                                     </ul>
                                 </div>
+
+                                {/* Add to Calendar Button */}
+                                {bookingDetails && (
+                                    <div className="relative mb-6">
+                                        <button
+                                            onClick={() => setShowCalendarMenu(!showCalendarMenu)}
+                                            className="w-full flex items-center justify-center gap-2 bg-primary-50 hover:bg-primary-100 text-primary-700 font-medium py-3 px-4 rounded-xl transition-colors"
+                                        >
+                                            <Calendar size={18} />
+                                            Add to Calendar
+                                            <ChevronDown size={16} className={`transition-transform ${showCalendarMenu ? 'rotate-180' : ''}`} />
+                                        </button>
+
+                                        {showCalendarMenu && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-10"
+                                            >
+                                                <button
+                                                    onClick={handleAddToGoogleCalendar}
+                                                    className="w-full text-left px-4 py-3 hover:bg-secondary-50 flex items-center gap-3 transition-colors"
+                                                >
+                                                    <span className="text-xl">📅</span>
+                                                    Google Calendar
+                                                </button>
+                                                <button
+                                                    onClick={handleAddToOutlook}
+                                                    className="w-full text-left px-4 py-3 hover:bg-secondary-50 flex items-center gap-3 transition-colors border-t border-secondary-100"
+                                                >
+                                                    <span className="text-xl">📧</span>
+                                                    Outlook Calendar
+                                                </button>
+                                                <button
+                                                    onClick={handleDownloadIcs}
+                                                    className="w-full text-left px-4 py-3 hover:bg-secondary-50 flex items-center gap-3 transition-colors border-t border-secondary-100"
+                                                >
+                                                    <span className="text-xl">📥</span>
+                                                    Download .ics file
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="flex gap-3">
                                     <Link to="/dashboard" className="flex-1">
