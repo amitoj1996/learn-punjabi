@@ -128,7 +128,7 @@ Try tracing these letters with your finger. Notice how each has a distinct shape
                 difficulty: 'beginner',
                 unlockRequirements: ['gurmukhi-alphabet'],
                 vocabulary: [
-                    { gurmukhi: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', transliteration: 'Sat Sri Akal', english: 'Hello (formal greeting)' },
+                    { gurmukhi: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', transliteration: 'Sat Shri Akal', english: 'Hello (formal greeting)' },
                     { gurmukhi: 'ਕਿਦਾਂ?', transliteration: 'Kidaan?', english: 'How are you? (informal)' },
                     { gurmukhi: 'ਠੀਕ ਹਾਂ', transliteration: 'Theek haan', english: 'I am fine' },
                     { gurmukhi: 'ਧੰਨਵਾਦ', transliteration: 'Dhannvaad', english: 'Thank you' },
@@ -143,7 +143,7 @@ Greetings are an important part of Punjabi culture. Let's learn the most common 
 
 ## The Most Important Greeting
 
-**ਸਤ ਸ੍ਰੀ ਅਕਾਲ** (Sat Sri Akal)
+**ਸਤ ਸ੍ਰੀ ਅਕਾਲ** (Sat Shri Akal)
 
 This is the traditional Sikh greeting meaning "God is the ultimate truth." It's used by Punjabis of all backgrounds and is appropriate in any situation.
 
@@ -164,7 +164,7 @@ When meeting friends, you can use:
                 `,
                 quiz: [
                     {
-                        question: 'What does "Sat Sri Akal" mean?',
+                        question: 'What does "Sat Shri Akal" mean?',
                         options: ['Good morning', 'God is the ultimate truth', 'How are you', 'Goodbye'],
                         correctIndex: 1
                     },
@@ -180,7 +180,7 @@ When meeting friends, you can use:
                     },
                     {
                         question: 'How do you say "I am fine"?',
-                        options: ['Sat Sri Akal', 'Theek haan', 'Dhannvaad', 'Kidaan'],
+                        options: ['Sat Shri Akal', 'Theek haan', 'Dhannvaad', 'Kidaan'],
                         correctIndex: 1
                     },
                     {
@@ -201,16 +201,16 @@ When meeting friends, you can use:
                 difficulty: 'beginner',
                 unlockRequirements: ['basic-greetings'],
                 vocabulary: [
-                    { gurmukhi: '੧ - ਇੱਕ', transliteration: 'Ikk', english: 'One (1)' },
-                    { gurmukhi: '੨ - ਦੋ', transliteration: 'Do', english: 'Two (2)' },
-                    { gurmukhi: '੩ - ਤਿੰਨ', transliteration: 'Tinn', english: 'Three (3)' },
-                    { gurmukhi: '੪ - ਚਾਰ', transliteration: 'Chaar', english: 'Four (4)' },
-                    { gurmukhi: '੫ - ਪੰਜ', transliteration: 'Panj', english: 'Five (5)' },
-                    { gurmukhi: '੬ - ਛੇ', transliteration: 'Chhe', english: 'Six (6)' },
-                    { gurmukhi: '੭ - ਸੱਤ', transliteration: 'Satt', english: 'Seven (7)' },
-                    { gurmukhi: '੮ - ਅੱਠ', transliteration: 'Atth', english: 'Eight (8)' },
-                    { gurmukhi: '੯ - ਨੌਂ', transliteration: 'Naunh', english: 'Nine (9)' },
-                    { gurmukhi: '੧੦ - ਦਸ', transliteration: 'Das', english: 'Ten (10)' },
+                    { gurmukhi: '੧ - ਇੱਕ', transliteration: 'Ikk', english: 'One (1)', pronunciation: 'ਇੱਕ' },
+                    { gurmukhi: '੨ - ਦੋ', transliteration: 'Do', english: 'Two (2)', pronunciation: 'ਦੋ' },
+                    { gurmukhi: '੩ - ਤਿੰਨ', transliteration: 'Tinn', english: 'Three (3)', pronunciation: 'ਤਿੰਨ' },
+                    { gurmukhi: '੪ - ਚਾਰ', transliteration: 'Chaar', english: 'Four (4)', pronunciation: 'ਚਾਰ' },
+                    { gurmukhi: '੫ - ਪੰਜ', transliteration: 'Panj', english: 'Five (5)', pronunciation: 'ਪੰਜ' },
+                    { gurmukhi: '੬ - ਛੇ', transliteration: 'Chhe', english: 'Six (6)', pronunciation: 'ਛੇ' },
+                    { gurmukhi: '੭ - ਸੱਤ', transliteration: 'Satt', english: 'Seven (7)', pronunciation: 'ਸੱਤ' },
+                    { gurmukhi: '੮ - ਅੱਠ', transliteration: 'Atth', english: 'Eight (8)', pronunciation: 'ਅੱਠ' },
+                    { gurmukhi: '੯ - ਨੌਂ', transliteration: 'Naunh', english: 'Nine (9)', pronunciation: 'ਨੌਂ' },
+                    { gurmukhi: '੧੦ - ਦਸ', transliteration: 'Das', english: 'Ten (10)', pronunciation: 'ਦਸ' },
                 ],
                 content: `
 # Numbers 1-10 in Punjabi
