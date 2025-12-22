@@ -14,6 +14,7 @@ import { ProgressHeader } from '../components/learn/ProgressHeader';
 import { SkillTree } from '../components/learn/SkillTree';
 import { XPNotification } from '../components/learn/XPNotification';
 import { ConfettiCelebration } from '../components/learn/ConfettiCelebration';
+import { AudioButton } from '../components/learn/AudioButton';
 
 // Interactive Flip Card Component
 const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, delay }) => {
@@ -21,7 +22,7 @@ const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, del
 
     return (
         <motion.div
-            className="perspective-1000 h-36 cursor-pointer group"
+            className="perspective-1000 h-40 cursor-pointer group"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
@@ -38,15 +39,21 @@ const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, del
                     className="absolute inset-0 bg-gradient-to-br from-primary-500 via-purple-500 to-indigo-600 rounded-2xl p-6 flex flex-col items-center justify-center text-white shadow-lg shadow-purple-200"
                     style={{ backfaceVisibility: "hidden" }}
                 >
-                    <span className="text-4xl font-bold mb-2">{word.gurmukhi}</span>
-                    <span className="text-white/70 text-sm">Tap to reveal</span>
+                    <div className="flex items-center gap-3 mb-2">
+                        <span className="text-4xl font-bold">{word.gurmukhi}</span>
+                        <AudioButton text={word.gurmukhi} size="sm" />
+                    </div>
+                    <span className="text-white/70 text-sm">Tap to reveal • 🔊 for audio</span>
                 </div>
                 {/* Back - English */}
                 <div
                     className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 flex flex-col items-center justify-center text-white shadow-lg shadow-emerald-200"
                     style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                 >
-                    <span className="text-xl font-bold mb-1">{word.transliteration}</span>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl font-bold">{word.transliteration}</span>
+                        <AudioButton text={word.gurmukhi} size="sm" />
+                    </div>
                     <span className="text-white/90">{word.english}</span>
                 </div>
             </motion.div>
