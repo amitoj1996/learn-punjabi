@@ -220,6 +220,27 @@ export const StudentDashboard: React.FC = () => {
     const pendingReviews = bookings.filter(b => new Date(b.date) < now && b.status !== 'cancelled' && !b.reviewed);
     const isPast = (booking: Booking) => new Date(booking.date) < new Date();
 
+    // Get next upcoming lesson (for hero card)
+    const upcomingLessons = bookings
+        .filter(b => new Date(b.date) >= now && b.status !== 'cancelled')
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const nextLesson = upcomingLessons[0] || null;
+
+    // Calculate time until next lesson
+    const getTimeUntil = (dateStr: string, timeStr: string) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const lessonDate = new Date(dateStr + 'T00:00:00');
+        lessonDate.setHours(hours, minutes, 0, 0);
+        const diff = lessonDate.getTime() - now.getTime();
+        if (diff < 0) return 'Starting soon';
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hrs = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        if (days > 0) return `in ${days} day${days > 1 ? 's' : ''}`;
+        if (hrs > 0) return `in ${hrs} hour${hrs > 1 ? 's' : ''}`;
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        return `in ${mins} min`;
+    };
+
     return (
         <Layout>
             <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-white">
@@ -243,37 +264,101 @@ export const StudentDashboard: React.FC = () => {
                         </div>
                     </motion.header>
 
-                    {/* Stats Cards */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-3 gap-4 mb-6">
-                        {stats.map((stat, i) => (
-                            <Card key={i} className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-3 rounded-xl ${stat.color} text-white`}>
-                                        <stat.icon size={22} />
+                    {/* Hero Section: Next Lesson + Stats */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        {/* Next Lesson Hero Card */}
+                        <div className="lg:col-span-2">
+                            {nextLesson ? (
+                                <Card className="p-6 bg-gradient-to-br from-primary-500 to-primary-700 text-white overflow-hidden relative">
+                                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                                    <div className="relative">
+                                        <div className="flex items-center gap-2 text-primary-100 text-sm mb-3">
+                                            <Calendar size={16} />
+                                            <span>Your Next Lesson</span>
+                                            <span className="ml-auto bg-white/20 px-3 py-1 rounded-full text-xs font-medium">
+                                                {getTimeUntil(nextLesson.date, nextLesson.time)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl font-bold backdrop-blur-sm">
+                                                {nextLesson.tutorName?.charAt(0) || 'T'}
+                                            </div>
+                                            <div className="flex-1">
+                                                <h2 className="text-2xl font-bold mb-1">{nextLesson.tutorName}</h2>
+                                                <p className="text-primary-100 text-sm mb-4">
+                                                    {new Date(nextLesson.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {convertUtcToLocal(nextLesson.time, nextLesson.date)} {getTimezoneAbbr()}
+                                                </p>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {nextLesson.meetingLink && (
+                                                        <a href={nextLesson.meetingLink} target="_blank" rel="noopener noreferrer">
+                                                            <Button size="sm" className="bg-white text-primary-700 hover:bg-primary-50 flex items-center gap-2">
+                                                                <Video size={16} /> Join Lesson
+                                                            </Button>
+                                                        </a>
+                                                    )}
+                                                    <Link to={`/messages?to=${nextLesson.tutorEmail}`}>
+                                                        <Button size="sm" variant="ghost" className="text-white border-white/30 hover:bg-white/10 flex items-center gap-2">
+                                                            <MessageCircle size={16} /> Message
+                                                        </Button>
+                                                    </Link>
+                                                    <Button size="sm" variant="ghost" className="text-white border-white/30 hover:bg-white/10 flex items-center gap-2" onClick={() => openRescheduleModal(nextLesson)}>
+                                                        <RefreshCw size={16} /> Reschedule
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-2xl font-bold text-secondary-900">{stat.value}</p>
-                                        <p className="text-xs text-secondary-500">{stat.label}</p>
+                                </Card>
+                            ) : (
+                                <Card className="p-8 bg-gradient-to-br from-secondary-50 to-white border-dashed border-2 border-secondary-200 text-center">
+                                    <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <GraduationCap size={32} className="text-primary-600" />
                                     </div>
-                                </div>
-                            </Card>
-                        ))}
-                    </motion.div>
+                                    <h2 className="text-xl font-bold text-secondary-900 mb-2">No Upcoming Lessons</h2>
+                                    <p className="text-secondary-500 mb-4">Ready to learn some Punjabi? Book your first lesson!</p>
+                                    <Link to="/tutors">
+                                        <Button className="flex items-center gap-2 mx-auto">
+                                            <Search size={16} /> Find a Tutor
+                                        </Button>
+                                    </Link>
+                                </Card>
+                            )}
+                        </div>
 
-                    {/* Pending Reviews Alert */}
-                    {pendingReviews.length > 0 && (
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-6">
-                            <Card className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Star size={20} className="text-yellow-600" />
-                                        <p className="font-medium text-secondary-900">{pendingReviews.length} lesson{pendingReviews.length > 1 ? 's' : ''} waiting for your review</p>
+                        {/* Stats Sidebar */}
+                        <div className="space-y-4">
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                                {stats.map((stat, i) => (
+                                    <Card key={i} className="p-4 hover:shadow-md transition-shadow">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2.5 rounded-xl ${stat.color} text-white`}>
+                                                <stat.icon size={18} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xl font-bold text-secondary-900">{stat.value}</p>
+                                                <p className="text-xs text-secondary-500">{stat.label}</p>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+
+                            {/* Pending Reviews */}
+                            {pendingReviews.length > 0 && (
+                                <Card className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <Star size={18} className="text-yellow-600" />
+                                        <p className="font-medium text-secondary-900 text-sm">{pendingReviews.length} lesson{pendingReviews.length > 1 ? 's' : ''} to review</p>
                                     </div>
-                                    <Button size="sm" onClick={() => setReviewBooking(pendingReviews[0])}>Review Now</Button>
-                                </div>
-                            </Card>
-                        </motion.div>
-                    )}
+                                    <Button size="sm" className="w-full" onClick={() => setReviewBooking(pendingReviews[0])}>
+                                        <Star size={14} className="mr-2" /> Review Now
+                                    </Button>
+                                </Card>
+                            )}
+                        </div>
+                    </motion.div>
 
                     {/* UNIFIED: Tabs + Bookings List in One Card */}
                     <Card className="overflow-hidden">
