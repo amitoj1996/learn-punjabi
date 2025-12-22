@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 import { Layout } from '../components/Layout';
-import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import {
-    CheckCircle, ChevronRight,
-    Award, Clock, X, Check, RotateCcw
-} from 'lucide-react';
+import { Clock, X, Check, RotateCcw, Sparkles } from 'lucide-react';
 import { modules } from '../data/lessons';
 import type { Lesson, VocabularyWord } from '../data/lessons';
 import ReactMarkdown from 'react-markdown';
+import { useGamification } from '../hooks/useGamification';
+import { ProgressHeader } from '../components/learn/ProgressHeader';
+import { SkillTree } from '../components/learn/SkillTree';
+import { XPNotification } from '../components/learn/XPNotification';
 
 // Interactive Flip Card Component
 const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, delay }) => {
@@ -19,14 +19,14 @@ const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, del
 
     return (
         <motion.div
-            className="perspective-1000 h-36 cursor-pointer"
+            className="perspective-1000 h-36 cursor-pointer group"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
             onClick={() => setIsFlipped(!isFlipped)}
         >
             <motion.div
-                className="relative w-full h-full"
+                className="relative w-full h-full text-center"
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
                 transition={{ duration: 0.6, type: "spring", damping: 20 }}
                 style={{ transformStyle: "preserve-3d" }}
@@ -52,85 +52,25 @@ const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, del
     );
 };
 
-interface UserProgress {
-    lessonId: string;
-    completed: boolean;
-    quizScore?: number;
-    completedAt?: string;
-}
-
 export const LearnPage: React.FC = () => {
-    const { user } = useAuth();
-    const isAuthenticated = !!user;
     const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
-    const [progress, setProgress] = useState<UserProgress[]>([]);
     const [currentView, setCurrentView] = useState<'content' | 'vocabulary' | 'quiz'>('content');
     const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
     const [quizSubmitted, setQuizSubmitted] = useState(false);
 
-    // Fetch user progress on mount
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchProgress();
-        }
-    }, [isAuthenticated]);
+    // Gamification hook
+    const {
+        totalXP,
+        currentStreak,
+        dailyXP,
+        dailyGoal,
+        completedLessons,
+        addXP,
+        showXPNotification,
+    } = useGamification();
 
-    const fetchProgress = async () => {
-        try {
-            const response = await fetch('/api/learn/progress');
-            if (response.ok) {
-                const data = await response.json();
-                setProgress(data.progress || []);
-            }
-        } catch (err) {
-            console.error('Failed to fetch progress:', err);
-        }
-    };
-
-    const markLessonComplete = async (lessonId: string, quizScore?: number) => {
-        const newProgress: UserProgress = {
-            lessonId,
-            completed: true,
-            quizScore,
-            completedAt: new Date().toISOString()
-        };
-
-        // Optimistic update
-        setProgress(prev => {
-            const existing = prev.findIndex(p => p.lessonId === lessonId);
-            if (existing >= 0) {
-                const updated = [...prev];
-                updated[existing] = newProgress;
-                return updated;
-            }
-            return [...prev, newProgress];
-        });
-
-        // Save to server if authenticated
-        if (isAuthenticated) {
-            try {
-                await fetch('/api/learn/progress', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newProgress)
-                });
-            } catch (err) {
-                console.error('Failed to save progress:', err);
-            }
-        }
-    };
-
-    const isLessonCompleted = (lessonId: string) => {
-        return progress.some(p => p.lessonId === lessonId && p.completed);
-    };
-
-    const getModuleProgress = (moduleId: string) => {
-        const module = modules.find(m => m.id === moduleId);
-        if (!module) return { completed: 0, total: 0, percentage: 0 };
-        const completed = module.lessons.filter(l => isLessonCompleted(l.id)).length;
-        const total = module.lessons.length;
-        return { completed, total, percentage: Math.round((completed / total) * 100) };
-    };
+    // Get all lessons flattened
+    const allLessons = modules.flatMap(m => m.lessons);
 
     const openLesson = (lesson: Lesson) => {
         setSelectedLesson(lesson);
@@ -154,8 +94,12 @@ export const LearnPage: React.FC = () => {
         if (!selectedLesson) return;
         setQuizSubmitted(true);
         const correct = selectedLesson.quiz.filter((q, i) => quizAnswers[i] === q.correctIndex).length;
-        const score = Math.round((correct / selectedLesson.quiz.length) * 100);
-        markLessonComplete(selectedLesson.id, score);
+        const percentage = Math.round((correct / selectedLesson.quiz.length) * 100);
+
+        // Award XP if passed (≥60%)
+        if (percentage >= 60) {
+            addXP(selectedLesson.xpReward, selectedLesson.id);
+        }
     };
 
     const retakeQuiz = () => {
@@ -169,122 +113,50 @@ export const LearnPage: React.FC = () => {
         return { correct, total: selectedLesson.quiz.length, percentage: Math.round((correct / selectedLesson.quiz.length) * 100) };
     };
 
-    const totalCompleted = progress.filter(p => p.completed).length;
-    const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
-
     return (
         <Layout>
             <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-purple-50 py-8">
-                <div className="container mx-auto px-4 max-w-6xl">
+                <div className="container mx-auto px-4 max-w-4xl">
                     {/* Header */}
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mb-8"
+                        className="text-center mb-6"
                     >
                         <h1 className="text-3xl md:text-4xl font-bold text-secondary-900">
                             Learn Punjabi <span className="text-primary-600">Free</span>
                         </h1>
                         <p className="text-secondary-600 mt-2">
-                            Self-paced lessons to start your Punjabi journey
+                            Complete lessons to earn XP and build your streak! 🔥
                         </p>
-
-                        {/* Overall Progress */}
-                        {totalCompleted > 0 && (
-                            <div className="mt-4 flex items-center gap-4">
-                                <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full">
-                                    <Award size={18} />
-                                    <span className="font-medium">{totalCompleted}/{totalLessons} lessons completed</span>
-                                </div>
-                            </div>
-                        )}
                     </motion.div>
 
-                    {/* Modules */}
-                    <div className="space-y-8">
-                        {modules.map((module, moduleIndex) => {
-                            const moduleProgress = getModuleProgress(module.id);
-                            return (
-                                <motion.div
-                                    key={module.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: moduleIndex * 0.1 }}
-                                >
-                                    <Card className="p-6 overflow-hidden">
-                                        {/* Module Header */}
-                                        <div className="flex items-center justify-between mb-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-14 h-14 bg-gradient-to-br from-primary-100 to-purple-100 rounded-2xl flex items-center justify-center text-2xl">
-                                                    {module.icon}
-                                                </div>
-                                                <div>
-                                                    <h2 className="text-xl font-bold text-secondary-900">{module.title}</h2>
-                                                    <p className="text-secondary-500 text-sm">{module.description}</p>
-                                                </div>
-                                            </div>
-                                            {moduleProgress.completed > 0 && (
-                                                <div className="hidden md:flex items-center gap-3">
-                                                    <div className="w-32 h-2 bg-secondary-100 rounded-full overflow-hidden">
-                                                        <motion.div
-                                                            className="h-full bg-gradient-to-r from-green-400 to-emerald-500"
-                                                            initial={{ width: 0 }}
-                                                            animate={{ width: `${moduleProgress.percentage}%` }}
-                                                            transition={{ duration: 0.5 }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm text-secondary-500 font-medium">
-                                                        {moduleProgress.completed}/{moduleProgress.total}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
+                    {/* Gamification Progress Header */}
+                    <ProgressHeader
+                        streak={currentStreak}
+                        totalXP={totalXP}
+                        dailyXP={dailyXP}
+                        dailyGoal={dailyGoal}
+                    />
 
-                                        {/* Lessons Grid */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {module.lessons.map((lesson) => {
-                                                const completed = isLessonCompleted(lesson.id);
-                                                return (
-                                                    <motion.button
-                                                        key={lesson.id}
-                                                        onClick={() => openLesson(lesson)}
-                                                        className={`p-4 rounded-xl border-2 text-left transition-all ${completed
-                                                            ? 'border-green-200 bg-green-50 hover:bg-green-100'
-                                                            : 'border-secondary-100 bg-white hover:border-primary-200 hover:bg-primary-50'
-                                                            }`}
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
-                                                    >
-                                                        <div className="flex items-start gap-3">
-                                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${completed ? 'bg-green-200' : 'bg-primary-100'
-                                                                }`}>
-                                                                {completed ? <CheckCircle size={20} className="text-green-600" /> : lesson.icon}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h3 className="font-semibold text-secondary-900 truncate">{lesson.title}</h3>
-                                                                <p className="text-xs text-secondary-500 mt-0.5">{lesson.description}</p>
-                                                                <div className="flex items-center gap-2 mt-2 text-xs text-secondary-400">
-                                                                    <Clock size={12} />
-                                                                    <span>{lesson.duration}</span>
-                                                                    {lesson.vocabulary.length > 0 && (
-                                                                        <>
-                                                                            <span>•</span>
-                                                                            <span>{lesson.vocabulary.length} words</span>
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <ChevronRight size={18} className="text-secondary-300 flex-shrink-0" />
-                                                        </div>
-                                                    </motion.button>
-                                                );
-                                            })}
-                                        </div>
-                                    </Card>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
+                    {/* Skill Tree */}
+                    <Card className="p-8 bg-white/60 backdrop-blur-sm">
+                        <div className="text-center mb-6">
+                            <h2 className="text-xl font-bold text-secondary-800 flex items-center justify-center gap-2">
+                                <Sparkles className="w-5 h-5 text-primary-500" />
+                                Module 1: Getting Started
+                            </h2>
+                            <p className="text-secondary-500 text-sm mt-1">
+                                Master the basics of Punjabi language
+                            </p>
+                        </div>
+
+                        <SkillTree
+                            lessons={allLessons}
+                            completedLessons={completedLessons}
+                            onLessonSelect={openLesson}
+                        />
+                    </Card>
 
                     {/* CTA for booking */}
                     <motion.div
@@ -305,7 +177,10 @@ export const LearnPage: React.FC = () => {
                     </motion.div>
                 </div>
 
-                {/* Premium Lesson Viewer Modal */}
+                {/* XP Notification Toast */}
+                <XPNotification amount={showXPNotification} />
+
+                {/* Lesson Viewer Modal */}
                 <AnimatePresence>
                     {selectedLesson && (
                         <motion.div
@@ -323,9 +198,8 @@ export const LearnPage: React.FC = () => {
                                 className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl shadow-purple-500/20"
                                 onClick={e => e.stopPropagation()}
                             >
-                                {/* Premium Header with glassmorphism */}
+                                {/* Header */}
                                 <div className="relative bg-gradient-to-r from-primary-600 via-purple-600 to-indigo-600 text-white p-8 overflow-hidden">
-                                    {/* Decorative circles */}
                                     <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
 
@@ -346,6 +220,10 @@ export const LearnPage: React.FC = () => {
                                                     </span>
                                                     <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
                                                     <span className="text-white/80 text-sm">{selectedLesson.vocabulary.length} words</span>
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                                                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-bold">
+                                                        +{selectedLesson.xpReward} XP
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -359,7 +237,7 @@ export const LearnPage: React.FC = () => {
                                         </motion.button>
                                     </div>
 
-                                    {/* Premium Tabs */}
+                                    {/* Tabs */}
                                     <div className="relative flex gap-2 mt-6">
                                         {[
                                             { id: 'content', label: '📖 Learn' },
@@ -377,19 +255,12 @@ export const LearnPage: React.FC = () => {
                                                 whileTap={{ scale: 0.97 }}
                                             >
                                                 {tab.label}
-                                                {currentView === tab.id && (
-                                                    <motion.div
-                                                        layoutId="activeTab"
-                                                        className="absolute inset-0 bg-white rounded-2xl -z-10"
-                                                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                                                    />
-                                                )}
                                             </motion.button>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* Modal Content with premium styling */}
+                                {/* Content */}
                                 <div className="p-8 overflow-y-auto max-h-[55vh] bg-gradient-to-b from-secondary-50/50 to-white">
                                     <AnimatePresence mode="wait">
                                         {currentView === 'content' && (
@@ -437,7 +308,6 @@ export const LearnPage: React.FC = () => {
                                                     {selectedLesson.content}
                                                 </ReactMarkdown>
 
-                                                {/* Next step prompt */}
                                                 <motion.div
                                                     className="mt-8 p-6 bg-gradient-to-r from-primary-50 to-purple-50 rounded-2xl border border-primary-100"
                                                     initial={{ opacity: 0, y: 10 }}
@@ -477,7 +347,7 @@ export const LearnPage: React.FC = () => {
                                                 >
                                                     <p className="text-secondary-700 font-medium flex items-center gap-2">
                                                         <span className="text-2xl">🎯</span>
-                                                        Ready to test yourself? Click <strong className="text-green-600">"✨ Quiz"</strong> to prove your knowledge!
+                                                        Ready to test yourself? Click <strong className="text-green-600">"✨ Quiz"</strong> to earn {selectedLesson.xpReward} XP!
                                                     </p>
                                                 </motion.div>
                                             </motion.div>
@@ -493,7 +363,7 @@ export const LearnPage: React.FC = () => {
                                             >
                                                 {quizSubmitted && (
                                                     <motion.div
-                                                        className={`p-8 rounded-2xl text-center ${getQuizScore()!.percentage >= 80
+                                                        className={`p-8 rounded-2xl text-center ${getQuizScore()!.percentage >= 60
                                                             ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-200'
                                                             : 'bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-200'
                                                             }`}
@@ -505,12 +375,12 @@ export const LearnPage: React.FC = () => {
                                                             animate={{ rotate: [0, -10, 10, -10, 0] }}
                                                             transition={{ duration: 0.5 }}
                                                         >
-                                                            {getQuizScore()!.percentage >= 80 ? '🎉' : '💪'}
+                                                            {getQuizScore()!.percentage >= 60 ? '🎉' : '💪'}
                                                         </motion.div>
                                                         <p className="text-4xl font-bold text-secondary-800">{getQuizScore()!.percentage}%</p>
                                                         <p className="text-secondary-600 mt-1">{getQuizScore()!.correct} out of {getQuizScore()!.total} correct</p>
-                                                        {getQuizScore()!.percentage >= 80 ? (
-                                                            <p className="mt-3 text-green-700 font-semibold">Lesson completed! Well done!</p>
+                                                        {getQuizScore()!.percentage >= 60 ? (
+                                                            <p className="mt-3 text-green-700 font-semibold">+{selectedLesson.xpReward} XP earned! 🎊</p>
                                                         ) : (
                                                             <Button onClick={retakeQuiz} variant="outline" className="mt-4">
                                                                 <RotateCcw size={16} className="mr-2" /> Try Again
@@ -590,6 +460,6 @@ export const LearnPage: React.FC = () => {
                     )}
                 </AnimatePresence>
             </div>
-        </Layout >
+        </Layout>
     );
 };

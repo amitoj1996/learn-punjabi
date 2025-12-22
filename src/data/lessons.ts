@@ -21,6 +21,9 @@ export interface Lesson {
     description: string;
     icon: string; // emoji
     duration: string; // e.g., "10 min"
+    xpReward: number; // XP earned for completing this lesson
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    unlockRequirements: string[]; // lesson IDs that must be completed first
     vocabulary: VocabularyWord[];
     content: string; // markdown content
     quiz: QuizQuestion[];
@@ -48,6 +51,9 @@ export const modules: Module[] = [
                 description: 'Introduction to the Punjabi script',
                 icon: '🔤',
                 duration: '15 min',
+                xpReward: 15,
+                difficulty: 'beginner',
+                unlockRequirements: [],
                 vocabulary: [
                     { gurmukhi: 'ੳ', transliteration: 'Ura', english: 'First letter (vowel carrier)' },
                     { gurmukhi: 'ਅ', transliteration: 'Aira', english: 'Second letter (vowel carrier)' },
@@ -117,6 +123,9 @@ Try tracing these letters with your finger. Notice how each has a distinct shape
                 description: 'Say hello and goodbye in Punjabi',
                 icon: '👋',
                 duration: '10 min',
+                xpReward: 10,
+                difficulty: 'beginner',
+                unlockRequirements: ['gurmukhi-alphabet'],
                 vocabulary: [
                     { gurmukhi: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', transliteration: 'Sat Sri Akal', english: 'Hello (formal greeting)' },
                     { gurmukhi: 'ਕਿਦਾਂ?', transliteration: 'Kidaan?', english: 'How are you? (informal)' },
@@ -187,6 +196,9 @@ When meeting friends, you can use:
                 description: 'Count from one to ten in Punjabi',
                 icon: '🔢',
                 duration: '10 min',
+                xpReward: 15,
+                difficulty: 'beginner',
+                unlockRequirements: ['basic-greetings'],
                 vocabulary: [
                     { gurmukhi: '੧ - ਇੱਕ', transliteration: 'Ikk', english: 'One (1)' },
                     { gurmukhi: '੨ - ਦੋ', transliteration: 'Do', english: 'Two (2)' },
@@ -260,6 +272,9 @@ Try counting objects around you in Punjabi!
                 description: 'Learn words for family members',
                 icon: '👨‍👩‍👧‍👦',
                 duration: '10 min',
+                xpReward: 12,
+                difficulty: 'beginner',
+                unlockRequirements: ['numbers-1-10'],
                 vocabulary: [
                     { gurmukhi: 'ਮਾਂ', transliteration: 'Maan', english: 'Mother' },
                     { gurmukhi: 'ਪਿਤਾ / ਬਾਪੂ', transliteration: 'Pita / Baapu', english: 'Father' },
@@ -341,6 +356,9 @@ In Punjabi families, it's common to use respectful terms even for siblings. Olde
                 description: 'Learn Punjabi vowel marks (lagaan matra)',
                 icon: '🗣️',
                 duration: '12 min',
+                xpReward: 20,
+                difficulty: 'intermediate',
+                unlockRequirements: ['family-words'],
                 vocabulary: [
                     { gurmukhi: 'ਾ', transliteration: 'aa (kanna)', english: 'Long "aa" sound' },
                     { gurmukhi: 'ਿ', transliteration: 'i (sihari)', english: 'Short "i" sound' },
