@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/Button';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,26 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { user, login, logout, isLoading } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
+    const prevUnreadCountRef = useRef(0);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    // Initialize audio on mount
+    useEffect(() => {
+        // Create audio element for notification sound
+        audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp2ZkYd8d3yCi5OXlpCIgHp3e4KKkJKQioN9eXp9g4mNjo2Ig3t3d3p/hoyPj42Hf3l2d3p/hYqNjYuGgHp2dnh8goeLi4mFf3p2dnh7gIWIiYeFgHt3dnd6foOGiIeFgX14dnd5fIGEhoaEgX14dnZ4e3+ChYWEgX54dXV3eX1/goODgX54dXR2eHt+gIGBf3x4dXR1d3p8fn9/fnx4dXR1dnl7fX5+fXt4dXR0dnh6fH19fHp3dXR0dXd5e3x8e3p3dXN0dXd5ent7enl2dHN0dXd4ent7enh2dHN0dHZ4ent7eXh1dHN0dHZ3eXp6eXh2dHNzdHV3eHp6eXd2dHNzdHV2eHl5eHd1dHJzdHV2eHh4d3Z0dHJzdHV2d3h4d3Z0c3JydHV2d3d3dnV0c3JydHV2dnZ2dXR0cnJzdHV2dnZ1dHRzcnJzdHV1dXV1dHNzcnJydHR1dXV0dHNycnJydHR0dHR0c3NycnJyc3R0dHRzc3JycnJyc3Nzc3Nzc3JycXJyc3Nzc3NycnJxcXJyc3Nzc3JycnFxcXJyc3NzcnJycXFxcXJyc3NycnJxcXFxcnJycnJycXFxcXFxcnJycnJxcXFxcXFxcnJycXFxcXFxcXFxcXJxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXFxcXE=');
+        audioRef.current.volume = 0.5;
+    }, []);
+
+    // Play notification sound
+    const playNotificationSound = () => {
+        if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(e => {
+                // Browser might block autoplay, that's okay
+                console.log('Could not play notification sound:', e);
+            });
+        }
+    };
 
     // Fetch unread message count
     const fetchUnreadCount = async () => {
@@ -20,7 +40,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             const response = await fetch('/api/messages/unread-count');
             if (response.ok) {
                 const data = await response.json();
-                setUnreadCount(data.count || 0);
+                const newCount = data.count || 0;
+
+                // Play sound if count increased (new message received)
+                if (newCount > prevUnreadCountRef.current && prevUnreadCountRef.current >= 0) {
+                    playNotificationSound();
+                }
+
+                prevUnreadCountRef.current = newCount;
+                setUnreadCount(newCount);
             }
         } catch (err) {
             console.error('Failed to fetch unread count:', err);
