@@ -23,13 +23,60 @@ app.http('getTutorAvailability', {
             }
 
             const tutor = tutors[0];
+            const baseAvailability = tutor.availability || {};
+
+            // Get existing bookings for this tutor (next 7 days)
+            const bookingsContainer = await getContainer("bookings");
+            const today = new Date();
+            const nextWeek = new Date();
+            nextWeek.setDate(today.getDate() + 8);
+
+            const todayStr = today.toISOString().split('T')[0];
+            const nextWeekStr = nextWeek.toISOString().split('T')[0];
+
+            const { resources: existingBookings } = await bookingsContainer.items
+                .query({
+                    query: "SELECT c.date, c.time FROM c WHERE c.tutorId = @tutorId AND c.date >= @startDate AND c.date <= @endDate AND c.status != 'cancelled'",
+                    parameters: [
+                        { name: "@tutorId", value: tutorId },
+                        { name: "@startDate", value: todayStr },
+                        { name: "@endDate", value: nextWeekStr }
+                    ]
+                })
+                .fetchAll();
+
+            // Create a set of booked slots for quick lookup
+            const bookedSlots = new Set(
+                existingBookings.map(b => `${b.date}_${b.time}`)
+            );
+
+            // Filter availability for the next 7 days
+            const filteredAvailability = {};
+            const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+            for (let i = 1; i <= 7; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayName = daysOfWeek[date.getDay()];
+
+                const daySlots = baseAvailability[dayName] || [];
+                // Filter out already booked slots
+                const availableSlots = daySlots.filter(time => {
+                    const slotKey = `${dateStr}_${time}`;
+                    return !bookedSlots.has(slotKey);
+                });
+
+                filteredAvailability[dayName] = availableSlots;
+            }
+
             return {
                 status: 200,
                 body: JSON.stringify({
                     tutorId: tutor.id,
                     tutorName: tutor.name,
                     hourlyRate: tutor.hourlyRate,
-                    availability: tutor.availability || {},
+                    availability: filteredAvailability,
                     timezone: tutor.timezone || 'America/New_York'
                 })
             };
@@ -39,6 +86,7 @@ app.http('getTutorAvailability', {
         }
     }
 });
+
 
 // POST - Create a booking
 app.http('createBooking', {
