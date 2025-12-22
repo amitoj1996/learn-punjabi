@@ -9,8 +9,13 @@ import { Link } from 'react-router-dom';
 import {
     MessageCircle, BookOpen, Star, DollarSign,
     Calendar, Video, X, ChevronLeft, ChevronRight,
-    Search, GraduationCap, AlertTriangle, RefreshCw
+    Search, GraduationCap, AlertTriangle, RefreshCw, MoreVertical
 } from 'lucide-react';
+import {
+    generateGoogleCalendarUrl,
+    generateOutlookCalendarUrl,
+    downloadIcsFile
+} from '../utils/calendarLinks';
 
 interface Booking {
     id: string;
@@ -44,6 +49,7 @@ export const StudentDashboard: React.FC = () => {
     const [rescheduleLoading, setRescheduleLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
     const displayName = user?.userDetails?.split('@')[0] || 'Student';
 
@@ -535,16 +541,77 @@ export const StudentDashboard: React.FC = () => {
                                                         <AlertTriangle size={14} />
                                                     </Button>
                                                 )}
-                                                {/* Reschedule button - for upcoming sessions */}
+                                                {/* Three-dot menu for upcoming sessions */}
                                                 {!isPast(booking) && booking.status !== 'cancelled' && (
-                                                    <Button size="sm" variant="outline" className="text-blue-500 border-blue-200 hover:bg-blue-50" onClick={() => openRescheduleModal(booking)} title="Reschedule">
-                                                        <RefreshCw size={14} />
-                                                    </Button>
-                                                )}
-                                                {!isPast(booking) && booking.status !== 'cancelled' && (
-                                                    <Button size="sm" variant="outline" className="text-red-500 border-red-200 hover:bg-red-50" onClick={() => handleCancelBooking(booking.id)}>
-                                                        <X size={14} />
-                                                    </Button>
+                                                    <div className="relative">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="p-2"
+                                                            onClick={() => setOpenMenuId(openMenuId === booking.id ? null : booking.id)}
+                                                        >
+                                                            <MoreVertical size={14} />
+                                                        </Button>
+                                                        {openMenuId === booking.id && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, y: -10 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-20 min-w-[180px]"
+                                                            >
+                                                                <button
+                                                                    onClick={() => {
+                                                                        window.open(generateGoogleCalendarUrl(booking), '_blank');
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm"
+                                                                >
+                                                                    <Calendar size={14} className="text-primary-500" />
+                                                                    Google Calendar
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        window.open(generateOutlookCalendarUrl(booking), '_blank');
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm border-t border-secondary-50"
+                                                                >
+                                                                    <Calendar size={14} className="text-blue-500" />
+                                                                    Outlook Calendar
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        downloadIcsFile(booking);
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm border-t border-secondary-50"
+                                                                >
+                                                                    <Calendar size={14} className="text-secondary-500" />
+                                                                    Download .ics
+                                                                </button>
+                                                                <div className="border-t border-secondary-100"></div>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        openRescheduleModal(booking);
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-blue-50 flex items-center gap-3 text-sm text-blue-600"
+                                                                >
+                                                                    <RefreshCw size={14} />
+                                                                    Reschedule
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        handleCancelBooking(booking.id);
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600"
+                                                                >
+                                                                    <X size={14} />
+                                                                    Cancel Lesson
+                                                                </button>
+                                                            </motion.div>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
