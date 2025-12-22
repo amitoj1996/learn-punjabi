@@ -156,7 +156,7 @@ const GlitchText: React.FC<{
             const progress = currentStep / steps;
 
             // Mix of random chars and target chars based on progress
-            const newText = targetText.split('').map((char, i) => {
+            const newText = targetText.split('').map((char) => {
                 if (char === ' ') return ' ';
                 if (Math.random() < progress) {
                     return char;
