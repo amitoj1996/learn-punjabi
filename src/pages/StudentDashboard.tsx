@@ -347,12 +347,94 @@ export const StudentDashboard: React.FC = () => {
                                                         <MessageCircle size={16} /> Message
                                                     </Button>
                                                 </Link>
-                                                <Button size="sm" variant="outline" className="flex items-center gap-2 hover:bg-purple-50" onClick={() => openRescheduleModal(nextLesson)}>
-                                                    <RefreshCw size={16} /> Reschedule
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleCancelBooking(nextLesson.id)}>
-                                                    <X size={16} /> Cancel
-                                                </Button>
+                                                {/* Calendar button */}
+                                                <div className="relative">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="flex items-center gap-2 hover:bg-purple-50"
+                                                        onClick={() => setOpenMenuId(openMenuId === 'hero-cal' ? null : 'hero-cal')}
+                                                    >
+                                                        <Calendar size={16} /> Add to Calendar
+                                                    </Button>
+                                                    {openMenuId === 'hero-cal' && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: -10 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            className="absolute left-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-20 min-w-[160px]"
+                                                        >
+                                                            <button
+                                                                onClick={() => {
+                                                                    window.open(generateGoogleCalendarUrl(nextLesson), '_blank');
+                                                                    setOpenMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm"
+                                                            >
+                                                                <Calendar size={14} className="text-primary-500" />
+                                                                Google
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    window.open(generateOutlookCalendarUrl(nextLesson), '_blank');
+                                                                    setOpenMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm border-t border-secondary-50"
+                                                            >
+                                                                <Calendar size={14} className="text-blue-500" />
+                                                                Outlook
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    downloadIcsFile(nextLesson);
+                                                                    setOpenMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-4 py-2.5 hover:bg-secondary-50 flex items-center gap-3 text-sm border-t border-secondary-50"
+                                                            >
+                                                                <Calendar size={14} className="text-secondary-500" />
+                                                                Download .ics
+                                                            </button>
+                                                        </motion.div>
+                                                    )}
+                                                </div>
+                                                {/* Three-dot menu */}
+                                                <div className="relative">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="p-2 hover:bg-purple-50"
+                                                        onClick={() => setOpenMenuId(openMenuId === 'hero-menu' ? null : 'hero-menu')}
+                                                    >
+                                                        <MoreVertical size={16} />
+                                                    </Button>
+                                                    {openMenuId === 'hero-menu' && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: -10 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-secondary-100 overflow-hidden z-20 min-w-[150px]"
+                                                        >
+                                                            <button
+                                                                onClick={() => {
+                                                                    openRescheduleModal(nextLesson);
+                                                                    setOpenMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-4 py-2.5 hover:bg-blue-50 flex items-center gap-3 text-sm text-blue-600"
+                                                            >
+                                                                <RefreshCw size={14} />
+                                                                Reschedule
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    handleCancelBooking(nextLesson.id);
+                                                                    setOpenMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-4 py-2.5 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600 border-t border-secondary-100"
+                                                            >
+                                                                <X size={14} />
+                                                                Cancel Lesson
+                                                            </button>
+                                                        </motion.div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </Card>
