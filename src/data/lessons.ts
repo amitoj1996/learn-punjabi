@@ -49,7 +49,7 @@ export const modules: Module[] = [
                 moduleId: 'getting-started',
                 title: 'The Gurmukhi Alphabet',
                 description: 'Introduction to the Punjabi script',
-                icon: '🔤',
+                icon: 'ੳ',
                 duration: '15 min',
                 xpReward: 15,
                 difficulty: 'beginner',

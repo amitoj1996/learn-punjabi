@@ -37,7 +37,7 @@ export const SkillTree: React.FC<SkillTreeProps> = ({
                     <div key={lesson.id} className="relative">
                         {/* Connector arrow to next (only show on larger screens) */}
                         {index < lessons.length - 1 && (
-                            <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                            <div className="hidden md:block absolute top-12 -right-4 transform -translate-y-1/2">
                                 <svg width="16" height="16" viewBox="0 0 16 16" className="text-secondary-300">
                                     <path d="M4 8H12M12 8L8 4M12 8L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                                 </svg>
