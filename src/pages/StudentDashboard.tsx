@@ -275,12 +275,12 @@ export const StudentDashboard: React.FC = () => {
                         <div className="lg:col-span-2 flex">
                             {nextLesson ? (
                                 <motion.div
-                                    className="flex-1"
+                                    className="flex-1 h-full"
                                     initial={{ opacity: 0, scale: 0.98 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.5 }}
                                 >
-                                    <Card className="p-6 bg-gradient-to-br from-white via-purple-50/40 to-primary-50/50 border border-purple-100/50 shadow-lg shadow-purple-100/30 overflow-hidden relative">
+                                    <Card className="h-full p-6 bg-gradient-to-br from-white via-purple-50/40 to-primary-50/50 border border-purple-100/50 shadow-lg shadow-purple-100/30 overflow-hidden relative">
                                         {/* Decorative background elements */}
                                         <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br from-primary-200/30 to-purple-200/20 rounded-full blur-2xl"></div>
                                         <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-purple-200/20 to-primary-100/20 rounded-full blur-xl"></div>
