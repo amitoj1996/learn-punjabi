@@ -20,6 +20,10 @@ import { AudioButton } from '../components/learn/AudioButton';
 const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, delay }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
+    // Determine if color is light (needs dark text) - for white/yellow colors
+    const isLightColor = word.color && ['#F8FAFC', '#EAB308', '#FBBF24'].includes(word.color);
+    const textColorClass = isLightColor ? 'text-gray-800' : 'text-white';
+
     return (
         <motion.div
             className="perspective-1000 h-40 cursor-pointer group"
@@ -45,16 +49,21 @@ const FlipCard: React.FC<{ word: VocabularyWord; delay: number }> = ({ word, del
                     </div>
                     <span className="text-white/70 text-sm">Tap to reveal • 🔊 for audio</span>
                 </div>
-                {/* Back - English */}
+                {/* Back - English (uses word.color if available) */}
                 <div
-                    className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 flex flex-col items-center justify-center text-white shadow-lg shadow-emerald-200"
-                    style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                    className={`absolute inset-0 rounded-2xl p-6 flex flex-col items-center justify-center shadow-lg ${textColorClass}`}
+                    style={{
+                        backfaceVisibility: "hidden",
+                        transform: "rotateY(180deg)",
+                        backgroundColor: word.color || undefined,
+                        background: word.color ? word.color : 'linear-gradient(to bottom right, #10B981, #14B8A6)'
+                    }}
                 >
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-xl font-bold">{word.transliteration}</span>
                         <AudioButton text={word.pronunciation || word.gurmukhi} size="sm" />
                     </div>
-                    <span className="text-white/90">{word.english}</span>
+                    <span className={isLightColor ? 'text-gray-600' : 'text-white/90'}>{word.english}</span>
                 </div>
             </motion.div>
         </motion.div>
@@ -159,25 +168,62 @@ export const LearnPage: React.FC = () => {
                         dailyGoal={dailyGoal}
                     />
 
-                    {/* Module Tabs */}
-                    <div className="flex justify-center gap-2 mb-6">
-                        {modules.map((module, index) => (
-                            <button
-                                key={module.id}
-                                onClick={() => setSelectedModuleIndex(index)}
-                                className={`
-                                    px-6 py-3 rounded-xl font-semibold transition-all duration-200
-                                    flex items-center gap-2
-                                    ${selectedModuleIndex === index
-                                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-200'
-                                        : 'bg-white text-secondary-600 hover:bg-secondary-50 border border-secondary-200'
-                                    }
-                                `}
-                            >
-                                <span className="text-xl">{module.icon}</span>
-                                <span className="hidden sm:inline">Module {index + 1}</span>
-                            </button>
-                        ))}
+                    {/* Module Navigator with Arrows */}
+                    <div className="flex items-center justify-center gap-4 mb-6">
+                        <button
+                            onClick={() => setSelectedModuleIndex(Math.max(0, selectedModuleIndex - 1))}
+                            disabled={selectedModuleIndex === 0}
+                            className={`p-3 rounded-full transition-all ${selectedModuleIndex === 0
+                                    ? 'bg-secondary-100 text-secondary-300 cursor-not-allowed'
+                                    : 'bg-primary-500 text-white hover:bg-primary-600 shadow-lg'
+                                }`}
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+
+                        <div className="flex-1 max-w-md text-center">
+                            <div className="bg-white rounded-2xl px-6 py-4 shadow-sm border border-secondary-100">
+                                <div className="flex items-center justify-center gap-3">
+                                    <span className="text-3xl">{modules[selectedModuleIndex].icon}</span>
+                                    <div className="text-left">
+                                        <p className="text-xs text-secondary-400 font-medium uppercase tracking-wide">
+                                            Module {selectedModuleIndex + 1} of {modules.length}
+                                        </p>
+                                        <h3 className="text-lg font-bold text-secondary-800">
+                                            {modules[selectedModuleIndex].title}
+                                        </h3>
+                                    </div>
+                                </div>
+                                {/* Progress dots */}
+                                <div className="flex justify-center gap-1.5 mt-3">
+                                    {modules.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setSelectedModuleIndex(index)}
+                                            className={`w-2 h-2 rounded-full transition-all ${index === selectedModuleIndex
+                                                    ? 'bg-primary-500 w-6'
+                                                    : 'bg-secondary-200 hover:bg-secondary-300'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setSelectedModuleIndex(Math.min(modules.length - 1, selectedModuleIndex + 1))}
+                            disabled={selectedModuleIndex === modules.length - 1}
+                            className={`p-3 rounded-full transition-all ${selectedModuleIndex === modules.length - 1
+                                    ? 'bg-secondary-100 text-secondary-300 cursor-not-allowed'
+                                    : 'bg-primary-500 text-white hover:bg-primary-600 shadow-lg'
+                                }`}
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
                     </div>
 
                     {/* Selected Module Skill Tree */}

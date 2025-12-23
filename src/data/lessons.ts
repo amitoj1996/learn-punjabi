@@ -7,6 +7,7 @@ export interface VocabularyWord {
     english: string; // English meaning
     pronunciation?: string; // Optional: text for TTS (defaults to gurmukhi)
     audio?: string; // Optional audio file path
+    color?: string; // Optional: CSS color for card background (used in color lessons)
 }
 
 export interface QuizQuestion {
@@ -525,14 +526,14 @@ Punjab is famous for:
                 difficulty: 'beginner',
                 unlockRequirements: ['food-drink'],
                 vocabulary: [
-                    { gurmukhi: 'ਲਾਲ', transliteration: 'Laal', english: 'Red', pronunciation: 'ਲਾਲ' },
-                    { gurmukhi: 'ਨੀਲਾ', transliteration: 'Neela', english: 'Blue', pronunciation: 'ਨੀਲਾ' },
-                    { gurmukhi: 'ਹਰਾ', transliteration: 'Hara', english: 'Green', pronunciation: 'ਹਰਾ' },
-                    { gurmukhi: 'ਪੀਲਾ', transliteration: 'Peela', english: 'Yellow', pronunciation: 'ਪੀਲਾ' },
-                    { gurmukhi: 'ਚਿੱਟਾ', transliteration: 'Chitta', english: 'White', pronunciation: 'ਚਿੱਟਾ' },
-                    { gurmukhi: 'ਕਾਲਾ', transliteration: 'Kaala', english: 'Black', pronunciation: 'ਕਾਲਾ' },
-                    { gurmukhi: 'ਸੰਤਰੀ', transliteration: 'Santri', english: 'Orange', pronunciation: 'ਸੰਤਰੀ' },
-                    { gurmukhi: 'ਗੁਲਾਬੀ', transliteration: 'Gulaabi', english: 'Pink', pronunciation: 'ਗੁਲਾਬੀ' },
+                    { gurmukhi: 'ਲਾਲ', transliteration: 'Laal', english: 'Red', pronunciation: 'ਲਾਲ', color: '#EF4444' },
+                    { gurmukhi: 'ਨੀਲਾ', transliteration: 'Neela', english: 'Blue', pronunciation: 'ਨੀਲਾ', color: '#3B82F6' },
+                    { gurmukhi: 'ਹਰਾ', transliteration: 'Hara', english: 'Green', pronunciation: 'ਹਰਾ', color: '#22C55E' },
+                    { gurmukhi: 'ਪੀਲਾ', transliteration: 'Peela', english: 'Yellow', pronunciation: 'ਪੀਲਾ', color: '#EAB308' },
+                    { gurmukhi: 'ਚਿੱਟਾ', transliteration: 'Chitta', english: 'White', pronunciation: 'ਚਿੱਟਾ', color: '#F8FAFC' },
+                    { gurmukhi: 'ਕਾਲਾ', transliteration: 'Kaala', english: 'Black', pronunciation: 'ਕਾਲਾ', color: '#1F2937' },
+                    { gurmukhi: 'ਸੰਤਰੀ', transliteration: 'Santri', english: 'Orange', pronunciation: 'ਸੰਤਰੀ', color: '#F97316' },
+                    { gurmukhi: 'ਗੁਲਾਬੀ', transliteration: 'Gulaabi', english: 'Pink', pronunciation: 'ਗੁਲਾਬੀ', color: '#EC4899' },
                 ],
                 content: `
 # Colors in Punjabi
@@ -805,6 +806,260 @@ Verbs are action words - they're essential for making sentences!
                     {
                         question: 'How do you say "To listen" in Punjabi?',
                         options: ['ਦੇਖਣਾ', 'ਬੋਲਣਾ', 'ਸੁਣਨਾ', 'ਆਉਣਾ'],
+                        correctIndex: 2
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'building-sentences',
+        title: 'Building Sentences',
+        description: 'Learn grammar and start making your own sentences',
+        icon: '📝',
+        lessons: [
+            {
+                id: 'pronouns',
+                moduleId: 'building-sentences',
+                title: 'Personal Pronouns',
+                description: 'I, you, he, she, we, they in Punjabi',
+                icon: '👤',
+                duration: '12 min',
+                xpReward: 20,
+                difficulty: 'beginner',
+                unlockRequirements: [],
+                vocabulary: [
+                    { gurmukhi: 'ਮੈਂ', transliteration: 'Main', english: 'I', pronunciation: 'ਮੈਂ' },
+                    { gurmukhi: 'ਤੂੰ', transliteration: 'Toon', english: 'You (informal)', pronunciation: 'ਤੂੰ' },
+                    { gurmukhi: 'ਤੁਸੀਂ', transliteration: 'Tuseen', english: 'You (formal/plural)', pronunciation: 'ਤੁਸੀਂ' },
+                    { gurmukhi: 'ਉਹ', transliteration: 'Oh', english: 'He/She/That', pronunciation: 'ਉਹ' },
+                    { gurmukhi: 'ਅਸੀਂ', transliteration: 'Aseen', english: 'We', pronunciation: 'ਅਸੀਂ' },
+                    { gurmukhi: 'ਇਹ', transliteration: 'Eh', english: 'This', pronunciation: 'ਇਹ' },
+                ],
+                content: `
+# Personal Pronouns in Punjabi
+
+Pronouns replace nouns in sentences. Punjabi has formal and informal forms!
+
+## Basic Pronouns
+
+| Punjabi | Pronunciation | English |
+|---------|---------------|---------|
+| ਮੈਂ | Main | I |
+| ਤੂੰ | Toon | You (informal) |
+| ਤੁਸੀਂ | Tuseen | You (formal) |
+| ਉਹ | Oh | He/She/That |
+| ਅਸੀਂ | Aseen | We |
+
+## Formal vs Informal
+
+Use **ਤੂੰ** (Toon) with close friends and younger people.
+Use **ਤੁਸੀਂ** (Tuseen) with elders and in formal situations.
+
+## Example Sentences
+
+- **ਮੈਂ ਪੰਜਾਬੀ ਸਿੱਖ ਰਿਹਾ ਹਾਂ** - I am learning Punjabi
+- **ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ?** - How are you? (formal)
+                `,
+                quiz: [
+                    {
+                        question: 'How do you say "I" in Punjabi?',
+                        options: ['ਤੂੰ', 'ਮੈਂ', 'ਉਹ', 'ਅਸੀਂ'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'Which is the formal "You"?',
+                        options: ['ਤੂੰ', 'ਮੈਂ', 'ਤੁਸੀਂ', 'ਉਹ'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'What does "ਅਸੀਂ" mean?',
+                        options: ['I', 'You', 'They', 'We'],
+                        correctIndex: 3
+                    }
+                ]
+            },
+            {
+                id: 'simple-sentences',
+                moduleId: 'building-sentences',
+                title: 'Simple Sentences',
+                description: 'Build basic subject-verb sentences',
+                icon: '💬',
+                duration: '15 min',
+                xpReward: 25,
+                difficulty: 'intermediate',
+                unlockRequirements: ['pronouns'],
+                vocabulary: [
+                    { gurmukhi: 'ਹੈ', transliteration: 'Hai', english: 'Is (singular)', pronunciation: 'ਹੈ' },
+                    { gurmukhi: 'ਹਾਂ', transliteration: 'Haan', english: 'Am (for I)', pronunciation: 'ਹਾਂ' },
+                    { gurmukhi: 'ਹੋ', transliteration: 'Ho', english: 'Are (for you)', pronunciation: 'ਹੋ' },
+                    { gurmukhi: 'ਹਨ', transliteration: 'Han', english: 'Are (plural)', pronunciation: 'ਹਨ' },
+                    { gurmukhi: 'ਚੰਗਾ', transliteration: 'Changa', english: 'Good (masc)', pronunciation: 'ਚੰਗਾ' },
+                    { gurmukhi: 'ਚੰਗੀ', transliteration: 'Changi', english: 'Good (fem)', pronunciation: 'ਚੰਗੀ' },
+                ],
+                content: `
+# Simple Sentences
+
+Learn how to form basic sentences in Punjabi!
+
+## Sentence Structure
+
+Punjabi follows Subject-Object-Verb (SOV) order:
+- English: I am good
+- Punjabi: ਮੈਂ ਚੰਗਾ ਹਾਂ (I good am)
+
+## The Verb "To Be"
+
+| Pronoun | Verb | Example |
+|---------|------|---------|
+| ਮੈਂ | ਹਾਂ | ਮੈਂ ਚੰਗਾ ਹਾਂ (I am good) |
+| ਤੂੰ | ਹੈਂ | ਤੂੰ ਚੰਗਾ ਹੈਂ |
+| ਤੁਸੀਂ | ਹੋ | ਤੁਸੀਂ ਚੰਗੇ ਹੋ |
+| ਉਹ | ਹੈ | ਉਹ ਚੰਗਾ ਹੈ |
+
+## Gender in Adjectives
+
+- **ਚੰਗਾ** (Changa) - Good (masculine)
+- **ਚੰਗੀ** (Changi) - Good (feminine)
+                `,
+                quiz: [
+                    {
+                        question: 'What verb form goes with "ਮੈਂ"?',
+                        options: ['ਹੈ', 'ਹਾਂ', 'ਹੋ', 'ਹਨ'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'Punjabi sentence order is:',
+                        options: ['Subject-Verb-Object', 'Subject-Object-Verb', 'Verb-Subject-Object', 'Object-Subject-Verb'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: '"ਚੰਗੀ" is used for:',
+                        options: ['Masculine', 'Feminine', 'Plural', 'Children'],
+                        correctIndex: 1
+                    }
+                ]
+            },
+            {
+                id: 'questions',
+                moduleId: 'building-sentences',
+                title: 'Asking Questions',
+                description: 'Learn question words - what, where, who, why',
+                icon: '❓',
+                duration: '12 min',
+                xpReward: 20,
+                difficulty: 'intermediate',
+                unlockRequirements: ['simple-sentences'],
+                vocabulary: [
+                    { gurmukhi: 'ਕੀ', transliteration: 'Ki', english: 'What', pronunciation: 'ਕੀ' },
+                    { gurmukhi: 'ਕਿੱਥੇ', transliteration: 'Kitthe', english: 'Where', pronunciation: 'ਕਿੱਥੇ' },
+                    { gurmukhi: 'ਕੌਣ', transliteration: 'Kaun', english: 'Who', pronunciation: 'ਕੌਣ' },
+                    { gurmukhi: 'ਕਿਉਂ', transliteration: 'Kiyon', english: 'Why', pronunciation: 'ਕਿਉਂ' },
+                    { gurmukhi: 'ਕਦੋਂ', transliteration: 'Kadon', english: 'When', pronunciation: 'ਕਦੋਂ' },
+                    { gurmukhi: 'ਕਿਵੇਂ', transliteration: 'Kiven', english: 'How', pronunciation: 'ਕਿਵੇਂ' },
+                ],
+                content: `
+# Question Words in Punjabi
+
+Learn to ask questions like a native speaker!
+
+## Question Words
+
+| Punjabi | Pronunciation | English |
+|---------|---------------|---------|
+| ਕੀ | Ki | What |
+| ਕਿੱਥੇ | Kitthe | Where |
+| ਕੌਣ | Kaun | Who |
+| ਕਿਉਂ | Kiyon | Why |
+| ਕਦੋਂ | Kadon | When |
+| ਕਿਵੇਂ | Kiven | How |
+
+## Example Questions
+
+- **ਤੁਹਾਡਾ ਨਾਂ ਕੀ ਹੈ?** - What is your name?
+- **ਤੁਸੀਂ ਕਿੱਥੇ ਰਹਿੰਦੇ ਹੋ?** - Where do you live?
+- **ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ?** - How are you?
+                `,
+                quiz: [
+                    {
+                        question: 'How do you say "What" in Punjabi?',
+                        options: ['ਕਿੱਥੇ', 'ਕੀ', 'ਕੌਣ', 'ਕਦੋਂ'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: '"ਕਿੱਥੇ" means:',
+                        options: ['What', 'When', 'Where', 'Why'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'Which word means "Why"?',
+                        options: ['ਕਿਵੇਂ', 'ਕਦੋਂ', 'ਕੌਣ', 'ਕਿਉਂ'],
+                        correctIndex: 3
+                    }
+                ]
+            },
+            {
+                id: 'family-words',
+                moduleId: 'building-sentences',
+                title: 'Family Words',
+                description: 'Learn family relationship words',
+                icon: '👨‍👩‍👧‍👦',
+                duration: '12 min',
+                xpReward: 18,
+                difficulty: 'beginner',
+                unlockRequirements: ['questions'],
+                vocabulary: [
+                    { gurmukhi: 'ਮਾਂ', transliteration: 'Maa', english: 'Mother', pronunciation: 'ਮਾਂ' },
+                    { gurmukhi: 'ਪਿਓ', transliteration: 'Pio', english: 'Father', pronunciation: 'ਪਿਓ' },
+                    { gurmukhi: 'ਭਰਾ', transliteration: 'Bhra', english: 'Brother', pronunciation: 'ਭਰਾ' },
+                    { gurmukhi: 'ਭੈਣ', transliteration: 'Bhain', english: 'Sister', pronunciation: 'ਭੈਣ' },
+                    { gurmukhi: 'ਦਾਦਾ', transliteration: 'Daada', english: 'Grandfather (paternal)', pronunciation: 'ਦਾਦਾ' },
+                    { gurmukhi: 'ਦਾਦੀ', transliteration: 'Daadi', english: 'Grandmother (paternal)', pronunciation: 'ਦਾਦੀ' },
+                    { gurmukhi: 'ਪੁੱਤਰ', transliteration: 'Puttar', english: 'Son', pronunciation: 'ਪੁੱਤਰ' },
+                    { gurmukhi: 'ਧੀ', transliteration: 'Dhee', english: 'Daughter', pronunciation: 'ਧੀ' },
+                ],
+                content: `
+# Family Words in Punjabi
+
+Family is central to Punjabi culture! Learn these essential words.
+
+## Immediate Family
+
+| Punjabi | Pronunciation | Relation |
+|---------|---------------|----------|
+| ਮਾਂ | Maa | Mother |
+| ਪਿਓ | Pio | Father |
+| ਭਰਾ | Bhra | Brother |
+| ਭੈਣ | Bhain | Sister |
+| ਪੁੱਤਰ | Puttar | Son |
+| ਧੀ | Dhee | Daughter |
+
+## Grandparents
+
+- **ਦਾਦਾ** (Daada) - Grandfather (father's side)
+- **ਦਾਦੀ** (Daadi) - Grandmother (father's side)
+- **ਨਾਨਾ** (Naana) - Grandfather (mother's side)
+- **ਨਾਨੀ** (Naani) - Grandmother (mother's side)
+
+## Talking About Family
+
+- **ਮੇਰੀ ਮਾਂ** - My mother
+- **ਮੇਰਾ ਪਿਓ** - My father
+                `,
+                quiz: [
+                    {
+                        question: 'How do you say "Mother" in Punjabi?',
+                        options: ['ਭੈਣ', 'ਮਾਂ', 'ਦਾਦੀ', 'ਧੀ'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: '"ਭਰਾ" means:',
+                        options: ['Sister', 'Father', 'Brother', 'Son'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'What is "Daada"?',
+                        options: ['Father', 'Uncle', 'Grandfather', 'Brother'],
                         correctIndex: 2
                     }
                 ]
