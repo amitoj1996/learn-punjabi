@@ -21,15 +21,23 @@ const staggerContainer = {
 };
 
 // ============================================
-// KHANDA SVG COMPONENT
+// KHANDA SVG COMPONENT - Proper Sikh Symbol
 // ============================================
 const KhandaSVG: React.FC<{ className?: string }> = ({ className }) => (
-    <svg viewBox="0 0 100 100" className={className} fill="currentColor">
-        <path d="M50 5 L52 45 L55 45 C60 35, 75 30, 85 35 C75 32, 65 38, 60 50 C65 62, 75 68, 85 65 C75 70, 60 65, 55 55 L52 55 L50 95 L48 55 L45 55 C40 65, 25 70, 15 65 C25 68, 35 62, 40 50 C35 38, 25 32, 15 35 C25 30, 40 35, 45 45 L48 45 L50 5 Z" />
-        <circle cx="50" cy="50" r="8" />
-        <circle cx="50" cy="50" r="12" fill="none" stroke="currentColor" strokeWidth="2" />
-        <path d="M30 20 Q50 5, 70 20" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-        <path d="M30 80 Q50 95, 70 80" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    <svg viewBox="0 0 200 200" className={className} fill="currentColor">
+        {/* Central Double-Edged Sword (Khanda) */}
+        <path d="M100 10 L104 10 L104 85 L108 85 L108 88 L104 88 L104 170 L108 175 L108 180 L100 190 L92 180 L92 175 L96 170 L96 88 L92 88 L92 85 L96 85 L96 10 L100 10 Z" />
+
+        {/* Chakkar (Circle) */}
+        <circle cx="100" cy="100" r="55" fill="none" stroke="currentColor" strokeWidth="8" />
+
+        {/* Left Kirpan (Curved Sword) */}
+        <path d="M45 35 C25 55, 20 100, 45 145 L50 145 C30 105, 35 60, 50 40 Z" />
+        <path d="M45 145 L40 155 L50 155 L50 145 Z" />
+
+        {/* Right Kirpan (Curved Sword) */}
+        <path d="M155 35 C175 55, 180 100, 155 145 L150 145 C170 105, 165 60, 150 40 Z" />
+        <path d="M155 145 L160 155 L150 155 L150 145 Z" />
     </svg>
 );
 
