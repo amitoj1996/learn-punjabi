@@ -64,7 +64,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'There is One God, His Name is True',
         keyEvents: ['Traveled extensively (Udasis) to spread message', 'Established Kartarpur community', 'Rejected caste system'],
         color: '#F59E0B', // Saffron
-        image: '/images/history/guru nanak dev ji.png',
+        image: '/images/history/guru_nanak_dev_ji.png',
         family: {
             father: 'Mehta Kalu Ji',
             mother: 'Mata Tripta Ji',
@@ -92,7 +92,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'Even if a hundred moons and a thousand suns were to rise',
         keyEvents: ['Developed Gurmukhi script', 'Collected Guru Nanak\'s hymns', 'Promoted physical fitness'],
         color: '#10B981', // Emerald
-        image: '/images/history/guru angad dev ji.png',
+        image: '/images/history/guru_angad_dev_ji.png',
         family: {
             father: 'Baba Pheru Mal Ji',
             mother: 'Mata Ramo Ji',
@@ -119,7 +119,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'First the Pangat (Langar), then the Sangat',
         keyEvents: ['Built Baoli at Goindwal', 'Appointed Manji system', 'Advocated for women\'s rights'],
         color: '#3B82F6', // Blue
-        image: '/images/history/guru amar das ji.png',
+        image: '/images/history/guru_amar_das_ji.png',
         family: {
             father: 'Baba Tej Bhan Ji',
             mother: 'Mata Sulakhni Ji',
@@ -146,7 +146,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'My mind longs for the Guru\'s Darshan',
         keyEvents: ['Founded Amritsar', 'Started construction of Sarovar', 'Composed Laavan for Anand Karaj'],
         color: '#8B5CF6', // Purple
-        image: '/images/history/guru ram das ji.png',
+        image: '/images/history/guru_ram_das_ji.png',
         family: {
             father: 'Baba Hari Das Ji',
             mother: 'Mata Anup Kaur Ji',
@@ -173,7 +173,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'Your Will seems sweet to me',
         keyEvents: ['Compiled Adi Granth', 'Completed Harmandir Sahib', 'Martyred on hot plate (first Sikh martyr)'],
         color: '#EF4444', // Red (martyrdom)
-        image: '/images/history/guru arjan dev ji.png',
+        image: '/images/history/guru_arjan_dev_ji.png',
         family: {
             father: 'Guru Ram Das Ji',
             mother: 'Mata Bhani Ji',
@@ -200,7 +200,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'Miri (temporal) and Piri (spiritual) - two swords of power',
         keyEvents: ['Wore two swords (Miri-Piri)', 'Built Akal Takht', 'Freed 52 Hindu kings from Gwalior Fort'],
         color: '#F97316', // Orange
-        image: '/images/history/guru har gobind ji.png',
+        image: '/images/history/guru_har_gobind_ji.png',
         family: {
             father: 'Guru Arjan Dev Ji',
             mother: 'Mata Ganga Ji',
@@ -227,7 +227,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'Compassion and Righteousness',
         keyEvents: ['Maintained army of 2,200 soldiers', 'Promoted herbal medicine', 'Protected followers during Mughal conflicts'],
         color: '#22C55E', // Green (nature/medicine)
-        image: '/images/history/guru har rai ji.png',
+        image: '/images/history/guru_har_rai_ji.png',
         family: {
             father: 'Baba Gurditta Ji',
             mother: 'Mata Nihal Kaur Ji',
@@ -253,7 +253,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'The Child Guru',
         keyEvents: ['Became Guru at age 5', 'Healed smallpox victims in Delhi', 'Said "Baba Bakale" before passing (pointing to 9th Guru)'],
         color: '#06B6D4', // Cyan
-        image: '/images/history/guru har krishan ji.png',
+        image: '/images/history/guru_har_krishan_ji.png',
         family: {
             father: 'Guru Har Rai Ji',
             mother: 'Mata Kishan Kaur Ji',
@@ -279,7 +279,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'He gave his head but not his faith',
         keyEvents: ['Martyred in Delhi (Chandni Chowk)', 'Protected Kashmiri Pandits', 'Called "Hind di Chadar" (Shield of India)'],
         color: '#DC2626', // Deep red (martyrdom)
-        image: '/images/history/guru teg bahadur ji.png',
+        image: '/images/history/guru_teg_bahadur_ji.png',
         family: {
             father: 'Guru Hargobind Sahib Ji',
             mother: 'Mata Nanaki Ji',
@@ -306,7 +306,7 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'I shall make one fight against 125,000',
         keyEvents: ['Created Khalsa in 1699', 'Gave the 5 Ks', 'Sacrifice of four Sahibzade', 'Declared Guru Granth Sahib as eternal Guru'],
         color: '#7C3AED', // Royal purple
-        image: '/images/history/guru gobind singh ji.png',
+        image: '/images/history/guru_gobind_singh_ji.png',
         family: {
             father: 'Guru Tegh Bahadur Ji',
             mother: 'Mata Gujri Ji',
