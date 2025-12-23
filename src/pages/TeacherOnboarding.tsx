@@ -9,33 +9,143 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
 import { Select } from '../components/ui/Select';
-import { CheckCircle, AlertCircle, BookOpen, Video, Clock, Award } from 'lucide-react';
+import { CheckCircle, AlertCircle, BookOpen, Video, Clock, Award, Camera, Upload } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
 
 // Validation Schema with enhanced requirements
 const teacherSchema = z.object({
     fullName: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
+    photoUrl: z.string().min(1, "Please upload a profile photo"),
+    timezone: z.string().min(1, "Please select your timezone"),
+    languagesSpoken: z.array(z.string()).min(1, "Select at least one language"),
     hourlyRate: z.number().min(5, "Rate must be at least $5").max(200, "Rate cannot exceed $200"),
     experienceLevel: z.string().min(1, "Please select an experience level"),
     proficiencyLevel: z.string().min(1, "Please select your proficiency level"),
     yearsExperience: z.string().min(1, "Please select your teaching experience"),
     bio: z.string().min(100, "Please provide a more detailed bio (at least 100 characters)"),
     teachingPhilosophy: z.string().min(50, "Please describe your teaching approach (at least 50 characters)"),
+    targetAgeGroups: z.array(z.string()).min(1, "Select at least one age group"),
+    specializations: z.array(z.string()).min(1, "Select at least one specialization"),
     videoIntro: z.string().url("Please provide a valid URL").optional().or(z.literal('')),
     weeklyAvailability: z.string().min(1, "Please select your availability"),
+    sessionLengths: z.array(z.string()).min(1, "Select at least one session length"),
     agreedToTerms: z.boolean().refine(val => val === true, "You must agree to the terms"),
 });
 
 type TeacherFormData = z.infer<typeof teacherSchema>;
 
+// Timezone options
+const TIMEZONE_OPTIONS = [
+    { label: 'Select Timezone', value: '' },
+    { label: 'India (IST, UTC+5:30)', value: 'Asia/Kolkata' },
+    { label: 'US Pacific (PST/PDT)', value: 'America/Los_Angeles' },
+    { label: 'US Eastern (EST/EDT)', value: 'America/New_York' },
+    { label: 'US Central (CST/CDT)', value: 'America/Chicago' },
+    { label: 'UK (GMT/BST)', value: 'Europe/London' },
+    { label: 'Canada Toronto (EST)', value: 'America/Toronto' },
+    { label: 'Canada Vancouver (PST)', value: 'America/Vancouver' },
+    { label: 'Australia Sydney (AEST)', value: 'Australia/Sydney' },
+    { label: 'UAE (GST)', value: 'Asia/Dubai' },
+    { label: 'Singapore (SGT)', value: 'Asia/Singapore' },
+];
+
+// Languages
+const LANGUAGES = ['Punjabi', 'English', 'Hindi', 'Urdu', 'Spanish', 'French', 'Other'];
+
+// Age groups
+const AGE_GROUPS = [
+    { value: 'kids', label: 'Kids (5-12 years)' },
+    { value: 'teens', label: 'Teenagers (13-17)' },
+    { value: 'adults', label: 'Adults (18+)' },
+    { value: 'seniors', label: 'Seniors (60+)' },
+];
+
+// Specializations
+const SPECIALIZATIONS = [
+    { value: 'conversational', label: 'Conversational Punjabi' },
+    { value: 'reading', label: 'Reading Gurmukhi' },
+    { value: 'writing', label: 'Writing Gurmukhi' },
+    { value: 'gurbani', label: 'Gurbani & Religious Texts' },
+    { value: 'grammar', label: 'Grammar & Structure' },
+    { value: 'heritage', label: 'Heritage Learners' },
+    { value: 'kids', label: 'Kids Lessons (Songs, Games)' },
+    { value: 'business', label: 'Business Punjabi' },
+];
+
+// Session lengths
+const SESSION_LENGTHS = [
+    { value: '30', label: '30 minutes' },
+    { value: '45', label: '45 minutes' },
+    { value: '60', label: '60 minutes' },
+    { value: '90', label: '90 minutes' },
+];
+
 export const TeacherOnboarding: React.FC = () => {
     const [step, setStep] = useState(1);
-    const { register, handleSubmit, formState: { errors, isSubmitting }, trigger, watch } = useForm<TeacherFormData>({
+    const [photoUrl, setPhotoUrl] = useState('');
+    const [uploading, setUploading] = useState(false);
+
+    const { register, handleSubmit, formState: { errors, isSubmitting }, trigger, watch, setValue } = useForm<TeacherFormData>({
         resolver: zodResolver(teacherSchema),
-        defaultValues: { agreedToTerms: false }
+        defaultValues: {
+            agreedToTerms: false,
+            languagesSpoken: [],
+            targetAgeGroups: [],
+            specializations: [],
+            sessionLengths: ['60'],
+        }
     });
 
     const watchedFields = watch();
+
+    // Photo upload handler with compression
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please upload an image file');
+            return;
+        }
+
+        setUploading(true);
+
+        try {
+            // Compress image before upload
+            const compressedFile = await imageCompression(file, {
+                maxSizeMB: 0.3,
+                maxWidthOrHeight: 400,
+                useWebWorker: true,
+                fileType: 'image/jpeg',
+            });
+
+            console.log(`Compressed: ${(file.size / 1024).toFixed(0)}KB → ${(compressedFile.size / 1024).toFixed(0)}KB`);
+
+            // Upload to Azure Blob Storage
+            const formData = new FormData();
+            formData.append('photo', compressedFile);
+
+            const res = await fetch('/api/upload/photo', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!res.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const { url } = await res.json();
+            setPhotoUrl(url);
+            setValue('photoUrl', url);
+        } catch (err) {
+            console.error('Photo upload error:', err);
+            alert('Failed to upload photo. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const onSubmit = async (data: TeacherFormData) => {
         try {
@@ -60,9 +170,9 @@ export const TeacherOnboarding: React.FC = () => {
     const nextStep = async () => {
         let fieldsToValidate: (keyof TeacherFormData)[] = [];
         if (step === 1) {
-            fieldsToValidate = ['fullName', 'email', 'proficiencyLevel', 'yearsExperience'];
+            fieldsToValidate = ['fullName', 'email', 'photoUrl', 'timezone', 'languagesSpoken', 'proficiencyLevel', 'yearsExperience'];
         } else if (step === 2) {
-            fieldsToValidate = ['bio', 'teachingPhilosophy', 'experienceLevel'];
+            fieldsToValidate = ['bio', 'teachingPhilosophy', 'experienceLevel', 'targetAgeGroups', 'specializations'];
         }
 
         const isValid = await trigger(fieldsToValidate);
@@ -98,12 +208,12 @@ export const TeacherOnboarding: React.FC = () => {
                                 {[1, 2, 3].map((s) => (
                                     <div key={s} className="flex items-center gap-2">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step > s ? 'bg-green-500 text-white' :
-                                                step === s ? 'bg-primary-600 text-white' : 'bg-secondary-200 text-secondary-500'
+                                            step === s ? 'bg-primary-600 text-white' : 'bg-secondary-200 text-secondary-500'
                                             }`}>
                                             {step > s ? <CheckCircle size={20} /> : s}
                                         </div>
                                         <span className={`hidden sm:block text-sm ${step >= s ? 'text-secondary-900' : 'text-secondary-400'}`}>
-                                            {s === 1 ? 'Basic Info' : s === 2 ? 'Experience' : 'Availability'}
+                                            {s === 1 ? 'About You' : s === 2 ? 'Teaching Profile' : 'Availability'}
                                         </span>
                                         {s < 3 && <div className={`w-8 h-0.5 ${step > s ? 'bg-green-500' : 'bg-secondary-200'}`} />}
                                     </div>
@@ -135,7 +245,49 @@ export const TeacherOnboarding: React.FC = () => {
                                 {/* Step 1: Basic Info */}
                                 {step === 1 && (
                                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                                        <h2 className="text-xl font-bold text-secondary-900 mb-4">Basic Information</h2>
+                                        <h2 className="text-xl font-bold text-secondary-900 mb-4">About You</h2>
+
+                                        {/* Profile Photo Upload */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-secondary-700 mb-2">
+                                                Profile Photo *
+                                            </label>
+                                            <div className="flex items-center gap-4">
+                                                {photoUrl ? (
+                                                    <img src={photoUrl} className="w-20 h-20 rounded-full object-cover border-2 border-primary-200" alt="Profile" />
+                                                ) : (
+                                                    <div className="w-20 h-20 rounded-full bg-secondary-100 flex items-center justify-center border-2 border-dashed border-secondary-300">
+                                                        <Camera size={28} className="text-secondary-400" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handlePhotoUpload}
+                                                        className="hidden"
+                                                        id="photo-upload"
+                                                    />
+                                                    <label htmlFor="photo-upload">
+                                                        <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => document.getElementById('photo-upload')?.click()}>
+                                                            {uploading ? (
+                                                                <>
+                                                                    <Upload size={16} className="mr-2 animate-spin" />
+                                                                    Uploading...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Upload size={16} className="mr-2" />
+                                                                    {photoUrl ? 'Change Photo' : 'Upload Photo'}
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                    </label>
+                                                    <p className="text-xs text-secondary-500 mt-1">Auto-compressed. Students see this on your profile.</p>
+                                                </div>
+                                            </div>
+                                            {errors.photoUrl && <p className="text-red-500 text-sm mt-2">{errors.photoUrl.message}</p>}
+                                        </div>
 
                                         <div className="grid md:grid-cols-2 gap-6">
                                             <Input
@@ -155,7 +307,13 @@ export const TeacherOnboarding: React.FC = () => {
 
                                         <div className="grid md:grid-cols-2 gap-6">
                                             <Select
-                                                label="Punjabi Proficiency Level *"
+                                                label="Your Timezone *"
+                                                options={TIMEZONE_OPTIONS}
+                                                {...register('timezone')}
+                                                error={errors.timezone?.message}
+                                            />
+                                            <Select
+                                                label="Punjabi Proficiency *"
                                                 options={[
                                                     { label: 'Select Level', value: '' },
                                                     { label: 'Native Speaker', value: 'native' },
@@ -166,6 +324,9 @@ export const TeacherOnboarding: React.FC = () => {
                                                 {...register('proficiencyLevel')}
                                                 error={errors.proficiencyLevel?.message}
                                             />
+                                        </div>
+
+                                        <div className="grid md:grid-cols-2 gap-6">
                                             <Select
                                                 label="Teaching Experience *"
                                                 options={[
@@ -179,6 +340,26 @@ export const TeacherOnboarding: React.FC = () => {
                                                 {...register('yearsExperience')}
                                                 error={errors.yearsExperience?.message}
                                             />
+                                            <div />
+                                        </div>
+
+                                        {/* Languages Spoken */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-secondary-700 mb-2">Languages You Speak *</label>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                {LANGUAGES.map(lang => (
+                                                    <label key={lang} className="flex items-center gap-2 text-sm p-2 rounded-lg hover:bg-secondary-50 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            value={lang}
+                                                            {...register('languagesSpoken')}
+                                                            className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                                                        />
+                                                        {lang}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {errors.languagesSpoken && <p className="text-red-500 text-sm mt-1">{errors.languagesSpoken.message}</p>}
                                         </div>
 
                                         <div className="flex justify-end">
@@ -221,13 +402,51 @@ export const TeacherOnboarding: React.FC = () => {
                                             error={errors.teachingPhilosophy?.message}
                                         />
 
+                                        {/* Target Age Groups */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-secondary-700 mb-2">Who do you want to teach? *</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {AGE_GROUPS.map(opt => (
+                                                    <label key={opt.value} className="flex items-center gap-2 text-sm p-3 rounded-lg border border-secondary-200 hover:border-primary-300 hover:bg-primary-50 cursor-pointer transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            value={opt.value}
+                                                            {...register('targetAgeGroups')}
+                                                            className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                                                        />
+                                                        {opt.label}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {errors.targetAgeGroups && <p className="text-red-500 text-sm mt-1">{errors.targetAgeGroups.message}</p>}
+                                        </div>
+
+                                        {/* Specializations */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-secondary-700 mb-2">What can you teach? *</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {SPECIALIZATIONS.map(opt => (
+                                                    <label key={opt.value} className="flex items-center gap-2 text-sm p-3 rounded-lg border border-secondary-200 hover:border-primary-300 hover:bg-primary-50 cursor-pointer transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            value={opt.value}
+                                                            {...register('specializations')}
+                                                            className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                                                        />
+                                                        {opt.label}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {errors.specializations && <p className="text-red-500 text-sm mt-1">{errors.specializations.message}</p>}
+                                        </div>
+
                                         <Input
                                             label="Introduction Video URL (Optional)"
-                                            placeholder="e.g. https://youtube.com/watch?v=... or https://loom.com/..."
+                                            placeholder="e.g. https://youtube.com/watch?v=... or https://vimeo.com/..."
                                             {...register('videoIntro')}
                                             error={errors.videoIntro?.message}
                                         />
-                                        <p className="text-xs text-secondary-500 -mt-4">Upload a 1-2 min video introducing yourself. This greatly increases your approval chances!</p>
+                                        <p className="text-xs text-secondary-500 -mt-4">Record a 1-2 min intro on YouTube (can be unlisted). Greatly increases booking rates!</p>
 
                                         <div className="flex justify-between">
                                             <Button type="button" variant="outline" onClick={() => setStep(1)}>
@@ -266,6 +485,25 @@ export const TeacherOnboarding: React.FC = () => {
                                                 {...register('hourlyRate', { valueAsNumber: true })}
                                                 error={errors.hourlyRate?.message}
                                             />
+                                        </div>
+
+                                        {/* Session Lengths */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-secondary-700 mb-2">Session Lengths You Offer *</label>
+                                            <div className="flex flex-wrap gap-3">
+                                                {SESSION_LENGTHS.map(opt => (
+                                                    <label key={opt.value} className="flex items-center gap-2 text-sm px-4 py-2 rounded-full border border-secondary-200 hover:border-primary-300 hover:bg-primary-50 cursor-pointer transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            value={opt.value}
+                                                            {...register('sessionLengths')}
+                                                            className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                                                        />
+                                                        {opt.label}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {errors.sessionLengths && <p className="text-red-500 text-sm mt-1">{errors.sessionLengths.message}</p>}
                                         </div>
 
                                         <Card className="p-4 bg-secondary-50 space-y-3">

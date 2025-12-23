@@ -15,11 +15,28 @@ app.http('createTeacherApplication', {
             const applicationData = await request.json();
 
             // Validate required fields
-            const requiredFields = ['email', 'fullName', 'proficiencyLevel', 'bio', 'hourlyRate', 'weeklyAvailability'];
+            const requiredFields = [
+                'email', 'fullName', 'proficiencyLevel', 'bio', 'hourlyRate',
+                'weeklyAvailability', 'photoUrl', 'timezone'
+            ];
             for (const field of requiredFields) {
                 if (!applicationData[field]) {
                     return { status: 400, jsonBody: { error: `Missing required field: ${field}` } };
                 }
+            }
+
+            // Validate array fields
+            if (!Array.isArray(applicationData.languagesSpoken) || applicationData.languagesSpoken.length === 0) {
+                return { status: 400, jsonBody: { error: 'Please select at least one language' } };
+            }
+            if (!Array.isArray(applicationData.targetAgeGroups) || applicationData.targetAgeGroups.length === 0) {
+                return { status: 400, jsonBody: { error: 'Please select at least one target age group' } };
+            }
+            if (!Array.isArray(applicationData.specializations) || applicationData.specializations.length === 0) {
+                return { status: 400, jsonBody: { error: 'Please select at least one specialization' } };
+            }
+            if (!Array.isArray(applicationData.sessionLengths) || applicationData.sessionLengths.length === 0) {
+                return { status: 400, jsonBody: { error: 'Please select at least one session length' } };
             }
 
             // Validate proficiency level

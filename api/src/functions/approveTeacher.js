@@ -52,7 +52,7 @@ app.http('approveTeacher', {
                 return { status: 404, body: JSON.stringify({ error: "Application not found" }) };
             }
 
-            // 3. Create Tutor Profile
+            // 3. Create Tutor Profile with all fields from application
             const tutorsContainer = await getContainer("tutors");
             const newTutor = {
                 id: application.id,
@@ -60,9 +60,23 @@ app.http('approveTeacher', {
                 email: application.email,
                 bio: application.bio,
                 hourlyRate: application.hourlyRate || 15,
+                // New fields from enhanced onboarding
+                photoUrl: application.photoUrl || null,
+                timezone: application.timezone || 'UTC',
+                languagesSpoken: application.languagesSpoken || ["Punjabi"],
+                targetAgeGroups: application.targetAgeGroups || [],
+                specializations: application.specializations || [],
+                sessionLengths: application.sessionLengths || ['60'],
+                videoIntro: application.videoIntro || null,
+                teachingPhilosophy: application.teachingPhilosophy || '',
+                proficiencyLevel: application.proficiencyLevel || 'native',
+                yearsExperience: application.yearsExperience || '0',
+                experienceLevel: application.experienceLevel || 'community',
+                // Legacy field for backwards compatibility
                 languages: ["Punjabi"],
                 rating: 0,
                 reviewCount: 0,
+                isSuspended: false,
                 createdAt: new Date().toISOString()
             };
             await tutorsContainer.items.create(newTutor);

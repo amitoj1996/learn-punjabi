@@ -142,7 +142,9 @@ export const TutorSearch: React.FC = () => {
                                 <Card variant="solid" className="h-full flex flex-col p-6 hover:shadow-xl transition-shadow bg-white rounded-2xl border border-slate-100">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex gap-4">
-                                            {tutor.avatarUrl ? (
+                                            {tutor.photoUrl ? (
+                                                <img src={tutor.photoUrl} alt={tutor.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md" />
+                                            ) : tutor.avatarUrl ? (
                                                 <img src={tutor.avatarUrl} alt={tutor.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md" />
                                             ) : (
                                                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
@@ -151,7 +153,7 @@ export const TutorSearch: React.FC = () => {
                                             )}
                                             <div>
                                                 <h3 className="font-bold text-lg text-secondary-900">{tutor.name}</h3>
-                                                <p className="text-secondary-500 text-sm">{tutor.role || 'Punjabi Tutor'}</p>
+                                                <p className="text-secondary-500 text-sm">{tutor.timezone || 'Punjabi Tutor'}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1 bg-primary-50 px-2 py-1 rounded-lg">
@@ -160,11 +162,29 @@ export const TutorSearch: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="mb-4 flex-grow">
-                                        <p className="text-secondary-600 text-sm line-clamp-3 leading-relaxed mb-4">{tutor.bio}</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {(tutor.languages || ['Punjabi']).map((lang) => (
-                                                <span key={lang} className="text-xs font-medium bg-secondary-100 text-secondary-600 px-2 py-1 rounded-md">{lang}</span>
-                                            ))}
+                                        <p className="text-secondary-600 text-sm line-clamp-2 leading-relaxed mb-3">{tutor.bio}</p>
+                                        {/* Specializations */}
+                                        {tutor.specializations && tutor.specializations.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mb-3">
+                                                {tutor.specializations.slice(0, 3).map((spec: string) => (
+                                                    <span key={spec} className="text-xs font-medium bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">
+                                                        {spec}
+                                                    </span>
+                                                ))}
+                                                {tutor.specializations.length > 3 && (
+                                                    <span className="text-xs text-secondary-400">+{tutor.specializations.length - 3}</span>
+                                                )}
+                                            </div>
+                                        )}
+                                        {/* Age groups & session lengths */}
+                                        <div className="flex items-center gap-2 text-xs text-secondary-500">
+                                            {tutor.targetAgeGroups?.includes('kids') && <span title="Teaches Kids">👶 Kids</span>}
+                                            {tutor.targetAgeGroups?.includes('adults') && <span title="Teaches Adults">👨 Adults</span>}
+                                            {tutor.sessionLengths && (
+                                                <span className="ml-auto">
+                                                    {tutor.sessionLengths.map((s: string) => `${s}m`).join(' / ')}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="pt-4 border-t border-secondary-100 flex items-center justify-between mt-auto">
@@ -173,9 +193,20 @@ export const TutorSearch: React.FC = () => {
                                             <span className="text-secondary-500 text-sm">/hr</span>
                                         </div>
                                         <div className="flex gap-2">
+                                            {tutor.videoIntro && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="px-3"
+                                                    title="Watch Intro"
+                                                    onClick={() => window.open(tutor.videoIntro, '_blank')}
+                                                >
+                                                    <Video size={20} />
+                                                </Button>
+                                            )}
                                             <Button variant="ghost" size="sm" className="px-3" title="Message"><MessageCircle size={20} /></Button>
                                             <Button size="sm" onClick={() => handleBook(tutor)} className="flex items-center gap-2">
-                                                <Video size={16} />Book
+                                                Book
                                             </Button>
                                         </div>
                                     </div>
