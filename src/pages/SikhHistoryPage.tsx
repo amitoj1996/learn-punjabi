@@ -21,30 +21,6 @@ const staggerContainer = {
 };
 
 // ============================================
-// KHANDA SVG COMPONENT - Accurate Sikh Symbol
-// ============================================
-const KhandaSVG: React.FC<{ className?: string }> = ({ className }) => (
-    <svg viewBox="0 0 100 120" className={className} fill="currentColor">
-        {/* Central vertical sword (Khanda blade) with pointed top */}
-        <path d="M50 0 L54 8 L52 8 L52 45 L54 45 L54 48 L52 48 L52 95 L54 97 L54 100 L50 105 L46 100 L46 97 L48 95 L48 48 L46 48 L46 45 L48 45 L48 8 L46 8 Z" />
-
-        {/* Chakkar (Circle) */}
-        <ellipse cx="50" cy="55" rx="22" ry="22" fill="none" stroke="currentColor" strokeWidth="5" />
-
-        {/* Left Kirpan - curved sword sweeping outward then inward */}
-        <path d="M28 25 C5 45, 5 75, 30 95 L33 95 C12 78, 12 50, 32 30 Z" />
-        <path d="M30 95 C28 100, 26 105, 30 108 C34 105, 32 100, 30 95 Z" />
-
-        {/* Right Kirpan - curved sword sweeping outward then inward */}
-        <path d="M72 25 C95 45, 95 75, 70 95 L67 95 C88 78, 88 50, 68 30 Z" />
-        <path d="M70 95 C72 100, 74 105, 70 108 C66 105, 68 100, 70 95 Z" />
-
-        {/* Bottom decorative element */}
-        <circle cx="50" cy="115" r="4" />
-    </svg>
-);
-
-// ============================================
 // HERO SECTION - GRADIENT MESH
 // ============================================
 const HeroSection: React.FC = () => (
@@ -76,7 +52,11 @@ const HeroSection: React.FC = () => (
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                 transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             >
-                <KhandaSVG className="w-28 h-28 md:w-36 md:h-36 mx-auto text-amber-400 drop-shadow-[0_0_60px_rgba(251,191,36,0.4)]" />
+                <img
+                    src="/images/history/khanda.png"
+                    alt="Khanda - Sikh Symbol"
+                    className="w-32 h-40 md:w-40 md:h-48 mx-auto drop-shadow-[0_0_60px_rgba(251,191,36,0.5)]"
+                />
             </motion.div>
 
             <motion.h1
