@@ -369,14 +369,15 @@ const ApplicationDetailModal: React.FC<{
                                             onClick={async () => {
                                                 try {
                                                     const res = await fetch(`/api/admin/credential?blob=${encodeURIComponent(cred.blobName)}`);
-                                                    if (res.ok) {
-                                                        const data = await res.json();
+                                                    const data = await res.json();
+                                                    if (res.ok && data.url) {
                                                         window.open(data.url, '_blank');
                                                     } else {
-                                                        alert('Failed to load credential. Please try again.');
+                                                        alert(`Failed to load credential: ${data.error || data.message || 'Unknown error'}`);
                                                     }
-                                                } catch (err) {
-                                                    alert('Error loading credential');
+                                                } catch (err: unknown) {
+                                                    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+                                                    alert(`Error loading credential: ${errorMessage}`);
                                                 }
                                             }}
                                             className="px-3 py-1 text-xs bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
