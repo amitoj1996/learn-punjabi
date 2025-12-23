@@ -106,8 +106,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Link
                 to={to}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                        ? 'bg-primary-50 text-primary-700 font-semibold'
-                        : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
+                    ? 'bg-primary-50 text-primary-700 font-semibold'
+                    : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
                     }`}
             >
                 <Icon size={20} className={isActive ? 'text-primary-600' : 'text-secondary-400'} />
@@ -157,18 +157,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 <SidebarLink to="/history" icon={HistoryIcon} label="Sikh History" />
 
                                 {user && (
-                                    <>
+                                    <div className="md:hidden">
                                         <div className="my-4 border-t border-secondary-100 pt-4 px-4 text-xs font-semibold text-secondary-400 uppercase tracking-wider">
                                             My Account
                                         </div>
                                         <SidebarLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" />
                                         <SidebarLink to="/messages" icon={MessageCircle} label="Messages" />
-                                    </>
+                                    </div>
                                 )}
                             </nav>
 
                             {user && (
-                                <div className="p-4 border-t border-secondary-100 bg-secondary-50">
+                                <div className="p-4 border-t border-secondary-100 bg-secondary-50 md:hidden">
                                     <div className="flex items-center gap-3 mb-4">
                                         <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
                                             {user.userDetails?.charAt(0).toUpperCase()}
@@ -197,8 +197,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </AnimatePresence>
 
             <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-secondary-100 z-40 transition-all duration-200">
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                <div className="w-full px-4 md:px-6 h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsSidebarOpen(true)}
                             className="p-2 -ml-2 hover:bg-secondary-100 rounded-full text-secondary-600 transition-colors"
