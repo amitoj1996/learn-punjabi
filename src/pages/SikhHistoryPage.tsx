@@ -613,8 +613,8 @@ const TimelineEvent: React.FC<{
                     <div className={`p-2.5 rounded-xl ${getCategoryColor()} text-white shadow-lg`}>
                         {getCategoryIcon()}
                     </div>
-                    <span className="text-3xl font-bold text-slate-700/20 absolute right-6 top-6 transition-colors group-hover:text-white/10">{event.year}</span>
-                    <span className="text-amber-400 font-bold text-xl">{event.year}</span>
+                    {/* Removed duplicate big background year, kept the clean amber one */}
+                    <span className="text-amber-400 font-bold text-xl ml-auto">{event.year}</span>
                 </div>
 
                 <h4 className="text-white font-bold text-lg mb-2 leading-snug group-hover:text-amber-400 transition-colors">{event.title}</h4>
@@ -678,11 +678,12 @@ const TimelineSection: React.FC = () => {
                 </div>
 
                 {/* Horizontal continuous timeline */}
-                <div className="relative">
+                <div className="relative group">
                     {/* Connecting line */}
                     <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 -translate-y-1/2 hidden md:block" />
 
-                    <div className="overflow-x-auto pb-12 pt-4 -mx-6 px-6 custom-scrollbar">
+                    {/* Scrollable Container with hidden scrollbar */}
+                    <div className="overflow-x-auto pb-12 pt-4 -mx-6 px-6 no-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         <div className="flex gap-8 min-w-max px-4">
                             <AnimatePresence mode='popLayout'>
                                 {filteredEvents.map((event, index) => (
@@ -717,7 +718,7 @@ const TimelineSection: React.FC = () => {
 
 // Core Values Section
 const ValuesSection: React.FC = () => (
-    <section className="py-20 bg-gradient-to-b from-indigo-950 to-slate-900">
+    <section className="py-20 bg-gradient-to-b from-slate-900 to-indigo-950">
         <div className="container mx-auto px-6">
             <motion.div
                 className="text-center mb-12"
@@ -786,9 +787,9 @@ export const SikhHistoryPage: React.FC = () => {
         <Layout>
             <div className="min-h-screen bg-slate-900">
                 <HeroSection />
+                <ValuesSection />
                 <GurusSection />
                 <TimelineSection />
-                <ValuesSection />
             </div>
         </Layout>
     );
