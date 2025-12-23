@@ -121,12 +121,14 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
         name: 'Guru Angad Dev Ji',
         gurmukhiName: 'ਗੁਰੂ ਅੰਗਦ ਦੇਵ ਜੀ',
         years: '1504 - 1552',
+        birthDate: 'March 31, 1504',
+        jotiJotDate: 'March 29, 1552',
         birthPlace: 'Matte Di Sarai, Muktsar',
         contribution: 'Standardized Gurmukhi script. Started tradition of Mall Akhara (wrestling).',
         famousQuote: 'ਜੇ ਸਉ ਚੰਦਾ ਉਗਵਹਿ ਸੂਰਜ ਚੜਹਿ ਹਜਾਰ',
         famousQuoteEnglish: 'Even if a hundred moons and a thousand suns were to rise',
         keyEvents: ['Developed Gurmukhi script', 'Collected Guru Nanak\'s hymns', 'Promoted physical fitness'],
-        color: '#10B981', // Emerald
+        color: '#10B981',
         image: '/images/history/guru_angad_dev_ji.png',
         family: {
             father: 'Baba Pheru Mal Ji',
@@ -141,19 +143,43 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
             'Importance of education and literacy'
         ],
         baani: ['63 Saloks in Guru Granth Sahib'],
-        legacy: 'Formalized Gurmukhi script which preserved Gurbani, and prioritized physical well-being (Mall Akhara).'
+        legacy: 'Formalized Gurmukhi script which preserved Gurbani, and prioritized physical well-being (Mall Akhara).',
+        biography: `Guru Angad Dev Ji, born Lehna on March 31, 1504, in the village of Matte Di Sarai near Muktsar, was the second Sikh Guru. His father Baba Pheru Mal was a small trader, and his mother Mata Ramo (also known as Daya Kaur) raised him with deep religious values.
+
+Before meeting Guru Nanak Dev Ji, Lehna was a devoted worshipper of the Hindu goddess Durga and led annual pilgrimages to the Jwalamukhi temple in the Himalayas. His life transformed in 1532 when he heard the divine shabads of Guru Nanak Ji recited by Bhai Jodha. Deeply moved, he traveled to Kartarpur to meet Guru Nanak Ji.
+
+Upon meeting the first Guru, Lehna was so captivated that he gave up his old life and stayed to serve. His devotion was legendary - he would carry mud on his head for construction, wash the Sangat's clothes, and perform any task without hesitation. Guru Nanak Ji tested him many times, and each time Lehna proved his humility and dedication.
+
+In 1539, after putting Lehna through numerous tests (including the famous test where Guru Ji asked his sons and Lehna to retrieve a body from muddy water), Guru Nanak Ji declared Lehna as his successor, giving him the name "Angad" meaning "my own limb" - signifying that Lehna was like a part of his own body.
+
+As Guru, Guru Angad Dev Ji made monumental contributions. He standardized and popularized the Gurmukhi script, making it the official script for Sikh scripture. This was crucial for preserving Gurbani and making it accessible to common people rather than just Sanskrit-learned Brahmins. He also established the tradition of Mall Akhara (wrestling arenas) to promote physical fitness alongside spiritual development.
+
+Guru Angad Dev Ji spent 13 years as Guru, expanding the Langar institution and collecting the hymns of Guru Nanak Dev Ji. He established his seat at Khadur Sahib. Before merging with the divine, he appointed Guru Amar Das Ji as his successor.`,
+        notableStories: [
+            'The Test of the Corpse: When Guru Nanak Ji asked who would retrieve a body from muddy water, his sons refused but Lehna immediately obeyed, finding sweets instead of a corpse.',
+            'Carrying Mud: Lehna carried mud baskets on his head for construction. When his fine clothes got dirty, Guru Ji praised his selfless service.',
+            'Emperor Humayun\'s Visit: The defeated Mughal Emperor Humayun came seeking help. Guru Ji advised him that God helps those who help themselves.',
+            'Refusing His Sons: When his sons Dasu and Datu demanded the Guruship, Guru Ji explained that spiritual succession is based on merit, not birth.'
+        ],
+        miracles: [
+            'When he first met Guru Nanak Ji, the Guru looked into his eyes and saw the light of divinity',
+            'His complete surrender transformed him from a goddess-worshipper to the embodiment of Sikh principles'
+        ],
+        historicalContext: 'Guru Angad Dev Ji lived during the early Mughal period. Babur had established the Mughal Empire in 1526, and after his death in 1530, Humayun faced constant challenges. The political instability meant the Sikhs needed to develop independent organizational structures, which Guru Angad Dev Ji provided through the Gurmukhi script and physical training centers.'
     },
     {
         id: 3,
         name: 'Guru Amar Das Ji',
         gurmukhiName: 'ਗੁਰੂ ਅਮਰ ਦਾਸ ਜੀ',
         years: '1479 - 1574',
+        birthDate: 'May 5, 1479',
+        jotiJotDate: 'September 1, 1574',
         birthPlace: 'Basarke, Punjab',
         contribution: 'Established Langar (community kitchen) as institution. Fought against caste discrimination.',
         famousQuote: 'ਪਹਿਲਾ ਪੰਗਤ ਪਾਛੈ ਸੰਗਤ',
         famousQuoteEnglish: 'First the Pangat (Langar), then the Sangat',
         keyEvents: ['Built Baoli at Goindwal', 'Appointed Manji system', 'Advocated for women\'s rights'],
-        color: '#3B82F6', // Blue
+        color: '#3B82F6',
         image: '/images/history/guru_amar_das_ji.png',
         family: {
             father: 'Baba Tej Bhan Ji',
@@ -168,19 +194,43 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
             'Humility and service (Seva)'
         ],
         baani: ['Anand Sahib', 'Allocated Raags to Bani'],
-        legacy: 'Institutionalized Langar and Manji system for preaching. Championed women\'s rights.'
+        legacy: 'Institutionalized Langar and Manji system for preaching. Championed women\'s rights.',
+        biography: `Guru Amar Das Ji was born on May 5, 1479, in the village of Basarke near Amritsar. For the first 62 years of his life, he followed Hindu traditions, making 20 pilgrimages to Haridwar. Everything changed when he heard his nephew's wife, Bibi Amro (daughter of Guru Angad Dev Ji), reciting Gurbani while churning butter.
+
+Deeply moved by the divine poetry, Amar Das traveled to Khadur Sahib to meet Guru Angad Dev Ji. Despite being older than the Guru in age, he became his most devoted disciple. For 11 years, he served the Guru with complete humility, waking before dawn to fetch water from the Beas river - reportedly making this journey 2,190 times.
+
+One stormy night, while carrying water, Amar Das Ji stumbled into a weaver's pit. The weaver, annoyed at being awakened, called him "nirhala" (homeless one). When Guru Angad Dev Ji heard of his devotion, he declared that Amar Das was indeed the true heir to the throne of Guru Nanak.
+
+As Guru from 1552 to 1574, Guru Amar Das Ji made revolutionary contributions. He strengthened the Langar institution, famously declaring "Pehle Pangat Fir Sangat" - first everyone would sit and eat together as equals, then join in worship. This directly challenged the caste system where different castes could not eat together.
+
+He established the Manji (preaching) and Piri (administrative) systems, appointing 22 Manjis and 52 Piris to spread Sikh teachings across different regions. Among the Piri heads, 52 of them were women - revolutionary for that era. He openly opposed Sati (widow burning) and Purdah (veiling of women), and encouraged widow remarriage.
+
+At Goindwal, he constructed the famous Baoli Sahib with 84 steps, declaring that those who recited Japji Sahib on each step with devotion would be liberated. Guru Amar Das Ji composed the Anand Sahib, recited at all Sikh ceremonies. Before his passing, he appointed his son-in-law Jetha (later Guru Ram Das Ji) as his successor.`,
+        notableStories: [
+            'Fetching Water 2,190 Times: For 11 years, he walked 5 miles daily to fetch water for Guru Angad Dev Ji, regardless of weather.',
+            'Falling in the Weaver\'s Pit: On a stormy night, he stumbled but never dropped the water pitcher. The weaver\'s insult led to Guru Angad Ji recognizing his devotion.',
+            'Emperor Akbar\'s Visit: When Mughal Emperor Akbar visited, Guru Ji made him sit in Pangat and eat Langar before granting an audience.',
+            'Bibi Bhani\'s Devotion: His daughter sat under the Guru\'s broken cot all night, using her hand to support it so his meditation wouldn\'t be disturbed.'
+        ],
+        miracles: [
+            'The Baoli at Goindwal was said to have healing properties, with devotees reporting cures after bathing while reciting Japji Sahib',
+            'His blessing transformed the young orphan Jetha into the future Guru Ram Das Ji'
+        ],
+        historicalContext: 'Guru Amar Das Ji lived during the reign of Emperor Akbar, who was known for his relatively tolerant religious policies. This provided some space for the Sikh faith to grow. However, the caste system and practices like Sati were deeply entrenched in society, making Guru Ji\'s social reforms truly revolutionary.'
     },
     {
         id: 4,
         name: 'Guru Ram Das Ji',
         gurmukhiName: 'ਗੁਰੂ ਰਾਮ ਦਾਸ ਜੀ',
         years: '1534 - 1581',
+        birthDate: 'September 24, 1534',
+        jotiJotDate: 'September 1, 1581',
         birthPlace: 'Lahore, Pakistan',
         contribution: 'Founded the city of Amritsar. Composed Laavan (wedding hymns).',
         famousQuote: 'ਮੇਰਾ ਮਨੁ ਲੋਚੈ ਗੁਰ ਦਰਸਨ ਤਾਈ',
         famousQuoteEnglish: 'My mind longs for the Guru\'s Darshan',
         keyEvents: ['Founded Amritsar', 'Started construction of Sarovar', 'Composed Laavan for Anand Karaj'],
-        color: '#8B5CF6', // Purple
+        color: '#8B5CF6',
         image: '/images/history/guru_ram_das_ji.png',
         family: {
             father: 'Baba Hari Das Ji',
@@ -195,19 +245,43 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
             'Ideal householder life'
         ],
         baani: ['Laavan (Wedding Hymns)', 'Ghorian'],
-        legacy: 'Founded Amritsar, the central religious place for Sikhs. Defined the Sikh marriage ceremony.'
+        legacy: 'Founded Amritsar, the central religious place for Sikhs. Defined the Sikh marriage ceremony.',
+        biography: `Guru Ram Das Ji was born as Bhai Jetha on September 24, 1534, in Lahore in a humble Sodhi Khatri family. Orphaned at a young age (losing his parents at age 7), he was raised by his maternal grandmother in the village of Basarke. As a young boy, he sold boiled gram and worked odd jobs to support himself.
+
+His life changed when he traveled with his grandmother to Goindwal Sahib, where Guru Amar Das Ji had established his seat. The young Jetha was deeply moved by the spiritual atmosphere and decided to stay. He threw himself into seva (selfless service), working tirelessly without any expectation. His devotion caught the attention of Guru Amar Das Ji.
+
+Bibi Bhani, the youngest daughter of Guru Amar Das Ji, was known for her own extraordinary devotion. When it came time for her marriage, Guru Amar Das Ji asked what kind of husband she wanted. She replied that she wanted someone exactly like her father. Impressed by Jetha's humility and service, Guru Ji arranged their marriage.
+
+When Guru Amar Das Ji was deciding on his successor, he tested both his sons-in-law by asking them to build platforms for him. Rama's platform looked better, but Guru Ji repeatedly rejected it. Jetha, however, demolished and rebuilt his platform every time the Guru asked - showing complete surrender to the Guru's will. This earned him the Guruship and the name "Ram Das" (servant of God).
+
+As the fourth Guru, Guru Ram Das Ji founded the city of Ramdaspur, now known as Amritsar (Pool of Nectar). He invited merchants and craftsmen from 52 trades to settle there. He began excavation of the sacred pool (Sarovar) that would eventually house the Harmandir Sahib (Golden Temple).
+
+His greatest contribution to Sikh ceremonies was the Laavan - the four stanzas that form the core of the Sikh wedding ceremony (Anand Karaj). The Laavan describes the soul's journey toward union with the Divine through different stages. Before his passing, he appointed his youngest son Arjan Dev Ji as the fifth Guru.`,
+        notableStories: [
+            'The Platform Test: When asked to build a platform, Guru Ram Das Ji demolished and rebuilt it seven times without complaint, demonstrating complete surrender.',
+            'Selling Gram: As an orphan, young Jetha sold boiled gram in the streets of Basarke to survive, showing humility that would define his life.',
+            'The City of Ramdaspur: He personally supervised the excavation of the sacred pool, working alongside laborers and inspiring future generations.',
+            'The Holy Pool: He invited the Sufi saint Mian Mir to lay the foundation stone of Harmandir Sahib, showing interfaith harmony.'
+        ],
+        miracles: [
+            'The land where Amritsar was built was said to have been blessed by Guru Nanak Dev Ji centuries earlier during his travels',
+            'The sacred pool was believed to have healing properties, with many reporting cures after bathing in it'
+        ],
+        historicalContext: 'Guru Ram Das Ji lived during the reign of Emperor Akbar, a relatively peaceful period for the Sikhs. Akbar\'s policy of religious tolerance allowed the Sikh faith to establish permanent institutions like the city of Amritsar. This was a crucial period of consolidation for the Sikh Panth.'
     },
     {
         id: 5,
         name: 'Guru Arjan Dev Ji',
         gurmukhiName: 'ਗੁਰੂ ਅਰਜਨ ਦੇਵ ਜੀ',
         years: '1563 - 1606',
+        birthDate: 'April 15, 1563',
+        jotiJotDate: 'May 30, 1606',
         birthPlace: 'Goindwal, Punjab',
         contribution: 'Compiled Adi Granth. Completed Harmandir Sahib. First Sikh martyr.',
         famousQuote: 'ਤੇਰਾ ਭਾਣਾ ਮੀਠਾ ਲਾਗੈ',
         famousQuoteEnglish: 'Your Will seems sweet to me',
         keyEvents: ['Compiled Adi Granth', 'Completed Harmandir Sahib', 'Martyred on hot plate (first Sikh martyr)'],
-        color: '#EF4444', // Red (martyrdom)
+        color: '#EF4444',
         image: '/images/history/guru_arjan_dev_ji.png',
         family: {
             father: 'Guru Ram Das Ji',
@@ -222,19 +296,44 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
             'Sacrifice for righteousness'
         ],
         baani: ['Sukhmani Sahib', 'Major contributor to Guru Granth Sahib'],
-        legacy: 'Constructed Harmandir Sahib (Golden Temple) and compiled Adi Granth. First Sikh Martyr.'
+        legacy: 'Constructed Harmandir Sahib (Golden Temple) and compiled Adi Granth. First Sikh Martyr.',
+        biography: `Guru Arjan Dev Ji was born on April 15, 1563, at Goindwal Sahib, as the youngest son of Guru Ram Das Ji and Mata Bhani Ji. From childhood, he showed extraordinary spiritual inclination. When his father asked his three sons to each build a platform, young Arjan Dev rebuilt his seven times without a single complaint, demonstrating the surrender that would define his life.
+
+At age 18, Guru Arjan Dev Ji was appointed the fifth Guru over his elder brothers. His eldest brother Prithi Chand became jealous and tried many times to harm the young Guru, even attempting to poison the Guru\'s son Hargobind. Despite these challenges, Guru Arjan Dev Ji continued his mission with love and forgiveness.
+
+His greatest achievement was the compilation of the Adi Granth (later to become Guru Granth Sahib). He collected the writings of all four previous Gurus, added his own 2,218 hymns (the largest contribution), and included verses from Hindu and Muslim saints regardless of caste - revolutionary for its time. Bhai Gurdas Ji served as his scribe. The Granth was installed at Harmandir Sahib in 1604.
+
+Guru Arjan Dev Ji completed the construction of Harmandir Sahib (Golden Temple), with its foundation stone laid by the Sufi saint Mian Mir. Uniquely, the temple has four entrances symbolizing openness to all four castes and all directions. He also built the cities of Tarn Taran and Kartarpur (Jalandhar).
+
+When Emperor Akbar died in 1605 and Jahangir took the throne, the political climate changed. Jahangir was prejudiced against the Sikhs. When Prince Khusrau rebelled against his father and sought refuge with the Guru, Guru Arjan Dev Ji blessed him with money and moral support - a decision that would cost him his life.
+
+Jahangir summoned Guru Ji to Lahore, demanding he convert to Islam, remove verses of Hindu and Muslim saints from the Granth, and pay a heavy fine. Guru Ji refused all demands. From May 24-30, 1606, he was subjected to horrific torture - made to sit on a burning hot plate while hot sand was poured on his body. Through it all, he recited "Tera Bhana Meetha Laage" (Sweet is Your Will). He was then taken to the Ravi river where he attained martyrdom, becoming the first Sikh martyr.`,
+        notableStories: [
+            'The Compilation of Adi Granth: Guru Ji collected hymns for 3 years and included writings from Hindus, Muslims, and people of all castes.',
+            'Mian Mir\'s Foundation Stone: The Sufi saint laid the foundation of Harmandir Sahib at Guru Ji\'s invitation, symbolizing interfaith harmony.',
+            'Sukhmani Sahib: He composed this masterpiece of 24 sections on the banks of Ramsar Sarovar.',
+            'The Four Doors: Harmandir Sahib was built with four entrances, open to all four castes and all directions.'
+        ],
+        miracles: [
+            'During his torture, his face remained calm and peaceful, with witnesses reporting a divine glow around him',
+            'When offered a drink by Mian Mir during his torture, he refused, saying that God\'s will was sweet to him'
+        ],
+        martyrdom: 'From May 24-30, 1606, Guru Arjan Dev Ji was tortured in Lahore by order of Emperor Jahangir. He was made to sit on a burning hot plate, had hot sand poured over his body, and was finally taken to the Ravi river where he attained martyrdom. His sacrifice established the tradition of martyrdom in the Sikh faith.',
+        historicalContext: 'The transition from Akbar (relatively tolerant) to Jahangir (hostile to Sikhs) marked a turning point. Jahangir wrote in his autobiography that he wanted to "close the shop" of Sikh teachings. This hostility would continue through multiple Mughal emperors, leading to more martyrdoms and eventually the creation of the Khalsa.'
     },
     {
         id: 6,
         name: 'Guru Hargobind Sahib Ji',
         gurmukhiName: 'ਗੁਰੂ ਹਰਿਗੋਬਿੰਦ ਸਾਹਿਬ ਜੀ',
         years: '1595 - 1644',
+        birthDate: 'June 19, 1595',
+        jotiJotDate: 'March 3, 1644',
         birthPlace: 'Wadali, Amritsar',
         contribution: 'Introduced Miri-Piri (spiritual and temporal authority). Built Akal Takht.',
         famousQuote: 'ਮੀਰੀ ਪੀਰੀ',
         famousQuoteEnglish: 'Miri (temporal) and Piri (spiritual) - two swords of power',
         keyEvents: ['Wore two swords (Miri-Piri)', 'Built Akal Takht', 'Freed 52 Hindu kings from Gwalior Fort'],
-        color: '#F97316', // Orange
+        color: '#F97316',
         image: '/images/history/guru_har_gobind_ji.png',
         family: {
             father: 'Guru Arjan Dev Ji',
@@ -249,19 +348,41 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
             'Justice along with spirituality'
         ],
         battles: ['Battle of Amritsar', 'Battle of Hargobindpur', 'Battle of Lahira'],
-        legacy: 'Transformed Sikhs into a martial community. Built Akal Takht (Throne of Timeless One).'
+        legacy: 'Transformed Sikhs into a martial community. Built Akal Takht (Throne of Timeless One).',
+        biography: `Guru Hargobind Sahib Ji was born on June 19, 1595, at village Wadali near Amritsar. He was the only child of Guru Arjan Dev Ji and Mata Ganga Ji. His birth came after years of waiting, and Baba Buddha Ji blessed his mother and prophesied that the child would be a great warrior.
+
+When Guru Arjan Dev Ji was martyred in 1606, the 11-year-old Hargobind was installed as the sixth Guru. Following his father's dying instructions, the young Guru appeared at his installation wearing two swords - one representing spiritual authority (Piri) and one representing temporal/political authority (Miri). This was the birth of the "Sant-Sipahi" (Saint-Soldier) concept.
+
+He built the Akal Takht (Throne of the Timeless One) directly facing Harmandir Sahib, symbolizing the balance between spiritual and worldly responsibilities. He maintained a royal court, kept horses and hunting hawks, and built an army - a dramatic transformation of Sikh practice.
+
+Emperor Jahangir, suspicious of the growing Sikh power, imprisoned Guru Hargobind Sahib Ji in Gwalior Fort for approximately 2 years along with 52 Hindu kings. When released, Guru Ji refused to leave unless all 52 kings were also freed. The emperor agreed to release whoever could hold onto the Guru's cloak. Guru Ji had a special cloak made with 52 tassels, and led all the kings to freedom. This day is celebrated as Bandi Chhor Divas.
+
+Guru Hargobind Sahib Ji fought and won four battles against Mughal forces - at Amritsar, Hargobindpur, Gurusar, and Kartarpur. He established Kiratpur Sahib as his base in his later years. He had six children, and before passing, designated his grandson Har Rai Ji (through Baba Gurditta) as the seventh Guru.`,
+        notableStories: [
+            'Bandi Chhor Divas: He freed 52 Hindu kings from Gwalior Fort by having them hold his special 52-tassel cloak.',
+            'Two Swords at Installation: At age 11, he wore two swords representing Miri (temporal) and Piri (spiritual) authority.',
+            'Hawk and Horses: He maintained a royal court with horses, hawks, and an army - transforming Sikh identity.',
+            'Akal Takht: He built the Throne of the Timeless One with his own hands, laying bricks alongside laborers.'
+        ],
+        miracles: [
+            'Baba Buddha Ji blessed him at birth, predicting he would shake empires and fight for righteousness',
+            'Despite being vastly outnumbered in battles, his forces were always victorious'
+        ],
+        historicalContext: 'Guru Hargobind Sahib Ji transformed the Sikh Panth from a peaceful religious community into a martial brotherhood. This was a necessary response to Mughal persecution that began with his father\'s martyrdom. The conflicts with Jahangir and Shah Jahan would continue through successive Gurus.'
     },
     {
         id: 7,
         name: 'Guru Har Rai Ji',
         gurmukhiName: 'ਗੁਰੂ ਹਰਿ ਰਾਇ ਜੀ',
         years: '1630 - 1661',
+        birthDate: 'January 16, 1630',
+        jotiJotDate: 'October 6, 1661',
         birthPlace: 'Kiratpur Sahib, Punjab',
         contribution: 'Known for compassion and maintaining Sikh army. Promoted herbal medicine.',
         famousQuote: 'ਦਯਾ ਅਤੇ ਧਰਮ',
         famousQuoteEnglish: 'Compassion and Righteousness',
         keyEvents: ['Maintained army of 2,200 soldiers', 'Promoted herbal medicine', 'Protected followers during Mughal conflicts'],
-        color: '#22C55E', // Green (nature/medicine)
+        color: '#22C55E',
         image: '/images/history/guru_har_rai_ji.png',
         family: {
             father: 'Baba Gurditta Ji',
@@ -275,19 +396,39 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
             'Environment and nature preservation',
             'Self-discipline'
         ],
-        legacy: 'Maintained a strong army but never fought a battle. Established Ayurvedic hospitals.'
+        legacy: 'Maintained a strong army but never fought a battle. Established Ayurvedic hospitals.',
+        biography: `Guru Har Rai Ji was born on January 16, 1630, at Kiratpur Sahib. He was the grandson of Guru Hargobind Sahib Ji through his father Baba Gurditta Ji. Known for his gentle and compassionate nature, even as a child he was deeply sensitive to all forms of life.
+
+At age 14, he became the seventh Sikh Guru after the passing of Guru Hargobind Sahib Ji. Despite maintaining an army of 2,200 cavalry soldiers (as established by his grandfather), Guru Har Rai Ji was known as a man of peace and never engaged in battle during his 17 years as Guru.
+
+He was deeply interested in nature and herbal medicine. At Kiratpur Sahib, he established a hospital and a research center for Ayurvedic treatment, with a garden of rare medicinal plants. His compassion extended to all living beings - once, when his robe brushed against flowers and broke them, he was deeply pained and thereafter always held his garments while walking through gardens.
+
+During the Mughal succession conflict between Dara Shikoh (the liberal prince) and Aurangzeb, Guru Har Rai Ji helped Dara Shikoh - providing him refuge and healing when he was ill. When Aurangzeb became emperor and summoned the Guru, Guru Har Rai Ji sent his elder son Ram Rai instead. When Ram Rai changed a word of Gurbani to please the emperor, the Guru disowned him and declared his younger son Har Krishan as his successor.`,
+        notableStories: [
+            'The Broken Flowers: As a child, when his robe accidentally broke some flowers, he felt such sorrow that he forever after held his garments while walking through gardens.',
+            'Medicine for Dara Shikoh: He provided healing herbs to the Mughal prince, showing compassion even to those in conflict.',
+            'Disowning Ram Rai: When his son changed a word of Gurbani to please Aurangzeb, Guru Ji disowned him, showing that truth cannot be compromised.',
+            'The 2,200 Soldiers: He maintained his grandfather\'s army but never used it for attack, only defense of the innocent.'
+        ],
+        miracles: [
+            'His touch was said to have healing properties, and many came to him for cures',
+            'His medicinal garden contained rare herbs that were said to cure diseases others could not'
+        ],
+        historicalContext: 'Guru Har Rai Ji lived during Aurangzeb\'s ascent to power - a particularly intolerant period for non-Muslims. By supporting Dara Shikoh (who was tolerant of other faiths) against Aurangzeb, the Guru made a political statement while maintaining the Sikh tradition of supporting righteousness over tyranny.'
     },
     {
         id: 8,
         name: 'Guru Har Krishan Ji',
         gurmukhiName: 'ਗੁਰੂ ਹਰਿ ਕ੍ਰਿਸ਼ਨ ਜੀ',
         years: '1656 - 1664',
+        birthDate: 'July 7, 1656',
+        jotiJotDate: 'March 30, 1664',
         birthPlace: 'Kiratpur Sahib, Punjab',
         contribution: 'Youngest Guru (became Guru at age 5). Helped smallpox victims in Delhi.',
         famousQuote: 'ਬਾਲਾ ਪੀਰ',
         famousQuoteEnglish: 'The Child Guru',
         keyEvents: ['Became Guru at age 5', 'Healed smallpox victims in Delhi', 'Said "Baba Bakale" before passing (pointing to 9th Guru)'],
-        color: '#06B6D4', // Cyan
+        color: '#06B6D4',
         image: '/images/history/guru_har_krishan_ji.png',
         family: {
             father: 'Guru Har Rai Ji',
@@ -301,19 +442,39 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
             'Purity of heart',
             'Humility'
         ],
-        legacy: 'Sacrificed life serving smallpox patients in Delhi. Symbol of purity and divinity in childhood.'
+        legacy: 'Sacrificed life serving smallpox patients in Delhi. Symbol of purity and divinity in childhood.',
+        biography: `Guru Har Krishan Ji, the eighth Sikh Guru, was born on July 7, 1656, at Kiratpur Sahib. He became Guru at the tender age of 5 after his father Guru Har Rai Ji passed away in 1661, making him the youngest Guru in Sikh history.
+
+Emperor Aurangzeb, skeptical of such a young child being a spiritual leader, summoned Guru Har Krishan Ji to Delhi. Raja Jai Singh sponsored the Guru's visit, and the young Guru stayed at his bungalow (now Gurdwara Bangla Sahib). Aurangzeb tried to test the young Guru's knowledge - famously, a scholar disguised as a low-caste water carrier was sent to him, but the Guru immediately recognized and honored him.
+
+During his time in Delhi, a devastating smallpox and cholera epidemic swept through the city. Without concern for his own safety, the young Guru Ji personally went into affected areas, distributing medicine, providing food and water, and serving the sick regardless of their religion or caste. The waters from the well at Raja Jai Singh's residence (now the Sarovar at Bangla Sahib) were said to have healing properties.
+
+Tragically, while serving the sick, the young Guru contracted smallpox himself. As his condition worsened, devotees asked who would be the next Guru. He simply said "Baba Bakale" - indicating the next Guru would be found in the village of Bakala. He attained Joti Jot on March 30, 1664, at the age of only 8 years. His sacrifice in serving others, even unto death, made him a symbol of selfless service.`,
+        notableStories: [
+            'Baba Bakale: On his deathbed, when asked who would succeed him, he simply said "Baba Bakale," pointing to where the next Guru (Tegh Bahadur) was meditating.',
+            'The Illiterate Who Recited Gita: When tested, he touched an illiterate water carrier who then recited complex scriptures perfectly.',
+            'Healing Waters: The waters from the well where he stayed are still believed to have healing properties today.',
+            'Serving the Sick: Despite his young age and royal status, he personally served smallpox patients, showing that seva knows no hierarchy.'
+        ],
+        miracles: [
+            'He blessed an illiterate man named Chhajju who then explained complex philosophical concepts',
+            'The water from the well at his residence (now Bangla Sahib Sarovar) was said to cure diseases'
+        ],
+        historicalContext: 'Guru Har Krishan Ji\'s short life occurred during Aurangzeb\'s oppressive reign. The emperor\'s attempt to summon and test the young Guru was part of broader Mughal attempts to control or discredit Sikh leadership. The Guru\'s death while serving the sick became a powerful example of Sikh values.'
     },
     {
         id: 9,
         name: 'Guru Tegh Bahadur Ji',
         gurmukhiName: 'ਗੁਰੂ ਤੇਗ਼ ਬਹਾਦਰ ਜੀ',
         years: '1621 - 1675',
+        birthDate: 'April 1, 1621',
+        jotiJotDate: 'November 11, 1675',
         birthPlace: 'Amritsar, Punjab',
         contribution: 'Sacrificed life for religious freedom. Protected Kashmiri Pandits. "Hind di Chadar".',
         famousQuote: 'ਸੀਸੁ ਦੀਆ ਪਰ ਸਿਰਰੁ ਨ ਦੀਆ',
         famousQuoteEnglish: 'He gave his head but not his faith',
         keyEvents: ['Martyred in Delhi (Chandni Chowk)', 'Protected Kashmiri Pandits', 'Called "Hind di Chadar" (Shield of India)'],
-        color: '#DC2626', // Deep red (martyrdom)
+        color: '#DC2626',
         image: '/images/history/guru_teg_bahadur_ji.png',
         family: {
             father: 'Guru Hargobind Sahib Ji',
@@ -328,19 +489,42 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
             'Detachment from worldly Maya'
         ],
         baani: ['59 Shabad and 57 Saloks in Guru Granth Sahib'],
-        legacy: 'Supreme sacrifice for the protection of another religion (Hindus), establishing universal religious freedom.'
+        legacy: 'Supreme sacrifice for the protection of another religion (Hindus), establishing universal religious freedom.',
+        biography: `Guru Tegh Bahadur Ji was born on April 1, 1621, in Amritsar, as the youngest son of Guru Hargobind Sahib Ji. Originally named Tyag Mal, he earned the name "Tegh Bahadur" (Brave Warrior of the Sword) after displaying exceptional courage in the Battle of Kartarpur at age 13.
+
+After his father's passing, he lived a life of deep meditation for 26 years - first at Bakala and later in Assam. When Guru Har Krishan Ji said "Baba Bakale" before his death, a search began at Bakala. Many imposters claimed the Guruship. Bhai Makhan Shah Lubana, who had prayed to the Guru during a storm and promised 500 gold coins, tested each claimant by offering only 2 coins. Only when Tegh Bahadur Ji recognized the full pledge did Makhan Shah proclaim from the rooftop: "Guru Ladho Re!" (I have found the Guru!).
+
+As the ninth Guru, he traveled extensively, visiting Dhaka, Assam, and finally founding the city of Anandpur Sahib in 1665. His compositions in the Guru Granth Sahib are profound meditations on detachment, the illusion of worldly life, and fearlessness.
+
+In 1675, Kashmiri Pandits led by Pandit Kirpa Ram came to Guru Tegh Bahadur Ji seeking protection from Aurangzeb's forced conversions. The young Gobind Rai (future Guru Gobind Singh Ji) asked why they were crying and, upon learning the situation, suggested his father could protect them. Guru Ji sent a message to the emperor: "If you can convert me, then have these Pandits convert."
+
+Aurangzeb summoned the Guru to Delhi. Guru Tegh Bahadur Ji was arrested along with three devoted Sikhs - Bhai Mati Das, Bhai Sati Das, and Bhai Dayala. These three were martyred first in front of the Guru to break his resolve. When asked to perform a miracle or convert, Guru Ji refused. On November 11, 1675, he was beheaded at Chandni Chowk, Delhi. His sacrifice, for a faith not his own, earned him the title "Hind di Chadar" (Shield of India).`,
+        notableStories: [
+            'Guru Ladho Re: Bhai Makhan Shah Lubana found the true Guru by testing claimants with a 2-coin offering - only Guru Ji knew the full 500-coin pledge.',
+            'The Kashmiri Pandits: When Pandits sought protection from forced conversion, his 9-year-old son suggested the Guru could save them.',
+            'The Three Martyrs: Bhai Mati Das (sawed in half), Bhai Dayala (boiled alive), and Bhai Sati Das (wrapped in cotton and burned) were martyred before him.',
+            'Final Message: His last words were "This is the time to sacrifice for righteousness - giving one\'s head without crying."'
+        ],
+        miracles: [
+            'A piece of paper found on his body after martyrdom contained a prophecy about the future',
+            'Despite torture, his face remained calm and peaceful, inspiring even his executioners'
+        ],
+        martyrdom: 'On November 11, 1675, Guru Tegh Bahadur Ji was publicly beheaded at Chandni Chowk, Delhi, by order of Emperor Aurangzeb. His three companions were first martyred before him: Bhai Mati Das was sawed in half, Bhai Dayala was boiled in a cauldron, and Bhai Sati Das was burned alive. The Guru accepted death rather than convert to Islam, sacrificing his life to protect the religious freedom of Kashmiri Hindus. Gurdwara Sis Ganj Sahib marks the site of his martyrdom.',
+        historicalContext: 'Aurangzeb had reversed his predecessors\' relatively tolerant policies, imposing the jizya tax on non-Muslims and ordering mass conversions. The Kashmiri Pandits represented the threatened Hindu minority. Guru Tegh Bahadur Ji\'s sacrifice was unprecedented - a leader of one faith dying to protect followers of another - establishing the Sikh principle of religious freedom for all.'
     },
     {
         id: 10,
         name: 'Guru Gobind Singh Ji',
         gurmukhiName: 'ਗੁਰੂ ਗੋਬਿੰਦ ਸਿੰਘ ਜੀ',
         years: '1666 - 1708',
+        birthDate: 'December 22, 1666',
+        jotiJotDate: 'October 7, 1708',
         birthPlace: 'Patna, Bihar',
         contribution: 'Created Khalsa. Gave 5 Ks. Declared Guru Granth Sahib as eternal Guru.',
         famousQuote: 'ਸਵਾ ਲਾਖ ਸੇ ਏਕ ਲੜਾਊਂ',
         famousQuoteEnglish: 'I shall make one fight against 125,000',
         keyEvents: ['Created Khalsa in 1699', 'Gave the 5 Ks', 'Sacrifice of four Sahibzade', 'Declared Guru Granth Sahib as eternal Guru'],
-        color: '#7C3AED', // Royal purple
+        color: '#7C3AED',
         image: '/images/history/guru_gobind_singh_ji.png',
         family: {
             father: 'Guru Tegh Bahadur Ji',
@@ -356,7 +540,30 @@ In 1521, he established Kartarpur, the first Sikh community, where he lived his 
         ],
         baani: ['Jaap Sahib', 'Tav-Prasad Savaiye', 'Chaupai Sahib', 'Zafarnama'],
         battles: ['Battle of Bhangani', 'Battle of Anandpur', 'Battle of Chamkaur', 'Battle of Muktsar'],
-        legacy: 'Created the Khalsa Panth (Brotherhood of Pure Ones), ending the lineage of human Gurus and bestowing Guruship to the Scripture.'
+        legacy: 'Created the Khalsa Panth (Brotherhood of Pure Ones), ending the lineage of human Gurus and bestowing Guruship to the Scripture.',
+        biography: `Guru Gobind Singh Ji was born on December 22, 1666, at Patna, Bihar, as Gobind Rai. His father Guru Tegh Bahadur Ji was martyred when Gobind Rai was only 9 years old, and the young boy was installed as the tenth Guru at Anandpur Sahib.
+
+From childhood, he was trained in martial arts, weaponry, and multiple languages including Sanskrit, Persian, Braj Bhasha, and Punjabi. He was also a poet and scholar, composing profound spiritual literature. He transformed Anandpur Sahib into a center of learning and martial training.
+
+His defining moment came on Vaisakhi 1699 when he created the Khalsa. Before a gathering of thousands, he asked for volunteers who would give their heads for the faith. Five brave Sikhs, later known as the Panj Pyare (Five Beloved Ones), stepped forward from different castes and regions. Guru Ji initiated them with Amrit (sweetened water stirred with a double-edged sword), gave them the name "Singh" (lion), established the 5 Ks, and then in a revolutionary act, asked them to initiate HIM - declaring that the Khalsa and Guru are one.
+
+His life was marked by tremendous sacrifice. He fought fourteen battles against Mughal and Hill Raja forces. After the Siege of Anandpur (1704), he lost everything - his mother Mata Gujri Ji, and all four sons (the Char Sahibzade). Sahibzada Ajit Singh (18) and Jujhar Singh (14) died fighting at Chamkaur, while Zorawar Singh (9) and Fateh Singh (6) were bricked alive at Sirhind for refusing to convert.
+
+Despite these unimaginable losses, he wrote the Zafarnama (Epistle of Victory) to Aurangzeb - a powerful letter questioning the emperor\'s morality and broken promises. After Aurangzeb\'s death, Guru Ji met the new Emperor Bahadur Shah. In October 1708, at Nanded, before his passing, he declared Guru Granth Sahib as the eternal Guru - ending the line of human Gurus forever.`,
+        notableStories: [
+            'Creation of Khalsa: On Vaisakhi 1699, he asked for heads and five brave Sikhs volunteered, becoming the Panj Pyare.',
+            'Chamkaur Sahib: His two elder sons died fighting against thousands, and he approved their going to battle saying "All four sons shall be martyred."',
+            'Brick Martyrdom: His younger sons (ages 9 and 6) refused to convert and were bricked alive at Sirhind.',
+            'Zafarnama: Even after losing everything, he wrote a defiant letter to Aurangzeb, declaring moral victory.',
+            'Final Declaration: Before passing, he bowed before Guru Granth Sahib, declaring it the eternal Guru.'
+        ],
+        miracles: [
+            'At Chamkaur, his small force of 40 held off an army of thousands',
+            'The Amrit prepared by him was said to transform ordinary men into fearless warriors',
+            'Despite losing all four sons, he never wavered in his mission or faith'
+        ],
+        sahibzade: ['Sahibzada Ajit Singh (18) - Martyred at Chamkaur Sahib', 'Sahibzada Jujhar Singh (14) - Martyred at Chamkaur Sahib', 'Sahibzada Zorawar Singh (9) - Bricked alive at Sirhind', 'Sahibzada Fateh Singh (6) - Bricked alive at Sirhind'],
+        historicalContext: 'Guru Gobind Singh Ji lived through the most oppressive period of Mughal rule under Aurangzeb. The creation of the Khalsa was a direct response to centuries of persecution - transforming persecuted people into fearless warriors who would stand for justice. His declaration of Guru Granth Sahib as the eternal Guru ensured Sikh guidance would never be dependent on any single human leader again.'
     }
 ];
 
