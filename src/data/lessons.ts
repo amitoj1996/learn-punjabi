@@ -999,68 +999,67 @@ Learn to ask questions like a native speaker!
                 ]
             },
             {
-                id: 'family-words',
+                id: 'common-adjectives',
                 moduleId: 'building-sentences',
-                title: 'Family Words',
-                description: 'Learn family relationship words',
-                icon: '👨‍👩‍👧‍👦',
+                title: 'Common Adjectives',
+                description: 'Describe things with adjectives',
+                icon: '✨',
                 duration: '12 min',
                 xpReward: 18,
-                difficulty: 'beginner',
+                difficulty: 'intermediate',
                 unlockRequirements: ['questions'],
                 vocabulary: [
-                    { gurmukhi: 'ਮਾਂ', transliteration: 'Maa', english: 'Mother', pronunciation: 'ਮਾਂ' },
-                    { gurmukhi: 'ਪਿਓ', transliteration: 'Pio', english: 'Father', pronunciation: 'ਪਿਓ' },
-                    { gurmukhi: 'ਭਰਾ', transliteration: 'Bhra', english: 'Brother', pronunciation: 'ਭਰਾ' },
-                    { gurmukhi: 'ਭੈਣ', transliteration: 'Bhain', english: 'Sister', pronunciation: 'ਭੈਣ' },
-                    { gurmukhi: 'ਦਾਦਾ', transliteration: 'Daada', english: 'Grandfather (paternal)', pronunciation: 'ਦਾਦਾ' },
-                    { gurmukhi: 'ਦਾਦੀ', transliteration: 'Daadi', english: 'Grandmother (paternal)', pronunciation: 'ਦਾਦੀ' },
-                    { gurmukhi: 'ਪੁੱਤਰ', transliteration: 'Puttar', english: 'Son', pronunciation: 'ਪੁੱਤਰ' },
-                    { gurmukhi: 'ਧੀ', transliteration: 'Dhee', english: 'Daughter', pronunciation: 'ਧੀ' },
+                    { gurmukhi: 'ਵੱਡਾ', transliteration: 'Vadda', english: 'Big', pronunciation: 'ਵੱਡਾ' },
+                    { gurmukhi: 'ਛੋਟਾ', transliteration: 'Chhota', english: 'Small', pronunciation: 'ਛੋਟਾ' },
+                    { gurmukhi: 'ਚੰਗਾ', transliteration: 'Changa', english: 'Good', pronunciation: 'ਚੰਗਾ' },
+                    { gurmukhi: 'ਮਾੜਾ', transliteration: 'Maara', english: 'Bad', pronunciation: 'ਮਾੜਾ' },
+                    { gurmukhi: 'ਗਰਮ', transliteration: 'Garam', english: 'Hot', pronunciation: 'ਗਰਮ' },
+                    { gurmukhi: 'ਠੰਡਾ', transliteration: 'Thanda', english: 'Cold', pronunciation: 'ਠੰਡਾ' },
+                    { gurmukhi: 'ਨਵਾਂ', transliteration: 'Navaan', english: 'New', pronunciation: 'ਨਵਾਂ' },
+                    { gurmukhi: 'ਪੁਰਾਣਾ', transliteration: 'Purana', english: 'Old', pronunciation: 'ਪੁਰਾਣਾ' },
                 ],
                 content: `
-# Family Words in Punjabi
+# Common Adjectives in Punjabi
 
-Family is central to Punjabi culture! Learn these essential words.
+Adjectives describe nouns. In Punjabi, they often come before the noun they describe.
 
-## Immediate Family
+## Size & Quality
 
-| Punjabi | Pronunciation | Relation |
-|---------|---------------|----------|
-| ਮਾਂ | Maa | Mother |
-| ਪਿਓ | Pio | Father |
-| ਭਰਾ | Bhra | Brother |
-| ਭੈਣ | Bhain | Sister |
-| ਪੁੱਤਰ | Puttar | Son |
-| ਧੀ | Dhee | Daughter |
+| Punjabi | Pronunciation | English |
+|---------|---------------|---------|
+| ਵੱਡਾ | Vadda | Big |
+| ਛੋਟਾ | Chhota | Small |
+| ਚੰਗਾ | Changa | Good |
+| ਮਾੜਾ | Maara | Bad |
 
-## Grandparents
+## Temperature & Age
 
-- **ਦਾਦਾ** (Daada) - Grandfather (father's side)
-- **ਦਾਦੀ** (Daadi) - Grandmother (father's side)
-- **ਨਾਨਾ** (Naana) - Grandfather (mother's side)
-- **ਨਾਨੀ** (Naani) - Grandmother (mother's side)
+- **ਗਰਮ** (Garam) - Hot
+- **ਠੰਡਾ** (Thanda) - Cold
+- **ਨਵਾਂ** (Navaan) - New
+- **ਪੁਰਾਣਾ** (Purana) - Old
 
-## Talking About Family
+## Example Usage
 
-- **ਮੇਰੀ ਮਾਂ** - My mother
-- **ਮੇਰਾ ਪਿਓ** - My father
+- **ਵੱਡਾ ਘਰ** - Big house
+- **ਠੰਡਾ ਪਾਣੀ** - Cold water
+- **ਚੰਗਾ ਦਿਨ** - Good day
                 `,
                 quiz: [
                     {
-                        question: 'How do you say "Mother" in Punjabi?',
-                        options: ['ਭੈਣ', 'ਮਾਂ', 'ਦਾਦੀ', 'ਧੀ'],
+                        question: 'What does "Vadda" mean?',
+                        options: ['Small', 'Big', 'Hot', 'Cold'],
                         correctIndex: 1
                     },
                     {
-                        question: '"ਭਰਾ" means:',
-                        options: ['Sister', 'Father', 'Brother', 'Son'],
-                        correctIndex: 2
+                        question: 'How do you say "Cold" in Punjabi?',
+                        options: ['ਗਰਮ', 'ਠੰਡਾ', 'ਨਵਾਂ', 'ਮਾੜਾ'],
+                        correctIndex: 1
                     },
                     {
-                        question: 'What is "Daada"?',
-                        options: ['Father', 'Uncle', 'Grandfather', 'Brother'],
-                        correctIndex: 2
+                        question: '"ਪੁਰਾਣਾ" means:',
+                        options: ['New', 'Old', 'Good', 'Bad'],
+                        correctIndex: 1
                     }
                 ]
             }
