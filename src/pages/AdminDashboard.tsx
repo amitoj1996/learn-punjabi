@@ -365,14 +365,29 @@ const ApplicationDetailModal: React.FC<{
                                             <span className="text-secondary-700">{cred.fileName}</span>
                                             <span className="text-xs text-secondary-400 capitalize">({cred.docType})</span>
                                         </div>
-                                        <span className="text-xs text-secondary-400">
-                                            Stored: {cred.blobName.split('-').slice(-1)[0]?.split('.')[0] ? 'Yes' : 'Yes'}
-                                        </span>
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    const res = await fetch(`/api/admin/credential/${encodeURIComponent(cred.blobName)}`);
+                                                    if (res.ok) {
+                                                        const data = await res.json();
+                                                        window.open(data.url, '_blank');
+                                                    } else {
+                                                        alert('Failed to load credential. Please try again.');
+                                                    }
+                                                } catch (err) {
+                                                    alert('Error loading credential');
+                                                }
+                                            }}
+                                            className="px-3 py-1 text-xs bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                                        >
+                                            View
+                                        </button>
                                     </div>
                                 ))}
                             </div>
                             <p className="text-xs text-secondary-400 mt-2">
-                                Note: Credentials are stored in private storage. Contact dev team to view actual files.
+                                Click "View" to open credential (link expires in 10 minutes)
                             </p>
                         </div>
                     )}
