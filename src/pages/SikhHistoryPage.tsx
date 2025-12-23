@@ -231,8 +231,8 @@ const EventDetailModal: React.FC<{ event: HistoricalEvent; onClose: () => void }
                 <div className="relative h-40 bg-slate-800 overflow-hidden flex-shrink-0 flex items-end p-8">
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent z-10" />
                     <div className={`absolute inset-0 opacity-20 ${event.category === 'battle' ? 'bg-red-900' :
-                            event.category === 'guru' ? 'bg-amber-900' :
-                                event.category === 'milestone' ? 'bg-blue-900' : 'bg-green-900'
+                        event.category === 'guru' ? 'bg-amber-900' :
+                            event.category === 'milestone' ? 'bg-blue-900' : 'bg-green-900'
                         }`} />
 
                     <button
@@ -245,8 +245,8 @@ const EventDetailModal: React.FC<{ event: HistoricalEvent; onClose: () => void }
                     <div className="relative z-20">
                         <div className="flex items-center gap-3 mb-2">
                             <span className={`px-3 py-1 rounded-full text-xs font-bold text-white shadow-lg ${event.category === 'battle' ? 'bg-red-500' :
-                                    event.category === 'guru' ? 'bg-amber-500' :
-                                        event.category === 'milestone' ? 'bg-blue-500' : 'bg-green-500'
+                                event.category === 'guru' ? 'bg-amber-500' :
+                                    event.category === 'milestone' ? 'bg-blue-500' : 'bg-green-500'
                                 }`}>
                                 {event.year}
                             </span>
@@ -560,21 +560,7 @@ const GurusSection: React.FC = () => {
                     />
                 </div>
 
-                {/* Quick navigation thumbnails */}
-                <div className="flex justify-center gap-2 mt-8 flex-wrap">
-                    {gurus.map((guru, index) => (
-                        <button
-                            key={guru.id}
-                            onClick={() => setActiveGuru(index)}
-                            className={`px-3 py-2 rounded-lg text-sm transition-all ${index === activeGuru
-                                ? 'bg-amber-500 text-slate-900 font-semibold'
-                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                                }`}
-                        >
-                            Guru {guru.id}
-                        </button>
-                    ))}
-                </div>
+
             </div>
 
             <AnimatePresence>
