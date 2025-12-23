@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Layout } from '../components/Layout';
-import { gurus, sikhValues, fiveKs, type Guru } from '../data/sikhHistory';
+import { gurus, type Guru } from '../data/sikhHistory';
 import { ChevronRight, BookOpen, X, Users, Scroll, Heart, ArrowDown, ChevronDown } from 'lucide-react';
 
 // ============================================
@@ -12,12 +12,6 @@ const fadeInUp = {
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true, margin: "-100px" },
     transition: { duration: 0.8 }
-};
-
-const staggerContainer = {
-    initial: {},
-    whileInView: { transition: { staggerChildren: 0.15 } },
-    viewport: { once: true }
 };
 
 // ============================================
@@ -108,72 +102,258 @@ const HeroSection: React.FC = () => (
 );
 
 // ============================================
-// CORE VALUES - GLASSMORPHISM CARDS
+// CORE VALUES - FOUNDATION SECTION (ENHANCED)
 // ============================================
-const ValuesSection: React.FC = () => (
-    <section className="py-32 bg-slate-950 relative overflow-hidden">
-        {/* Background accents */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-amber-900/10 to-transparent rounded-full blur-3xl" />
+const ValuesSection: React.FC = () => {
+    const pillarsData = [
+        {
+            name: "Naam Japna",
+            gurmukhi: "ਨਾਮ ਜਪਣਾ",
+            meaning: "Meditating on God's Name",
+            icon: "🙏",
+            color: "from-amber-500 to-orange-600",
+            description: "The practice of keeping the Divine in your consciousness at all times. Through meditation, prayer, and recitation of Gurbani, a Sikh remains connected to Waheguru. It is the foundation of spiritual life - remembering the One who created all.",
+            practices: ["Daily recitation of Japji Sahib", "Simran (repetition of Waheguru)", "Listening to Kirtan", "Studying Gurbani"]
+        },
+        {
+            name: "Kirat Karni",
+            gurmukhi: "ਕਿਰਤ ਕਰਨੀ",
+            meaning: "Earning an honest living",
+            icon: "💼",
+            color: "from-blue-500 to-indigo-600",
+            description: "To live by the sweat of one's brow - earning through honest, ethical means without exploitation or fraud. A Sikh does not beg, steal, or take advantage of others. Work is worship, and every occupation is honored when done with integrity.",
+            practices: ["Honest labor regardless of profession", "No cheating or exploitation", "Fair treatment of workers", "Giving back through Dasvandh (10%)"]
+        },
+        {
+            name: "Vand Chakna",
+            gurmukhi: "ਵੰਡ ਛਕਣਾ",
+            meaning: "Sharing with others",
+            icon: "🤝",
+            color: "from-emerald-500 to-teal-600",
+            description: "Sharing what you have with those in need - be it food, wealth, time, or skills. The institution of Langar (free community kitchen) is the living embodiment of this principle, where millions are fed daily regardless of background.",
+            practices: ["Serving in Langar (community kitchen)", "Dasvandh (donating 10% of income)", "Helping those in need", "Seva (selfless service)"]
+        }
+    ];
 
-        <div className="container mx-auto px-6 relative z-10">
-            <motion.div className="text-center mb-20" {...fadeInUp}>
-                <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">The Foundation</h2>
-                <p className="text-2xl text-amber-500/80 font-serif">ਮੁੱਖ ਕਦਰਾਂ-ਕੀਮਤਾਂ</p>
-            </motion.div>
+    const fiveKsData = [
+        {
+            name: "Kesh",
+            gurmukhi: "ਕੇਸ",
+            meaning: "Uncut Hair",
+            icon: "💇",
+            color: "from-purple-500 to-violet-600",
+            description: "Keeping hair in its natural, uncut form as God intended. Covered with a turban (Dastar), it represents spirituality, devotion, and acceptance of God's will. It is a crown of sovereignty and self-respect.",
+            symbolism: "Spirituality, acceptance of God's will, and identity"
+        },
+        {
+            name: "Kangha",
+            gurmukhi: "ਕੰਘਾ",
+            meaning: "Wooden Comb",
+            icon: "🪮",
+            color: "from-amber-500 to-yellow-600",
+            description: "A small wooden comb traditionally tucked in the hair. It represents cleanliness, discipline, and order. Just as one combs the hair twice daily, one must also comb the mind - removing tangles of ego and negativity.",
+            symbolism: "Cleanliness, discipline, and ordered spiritual life"
+        },
+        {
+            name: "Kara",
+            gurmukhi: "ਕੜਾ",
+            meaning: "Steel Bracelet",
+            icon: "⭕",
+            color: "from-slate-400 to-slate-600",
+            description: "A simple steel bracelet worn on the wrist. Its circular shape represents the eternal nature of God - no beginning, no end. Steel symbolizes strength. It serves as a constant reminder of one's commitment to righteousness.",
+            symbolism: "Eternal bond with God, restraint from wrong actions"
+        },
+        {
+            name: "Kachera",
+            gurmukhi: "ਕਛਹਿਰਾ",
+            meaning: "Cotton Undergarment",
+            icon: "👖",
+            color: "from-sky-500 to-cyan-600",
+            description: "A specially designed cotton undergarment representing modesty, self-control, and moral character. It symbolizes the commitment to marital fidelity and chastity - treating all with respect and dignity.",
+            symbolism: "Self-control, modesty, and moral restraint"
+        },
+        {
+            name: "Kirpan",
+            gurmukhi: "ਕਿਰਪਾਨ",
+            meaning: "Ceremonial Sword",
+            icon: "⚔️",
+            color: "from-red-500 to-rose-600",
+            description: "A sword representing courage, self-defense, and protection of the weak. The word comes from 'Kirpa' (mercy) and 'Aan' (honor). A Sikh is a Sant-Sipahi (Saint-Soldier) - peaceful but ready to defend justice.",
+            symbolism: "Courage, honor, and protection of the oppressed"
+        }
+    ];
 
-            {/* Three Pillars - Glassmorphism */}
-            <motion.div
-                className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-24"
-                variants={staggerContainer}
-                initial="initial"
-                whileInView="whileInView"
-                viewport={{ once: true }}
-            >
-                {sikhValues.map((value, index) => (
-                    <motion.div
-                        key={value.name}
-                        className="relative group"
-                        variants={{
-                            initial: { opacity: 0, y: 50 },
-                            whileInView: { opacity: 1, y: 0, transition: { duration: 0.6, delay: index * 0.15 } }
-                        }}
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-indigo-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <div className="relative p-10 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 hover:border-amber-500/30 transition-all duration-500 h-full">
-                            <div className="text-6xl mb-6">{value.icon}</div>
-                            <h3 className="text-2xl font-bold text-white mb-2">{value.name}</h3>
-                            <p className="text-amber-400 font-serif text-lg mb-4">{value.gurmukhi}</p>
-                            <p className="text-slate-400 leading-relaxed">{value.meaning}</p>
-                        </div>
-                    </motion.div>
-                ))}
-            </motion.div>
+    const [expandedK, setExpandedK] = useState<string | null>(null);
 
-            {/* Five Ks */}
-            <motion.div {...fadeInUp}>
-                <h3 className="text-3xl font-bold text-white text-center mb-12">The Five Ks <span className="text-amber-500/80 font-serif">ਪੰਜ ਕਕਾਰ</span></h3>
-                <div className="flex flex-wrap justify-center gap-6">
-                    {fiveKs.map((k, index) => (
+    return (
+        <section className="py-32 bg-slate-950 relative overflow-hidden">
+            {/* Background accents */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-amber-900/15 to-transparent rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-gradient-to-t from-indigo-900/10 to-transparent rounded-full blur-3xl" />
+
+            <div className="container mx-auto px-6 relative z-10">
+                {/* Section Header */}
+                <motion.div
+                    className="text-center mb-20"
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4">The Foundation</h2>
+                    <p className="text-2xl md:text-3xl text-amber-500/80 font-serif mb-6">ਸਿੱਖੀ ਦੀ ਨੀਂਹ</p>
+                    <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+                        Guru Nanak Dev Ji gave humanity three golden principles for living a meaningful life.
+                        These form the foundation upon which all Sikh practice is built.
+                    </p>
+                </motion.div>
+
+                {/* Three Pillars - Enhanced */}
+                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-32">
+                    {pillarsData.map((pillar, index) => (
+                        <motion.div
+                            key={pillar.name}
+                            className="relative group"
+                            initial={{ opacity: 0, y: 50 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6, delay: index * 0.15 }}
+                        >
+                            {/* Glow effect */}
+                            <div className={`absolute inset-0 bg-gradient-to-br ${pillar.color} rounded-3xl blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
+
+                            <div className="relative p-8 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-500 h-full">
+                                {/* Icon */}
+                                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${pillar.color} flex items-center justify-center text-3xl mb-6 shadow-lg`}>
+                                    {pillar.icon}
+                                </div>
+
+                                {/* Title */}
+                                <h3 className="text-2xl font-bold text-white mb-1">{pillar.name}</h3>
+                                <p className="text-amber-400 font-serif text-lg mb-4">{pillar.gurmukhi}</p>
+
+                                {/* Description */}
+                                <p className="text-slate-300 leading-relaxed mb-6">{pillar.description}</p>
+
+                                {/* Practices */}
+                                <div className="space-y-2">
+                                    <p className="text-xs uppercase tracking-wider text-slate-500 mb-2">Daily Practices</p>
+                                    {pillar.practices.map((practice, i) => (
+                                        <div key={i} className="flex items-center gap-2 text-sm text-slate-400">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                            {practice}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Divider */}
+                <div className="flex items-center justify-center gap-4 mb-20">
+                    <div className="h-px w-24 bg-gradient-to-r from-transparent to-amber-500/50" />
+                    <div className="w-3 h-3 rotate-45 border-2 border-amber-500/50" />
+                    <div className="h-px w-24 bg-gradient-to-l from-transparent to-amber-500/50" />
+                </div>
+
+                {/* Five Ks Header */}
+                <motion.div
+                    className="text-center mb-16"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <h3 className="text-3xl md:text-5xl font-bold text-white mb-4">
+                        The Five Ks
+                    </h3>
+                    <p className="text-2xl text-amber-500/80 font-serif mb-4">ਪੰਜ ਕਕਾਰ</p>
+                    <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+                        Bestowed by Guru Gobind Singh Ji upon the Khalsa in 1699, these five articles of faith
+                        are worn by every initiated Sikh as a uniform of spiritual commitment and readiness.
+                    </p>
+                </motion.div>
+
+                {/* Five Ks - Interactive Cards */}
+                <div className="grid md:grid-cols-5 gap-4 max-w-6xl mx-auto">
+                    {fiveKsData.map((k, index) => (
                         <motion.div
                             key={k.name}
-                            className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 w-44 text-center hover:bg-white/10 hover:border-amber-500/30 transition-all duration-300"
+                            className={`relative cursor-pointer transition-all duration-500 ${expandedK === k.name ? 'md:col-span-2 row-span-2' : ''
+                                }`}
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
-                            whileHover={{ y: -5 }}
+                            onClick={() => setExpandedK(expandedK === k.name ? null : k.name)}
+                            layout
                         >
-                            <div className="text-4xl mb-3">{k.icon}</div>
-                            <h4 className="text-white font-bold text-lg">{k.name}</h4>
-                            <p className="text-amber-400 font-serif text-sm">{k.gurmukhi}</p>
-                            <p className="text-slate-500 text-xs mt-3">{k.meaning}</p>
+                            <div className={`relative p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-amber-500/30 transition-all duration-300 h-full ${expandedK === k.name ? 'bg-gradient-to-br from-white/15 to-white/5' : ''
+                                }`}>
+                                {/* Icon */}
+                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${k.color} flex items-center justify-center text-2xl mb-4 shadow-lg`}>
+                                    {k.icon}
+                                </div>
+
+                                {/* Title */}
+                                <h4 className="text-xl font-bold text-white mb-1">{k.name}</h4>
+                                <p className="text-amber-400 font-serif text-sm mb-2">{k.gurmukhi}</p>
+                                <p className="text-slate-400 text-sm">{k.meaning}</p>
+
+                                {/* Expanded Content */}
+                                <AnimatePresence>
+                                    {expandedK === k.name && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="mt-4 pt-4 border-t border-white/10"
+                                        >
+                                            <p className="text-slate-300 text-sm leading-relaxed mb-3">
+                                                {k.description}
+                                            </p>
+                                            <p className="text-xs text-amber-500/80 italic">
+                                                ✨ {k.symbolism}
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                {/* Expand indicator */}
+                                <div className="absolute top-4 right-4">
+                                    <motion.div
+                                        animate={{ rotate: expandedK === k.name ? 180 : 0 }}
+                                        className="text-slate-500"
+                                    >
+                                        <ChevronDown size={16} />
+                                    </motion.div>
+                                </div>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
-            </motion.div>
-        </div>
-    </section>
-);
+
+                {/* Bottom Quote */}
+                <motion.div
+                    className="mt-20 text-center"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <p className="text-xl md:text-2xl text-slate-400 font-light max-w-3xl mx-auto italic">
+                        "ਰਹਿਤ ਪਿਆਰੀ ਮੁਝ ਕੋ ਸਿੱਖ ਪਿਆਰਾ ਨਾਹਿ"
+                    </p>
+                    <p className="text-slate-500 mt-2 text-sm">
+                        "The discipline is dear to me, not the Sikh without it" — Guru Gobind Singh Ji
+                    </p>
+                </motion.div>
+            </div>
+        </section>
+    );
+};
+
 
 // ============================================
 // GURUS SECTION - ALTERNATING LAYOUT
