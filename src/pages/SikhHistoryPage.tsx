@@ -102,7 +102,7 @@ const HeroSection: React.FC = () => (
 );
 
 // ============================================
-// CORE VALUES - FOUNDATION SECTION (ENHANCED)
+// CORE VALUES - FOUNDATION SECTION (WITH IMAGES)
 // ============================================
 const ValuesSection: React.FC = () => {
     const pillarsData = [
@@ -110,7 +110,7 @@ const ValuesSection: React.FC = () => {
             name: "Naam Japna",
             gurmukhi: "ਨਾਮ ਜਪਣਾ",
             meaning: "Meditating on God's Name",
-            icon: "🙏",
+            image: "/images/history/foundation/naam_japna.webp",
             color: "from-amber-500 to-orange-600",
             description: "The practice of keeping the Divine in your consciousness at all times. Through meditation, prayer, and recitation of Gurbani, a Sikh remains connected to Waheguru. It is the foundation of spiritual life - remembering the One who created all.",
             practices: ["Daily recitation of Japji Sahib", "Simran (repetition of Waheguru)", "Listening to Kirtan", "Studying Gurbani"]
@@ -119,7 +119,7 @@ const ValuesSection: React.FC = () => {
             name: "Kirat Karni",
             gurmukhi: "ਕਿਰਤ ਕਰਨੀ",
             meaning: "Earning an honest living",
-            icon: "💼",
+            image: "/images/history/foundation/kirat_karni.webp",
             color: "from-blue-500 to-indigo-600",
             description: "To live by the sweat of one's brow - earning through honest, ethical means without exploitation or fraud. A Sikh does not beg, steal, or take advantage of others. Work is worship, and every occupation is honored when done with integrity.",
             practices: ["Honest labor regardless of profession", "No cheating or exploitation", "Fair treatment of workers", "Giving back through Dasvandh (10%)"]
@@ -128,7 +128,7 @@ const ValuesSection: React.FC = () => {
             name: "Vand Chakna",
             gurmukhi: "ਵੰਡ ਛਕਣਾ",
             meaning: "Sharing with others",
-            icon: "🤝",
+            image: "/images/history/foundation/vand_chakna.webp",
             color: "from-emerald-500 to-teal-600",
             description: "Sharing what you have with those in need - be it food, wealth, time, or skills. The institution of Langar (free community kitchen) is the living embodiment of this principle, where millions are fed daily regardless of background.",
             practices: ["Serving in Langar (community kitchen)", "Dasvandh (donating 10% of income)", "Helping those in need", "Seva (selfless service)"]
@@ -140,50 +140,55 @@ const ValuesSection: React.FC = () => {
             name: "Kesh",
             gurmukhi: "ਕੇਸ",
             meaning: "Uncut Hair",
-            icon: "💇",
+            image: "/images/history/fiveks/kesh.webp",
             color: "from-purple-500 to-violet-600",
             description: "Keeping hair in its natural, uncut form as God intended. Covered with a turban (Dastar), it represents spirituality, devotion, and acceptance of God's will. It is a crown of sovereignty and self-respect.",
-            symbolism: "Spirituality, acceptance of God's will, and identity"
+            symbolism: "Spirituality, acceptance of God's will, and identity",
+            verse: "ਸਾਬਤ ਸੂਰਤ ਰੱਬ ਦੀ, ਭੰਨੇ ਬੇਈਮਾਨ"
         },
         {
             name: "Kangha",
             gurmukhi: "ਕੰਘਾ",
             meaning: "Wooden Comb",
-            icon: "🪮",
+            image: "/images/history/fiveks/kangha.webp",
             color: "from-amber-500 to-yellow-600",
             description: "A small wooden comb traditionally tucked in the hair. It represents cleanliness, discipline, and order. Just as one combs the hair twice daily, one must also comb the mind - removing tangles of ego and negativity.",
-            symbolism: "Cleanliness, discipline, and ordered spiritual life"
+            symbolism: "Cleanliness, discipline, and ordered spiritual life",
+            verse: "ਕੰਘਾ ਦੋਨੋਂ ਵਕਤ ਕਰ, ਪਾਗ ਚੁੰਨੇ ਕਰ ਬਾਂਧਈ"
         },
         {
             name: "Kara",
             gurmukhi: "ਕੜਾ",
             meaning: "Steel Bracelet",
-            icon: "⭕",
+            image: "/images/history/fiveks/kara.webp",
             color: "from-slate-400 to-slate-600",
             description: "A simple steel bracelet worn on the wrist. Its circular shape represents the eternal nature of God - no beginning, no end. Steel symbolizes strength. It serves as a constant reminder of one's commitment to righteousness.",
-            symbolism: "Eternal bond with God, restraint from wrong actions"
+            symbolism: "Eternal bond with God, restraint from wrong actions",
+            verse: "ਕੜਾ ਕਰ ਕਾਰਣ ਆਪਣੇ, ਹੱਥ ਕੂ ਬੰਧਾਵੈ"
         },
         {
             name: "Kachera",
             gurmukhi: "ਕਛਹਿਰਾ",
             meaning: "Cotton Undergarment",
-            icon: "👖",
+            image: "/images/history/fiveks/kachera.webp",
             color: "from-sky-500 to-cyan-600",
             description: "A specially designed cotton undergarment representing modesty, self-control, and moral character. It symbolizes the commitment to marital fidelity and chastity - treating all with respect and dignity.",
-            symbolism: "Self-control, modesty, and moral restraint"
+            symbolism: "Self-control, modesty, and moral restraint",
+            verse: "ਕਛ ਪਹਿਨੀਏ ਧਰਮ ਪੁੱਤ, ਧਰਮ ਪਾਲਨ ਹੇਤ"
         },
         {
             name: "Kirpan",
             gurmukhi: "ਕਿਰਪਾਨ",
             meaning: "Ceremonial Sword",
-            icon: "⚔️",
+            image: "/images/history/fiveks/kirpan.webp",
             color: "from-red-500 to-rose-600",
             description: "A sword representing courage, self-defense, and protection of the weak. The word comes from 'Kirpa' (mercy) and 'Aan' (honor). A Sikh is a Sant-Sipahi (Saint-Soldier) - peaceful but ready to defend justice.",
-            symbolism: "Courage, honor, and protection of the oppressed"
+            symbolism: "Courage, honor, and protection of the oppressed",
+            verse: "ਕਿਰਪਾਨ ਅਰ ਆਨ ਕੋ ਮੇਲ ਕੇ ਕਿਰਪਾਨ"
         }
     ];
 
-    const [expandedK, setExpandedK] = useState<string | null>(null);
+    const [selectedK, setSelectedK] = useState<typeof fiveKsData[0] | null>(null);
 
     return (
         <section className="py-32 bg-slate-950 relative overflow-hidden">
@@ -208,7 +213,7 @@ const ValuesSection: React.FC = () => {
                     </p>
                 </motion.div>
 
-                {/* Three Pillars - Enhanced */}
+                {/* Three Pillars - With Images */}
                 <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-32">
                     {pillarsData.map((pillar, index) => (
                         <motion.div
@@ -222,28 +227,39 @@ const ValuesSection: React.FC = () => {
                             {/* Glow effect */}
                             <div className={`absolute inset-0 bg-gradient-to-br ${pillar.color} rounded-3xl blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
 
-                            <div className="relative p-8 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-500 h-full">
-                                {/* Icon */}
-                                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${pillar.color} flex items-center justify-center text-3xl mb-6 shadow-lg`}>
-                                    {pillar.icon}
+                            <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-500 h-full overflow-hidden">
+                                {/* Image */}
+                                <div className="relative h-48 overflow-hidden">
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${pillar.color} opacity-20`} />
+                                    <img
+                                        src={pillar.image}
+                                        alt={pillar.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
                                 </div>
 
-                                {/* Title */}
-                                <h3 className="text-2xl font-bold text-white mb-1">{pillar.name}</h3>
-                                <p className="text-amber-400 font-serif text-lg mb-4">{pillar.gurmukhi}</p>
+                                <div className="p-8 -mt-12 relative">
+                                    {/* Title */}
+                                    <h3 className="text-2xl font-bold text-white mb-1">{pillar.name}</h3>
+                                    <p className="text-amber-400 font-serif text-lg mb-4">{pillar.gurmukhi}</p>
 
-                                {/* Description */}
-                                <p className="text-slate-300 leading-relaxed mb-6">{pillar.description}</p>
+                                    {/* Description */}
+                                    <p className="text-slate-300 leading-relaxed mb-6 text-sm">{pillar.description}</p>
 
-                                {/* Practices */}
-                                <div className="space-y-2">
-                                    <p className="text-xs uppercase tracking-wider text-slate-500 mb-2">Daily Practices</p>
-                                    {pillar.practices.map((practice, i) => (
-                                        <div key={i} className="flex items-center gap-2 text-sm text-slate-400">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                            {practice}
-                                        </div>
-                                    ))}
+                                    {/* Practices */}
+                                    <div className="space-y-2">
+                                        <p className="text-xs uppercase tracking-wider text-slate-500 mb-2">Daily Practices</p>
+                                        {pillar.practices.map((practice, i) => (
+                                            <div key={i} className="flex items-center gap-2 text-sm text-slate-400">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                                {practice}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
@@ -275,64 +291,117 @@ const ValuesSection: React.FC = () => {
                     </p>
                 </motion.div>
 
-                {/* Five Ks - Interactive Cards */}
-                <div className="grid md:grid-cols-5 gap-4 max-w-6xl mx-auto">
+                {/* Five Ks - Elegant Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-5xl mx-auto">
                     {fiveKsData.map((k, index) => (
-                        <motion.div
+                        <motion.button
                             key={k.name}
-                            className={`relative cursor-pointer transition-all duration-500 ${expandedK === k.name ? 'md:col-span-2 row-span-2' : ''
-                                }`}
+                            className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 hover:border-amber-500/50 transition-all duration-500"
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
-                            onClick={() => setExpandedK(expandedK === k.name ? null : k.name)}
-                            layout
+                            onClick={() => setSelectedK(k)}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                         >
-                            <div className={`relative p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-amber-500/30 transition-all duration-300 h-full ${expandedK === k.name ? 'bg-gradient-to-br from-white/15 to-white/5' : ''
-                                }`}>
-                                {/* Icon */}
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${k.color} flex items-center justify-center text-2xl mb-4 shadow-lg`}>
-                                    {k.icon}
-                                </div>
+                            {/* Background gradient */}
+                            <div className={`absolute inset-0 bg-gradient-to-br ${k.color} opacity-20 group-hover:opacity-40 transition-opacity duration-300`} />
 
-                                {/* Title */}
-                                <h4 className="text-xl font-bold text-white mb-1">{k.name}</h4>
-                                <p className="text-amber-400 font-serif text-sm mb-2">{k.gurmukhi}</p>
-                                <p className="text-slate-400 text-sm">{k.meaning}</p>
+                            {/* Image */}
+                            <img
+                                src={k.image}
+                                alt={k.name}
+                                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-500"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                }}
+                            />
 
-                                {/* Expanded Content */}
-                                <AnimatePresence>
-                                    {expandedK === k.name && (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            className="mt-4 pt-4 border-t border-white/10"
-                                        >
-                                            <p className="text-slate-300 text-sm leading-relaxed mb-3">
-                                                {k.description}
-                                            </p>
-                                            <p className="text-xs text-amber-500/80 italic">
-                                                ✨ {k.symbolism}
-                                            </p>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
 
-                                {/* Expand indicator */}
-                                <div className="absolute top-4 right-4">
-                                    <motion.div
-                                        animate={{ rotate: expandedK === k.name ? 180 : 0 }}
-                                        className="text-slate-500"
-                                    >
-                                        <ChevronDown size={16} />
-                                    </motion.div>
-                                </div>
+                            {/* Content */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-end p-4 text-center">
+                                <h4 className="text-xl font-bold text-white mb-1 group-hover:text-amber-400 transition-colors">{k.name}</h4>
+                                <p className="text-amber-400/80 font-serif text-sm">{k.gurmukhi}</p>
                             </div>
-                        </motion.div>
+
+                            {/* Hover indicator */}
+                            <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ChevronRight size={16} className="text-white" />
+                            </div>
+                        </motion.button>
                     ))}
                 </div>
+
+                {/* Five K Detail Modal */}
+                <AnimatePresence>
+                    {selectedK && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                            onClick={() => setSelectedK(null)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                className="bg-slate-900 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-slate-700"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                {/* Header with Image */}
+                                <div className="relative h-64 overflow-hidden">
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${selectedK.color} opacity-30`} />
+                                    <img
+                                        src={selectedK.image}
+                                        alt={selectedK.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
+
+                                    {/* Close button */}
+                                    <button
+                                        onClick={() => setSelectedK(null)}
+                                        className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors"
+                                    >
+                                        <X size={24} />
+                                    </button>
+
+                                    {/* Title overlay */}
+                                    <div className="absolute bottom-6 left-8">
+                                        <p className="text-amber-400 font-serif text-2xl mb-1">{selectedK.gurmukhi}</p>
+                                        <h2 className="text-4xl font-bold text-white">{selectedK.name}</h2>
+                                        <p className="text-slate-400 mt-1">{selectedK.meaning}</p>
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-8">
+                                    <p className="text-slate-300 leading-relaxed mb-6">
+                                        {selectedK.description}
+                                    </p>
+
+                                    {/* Symbolism */}
+                                    <div className="bg-white/5 rounded-xl p-4 mb-6">
+                                        <p className="text-xs uppercase tracking-wider text-slate-500 mb-2">Symbolism</p>
+                                        <p className="text-amber-400">{selectedK.symbolism}</p>
+                                    </div>
+
+                                    {/* Related Verse */}
+                                    <div className="border-l-2 border-amber-500/50 pl-4">
+                                        <p className="text-amber-500/80 font-serif text-lg italic">{selectedK.verse}</p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Bottom Quote */}
                 <motion.div
