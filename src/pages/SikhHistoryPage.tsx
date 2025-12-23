@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Layout } from '../components/Layout';
-import { gurus, historicalEvents, sikhValues, fiveKs, type Guru, type HistoricalEvent } from '../data/sikhHistory';
-import { ChevronLeft, ChevronRight, BookOpen, Sword, Calendar, MapPin, X, Users, Scroll, Heart, ArrowDown } from 'lucide-react';
+import { gurus, sikhValues, fiveKs, type Guru } from '../data/sikhHistory';
+import { ChevronRight, BookOpen, X, Users, Scroll, Heart, ArrowDown, ChevronDown } from 'lucide-react';
 
 // ============================================
 // ANIMATION VARIANTS
@@ -561,108 +561,348 @@ const GuruDetailModal: React.FC<{ guru: Guru; onClose: () => void }> = ({ guru, 
 };
 
 // ============================================
-// TIMELINE SECTION
+// APPLE-STYLE TIMELINE DATA
 // ============================================
-const TimelineEvent: React.FC<{ event: HistoricalEvent; index: number }> = ({ event, index }) => {
+const timelineData = [
+    {
+        id: 1,
+        year: 1469,
+        title: "Birth of Guru Nanak Dev Ji",
+        subtitle: "ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ ਦਾ ਜਨਮ",
+        description: "In the village of Talwandi (now Nankana Sahib, Pakistan), a child was born who would change the spiritual landscape of South Asia forever. Guru Nanak Dev Ji, the founder of Sikhism, brought a message of equality, devotion to one God, and honest living.",
+        image: "/images/history/timeline/event_1.png",
+        category: "birth"
+    },
+    {
+        id: 2,
+        year: 1521,
+        title: "Kartarpur Established",
+        subtitle: "ਕਰਤਾਰਪੁਰ ਦੀ ਸਥਾਪਨਾ",
+        description: "After decades of traveling across India, Tibet, Arabia, and beyond, Guru Nanak Dev Ji settled on the banks of the Ravi River. Here, he established Kartarpur - the first Sikh community - where people lived together as equals, working the land and sharing meals regardless of caste.",
+        image: "/images/history/timeline/event_2.png",
+        category: "milestone"
+    },
+    {
+        id: 3,
+        year: 1541,
+        title: "Gurmukhi Script Standardized",
+        subtitle: "ਗੁਰਮੁਖੀ ਲਿਪੀ",
+        description: "Guru Angad Dev Ji refined and standardized the Gurmukhi script, creating a writing system that would preserve Gurbani for eternity. This democratized spiritual knowledge - no longer was it locked in Sanskrit known only to Brahmins.",
+        image: "/images/history/timeline/event_3.png",
+        category: "milestone"
+    },
+    {
+        id: 4,
+        year: 1552,
+        title: "Langar Institution Formalized",
+        subtitle: "ਲੰਗਰ ਦੀ ਸੰਸਥਾ",
+        description: "\"Pehle Pangat, Phir Sangat\" - First eat together, then worship together. Guru Amar Das Ji made the community kitchen mandatory for all visitors, including Emperor Akbar. Kings and beggars sat as equals, destroying centuries of caste discrimination.",
+        image: "/images/history/timeline/event_4.png",
+        category: "milestone"
+    },
+    {
+        id: 5,
+        year: 1577,
+        title: "Amritsar Founded",
+        subtitle: "ਅੰਮ੍ਰਿਤਸਰ ਦੀ ਸਥਾਪਨਾ",
+        description: "Guru Ram Das Ji began excavating the sacred pool that would become the heart of Sikhism. He invited artisans from 52 trades to settle there, creating both a spiritual center and a thriving commercial hub - the city of Ramdaspur, now known as Amritsar.",
+        image: "/images/history/timeline/event_5.png",
+        category: "milestone"
+    },
+    {
+        id: 6,
+        year: 1604,
+        title: "Adi Granth Compiled",
+        subtitle: "ਆਦਿ ਗ੍ਰੰਥ ਦਾ ਸੰਕਲਨ",
+        description: "Guru Arjan Dev Ji compiled the sacred scriptures of the Sikhs, including writings from Hindu and Muslim saints alongside the Gurus - revolutionary for its time. Bhai Gurdas served as scribe, and the Adi Granth was installed in the newly completed Harmandir Sahib.",
+        image: "/images/history/timeline/event_6.png",
+        category: "milestone"
+    },
+    {
+        id: 7,
+        year: 1606,
+        title: "First Sikh Martyrdom",
+        subtitle: "ਪਹਿਲੀ ਸ਼ਹੀਦੀ",
+        description: "Guru Arjan Dev Ji became the first Sikh martyr, tortured for five days by Mughal Emperor Jahangir. Made to sit on a burning hot plate with hot sand poured on him, he remained in divine peace, reciting \"Tera Bhana Meetha Laage\" - Sweet is Your Will, O Lord.",
+        image: "/images/history/timeline/event_7.png",
+        category: "martyrdom"
+    },
+    {
+        id: 8,
+        year: 1609,
+        title: "Akal Takht Established",
+        subtitle: "ਅਕਾਲ ਤਖ਼ਤ ਦੀ ਸਥਾਪਨਾ",
+        description: "Guru Hargobind Sahib Ji, just 11 years old, donned two swords representing Miri (temporal power) and Piri (spiritual power). He built the Akal Takht - Throne of the Timeless One - transforming Sikhs into Saint-Soldiers prepared to defend the oppressed.",
+        image: "/images/history/timeline/event_8.png",
+        category: "milestone"
+    },
+    {
+        id: 9,
+        year: 1675,
+        title: "Hind di Chadar",
+        subtitle: "ਹਿੰਦ ਦੀ ਚਾਦਰ",
+        description: "When Kashmiri Pandits begged for protection from forced conversion, Guru Tegh Bahadur Ji offered his own head. \"Protect them by converting me first,\" he told Aurangzeb. Martyred at Chandni Chowk, Delhi, he became the Shield of India - a leader of one faith dying for another.",
+        image: "/images/history/timeline/event_9.png",
+        category: "martyrdom"
+    },
+    {
+        id: 10,
+        year: 1699,
+        title: "Birth of the Khalsa",
+        subtitle: "ਖ਼ਾਲਸਾ ਪੰਥ ਦੀ ਸਾਜਨਾ",
+        description: "On Vaisakhi, before thousands, Guru Gobind Singh Ji asked for heads. Five brave men stepped forward from five different castes - becoming the Panj Pyare. The Khalsa was born: a brotherhood of equals, bound by the Five Ks, ready to fight tyranny anywhere.",
+        image: "/images/history/timeline/event_10.png",
+        category: "milestone"
+    },
+    {
+        id: 11,
+        year: 1704,
+        title: "Battle of Chamkaur",
+        subtitle: "ਚਮਕੌਰ ਦੀ ਜੰਗ",
+        description: "Forty Sikhs against ten thousand. In a small mud fortress, Guru Gobind Singh Ji's elder sons - Sahibzada Ajit Singh and Jujhar Singh - fought to their last breath. This legendary last stand exemplifies courage against impossible odds.",
+        image: "/images/history/timeline/event_11.png",
+        category: "battle"
+    },
+    {
+        id: 12,
+        year: 1704,
+        title: "Martyrdom of the Sahibzade",
+        subtitle: "ਛੋਟੇ ਸਾਹਿਬਜ਼ਾਦਿਆਂ ਦੀ ਸ਼ਹੀਦੀ",
+        description: "At Sirhind, the youngest sons of Guru Gobind Singh Ji - Sahibzada Zorawar Singh (9) and Fateh Singh (6) - refused to convert to Islam. They were bricked alive inside a wall. Their grandmother Mata Gujri Ji died upon hearing the news.",
+        image: "/images/history/timeline/event_12.png",
+        category: "martyrdom"
+    },
+    {
+        id: 13,
+        year: 1708,
+        title: "Guru Granth Sahib Eternal",
+        subtitle: "ਸ਼ਬਦ ਗੁਰੂ",
+        description: "At Nanded, Guru Gobind Singh Ji bowed before the Guru Granth Sahib, declaring: \"All Sikhs are commanded to accept the Granth as their Guru.\" The line of human Gurus ended. The eternal Word became the everlasting guide.",
+        image: "/images/history/timeline/event_13.png",
+        category: "milestone"
+    },
+    {
+        id: 14,
+        year: 1799,
+        title: "Rise of the Sikh Empire",
+        subtitle: "ਸਿੱਖ ਰਾਜ",
+        description: "Maharaja Ranjit Singh unified the Sikh confederacies and established the powerful Sikh Empire. From the Khyber Pass to the Himalayas, the Khalsa Raj brought peace, religious tolerance, and prosperity to Punjab for half a century.",
+        image: "/images/history/timeline/event_14.png",
+        category: "milestone"
+    },
+    {
+        id: 15,
+        year: 1984,
+        title: "Resilience & Healing",
+        subtitle: "ਸਿਦਕ ਤੇ ਇਲਾਜ",
+        description: "June 1984 left deep wounds in the Sikh community. Yet, like a flame that cannot be extinguished, the spirit of the Khalsa endured. The community rebuilt, healed, and emerged stronger - a testament to the unbreakable faith passed down through generations.",
+        image: "/images/history/timeline/event_15.png",
+        category: "remembrance"
+    },
+    {
+        id: 16,
+        year: 2019,
+        title: "550th Prakash Purab",
+        subtitle: "550ਵਾਂ ਪ੍ਰਕਾਸ਼ ਪੁਰਬ",
+        description: "The world celebrated 550 years of Guru Nanak Dev Ji. The Kartarpur Corridor opened, connecting Sikhs across borders. Millions gathered globally, united in gratitude for the timeless message: There is One God, and all humanity is one.",
+        image: "/images/history/timeline/event_16.png",
+        category: "celebration"
+    }
+];
+
+// ============================================
+// PARALLAX TIMELINE EVENT (Apple-style)
+// ============================================
+const AppleTimelineEvent: React.FC<{
+    event: typeof timelineData[0];
+    index: number;
+    isReversed: boolean;
+}> = ({ event, index, isReversed }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start end", "end start"]
+    });
+
+    const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+    const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+    const scale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.95, 1, 1, 0.95]);
+
     const getCategoryColor = () => {
         switch (event.category) {
-            case 'guru': return 'bg-amber-500';
-            case 'battle': return 'bg-red-500';
-            case 'milestone': return 'bg-blue-500';
-            default: return 'bg-green-500';
-        }
-    };
-
-    const getCategoryIcon = () => {
-        switch (event.category) {
-            case 'guru': return <BookOpen className="w-4 h-4" />;
-            case 'battle': return <Sword className="w-4 h-4" />;
-            case 'milestone': return <Calendar className="w-4 h-4" />;
-            default: return <MapPin className="w-4 h-4" />;
+            case 'birth': return 'from-amber-500/30 to-amber-900/50';
+            case 'martyrdom': return 'from-red-500/30 to-red-900/50';
+            case 'battle': return 'from-orange-500/30 to-orange-900/50';
+            case 'milestone': return 'from-blue-500/30 to-blue-900/50';
+            case 'remembrance': return 'from-slate-500/30 to-slate-900/50';
+            case 'celebration': return 'from-emerald-500/30 to-emerald-900/50';
+            default: return 'from-indigo-500/30 to-indigo-900/50';
         }
     };
 
     return (
         <motion.div
-            className="flex-shrink-0 w-80 group"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.05 }}
+            ref={containerRef}
+            className="relative min-h-screen flex items-center py-20"
+            style={{ opacity }}
         >
-            <div className="relative p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-amber-500/30 hover:bg-white/10 transition-all duration-300 h-full flex flex-col group-hover:-translate-y-2">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className={`p-2.5 rounded-xl ${getCategoryColor()} text-white shadow-lg`}>
-                        {getCategoryIcon()}
-                    </div>
-                    <span className="text-amber-400 font-bold text-2xl ml-auto">{event.year}</span>
-                </div>
+            {/* Background Image with Parallax */}
+            <motion.div
+                className="absolute inset-0 z-0"
+                style={{ y: imageY, scale }}
+            >
+                <div className={`absolute inset-0 bg-gradient-to-b ${getCategoryColor()} z-10`} />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent z-10" />
+                <img
+                    src={event.image}
+                    alt={event.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                        // Fallback to gradient if image not found
+                        (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                />
+            </motion.div>
 
-                <h4 className="text-white font-bold text-lg mb-2 leading-snug group-hover:text-amber-400 transition-colors">
-                    {event.title}
-                </h4>
-                <p className="text-slate-400 text-sm leading-relaxed flex-grow">
-                    {event.description}
-                </p>
+            {/* Content */}
+            <div className="container mx-auto px-6 relative z-20">
+                <div className={`flex flex-col ${isReversed ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} max-w-3xl ${isReversed ? 'md:ml-auto' : ''}`}>
+
+                    {/* Year - Large Display */}
+                    <motion.div
+                        className="mb-6"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 0.6 }}
+                    >
+                        <span className="text-8xl md:text-[12rem] font-bold text-white/10 leading-none block">
+                            {event.year}
+                        </span>
+                    </motion.div>
+
+                    {/* Subtitle in Gurmukhi */}
+                    <motion.p
+                        className="text-amber-400 font-serif text-xl md:text-2xl mb-3"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                    >
+                        {event.subtitle}
+                    </motion.p>
+
+                    {/* Title */}
+                    <motion.h3
+                        className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                        {event.title}
+                    </motion.h3>
+
+                    {/* Description */}
+                    <motion.p
+                        className="text-lg md:text-xl text-slate-300 leading-relaxed max-w-2xl"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                        {event.description}
+                    </motion.p>
+
+                    {/* Event Number Indicator */}
+                    <motion.div
+                        className="mt-8 flex items-center gap-3"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.4 }}
+                    >
+                        <div className="w-12 h-1 bg-amber-500/50 rounded-full" />
+                        <span className="text-slate-500 text-sm font-medium">
+                            {String(index + 1).padStart(2, '0')} / {String(timelineData.length).padStart(2, '0')}
+                        </span>
+                    </motion.div>
+                </div>
             </div>
+
+            {/* Scroll Indicator (only on first event) */}
+            {index === 0 && (
+                <motion.div
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                >
+                    <span className="text-slate-500 text-xs uppercase tracking-[0.2em]">Scroll to explore</span>
+                    <motion.div
+                        animate={{ y: [0, 8, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                        <ChevronDown className="w-5 h-5 text-slate-500" />
+                    </motion.div>
+                </motion.div>
+            )}
         </motion.div>
     );
 };
 
+// ============================================
+// APPLE-STYLE TIMELINE SECTION
+// ============================================
 const TimelineSection: React.FC = () => {
-    const [filter, setFilter] = useState<'all' | 'guru' | 'battle' | 'milestone'>('all');
-
-    const filteredEvents = filter === 'all'
-        ? historicalEvents
-        : historicalEvents.filter(e => e.category === filter);
-
     return (
-        <section className="py-32 bg-slate-950 border-t border-slate-800/50">
-            <div className="container mx-auto px-6">
-                <motion.div className="text-center mb-16" {...fadeInUp}>
-                    <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">Historical Timeline</h2>
-                    <p className="text-2xl text-amber-500/80 font-serif mb-8">ਇਤਿਹਾਸਕ ਸਮਾਂ-ਰੇਖਾ</p>
-
-                    {/* Filters */}
-                    <div className="flex justify-center flex-wrap gap-3">
-                        {[
-                            { id: 'all', label: 'All Events' },
-                            { id: 'guru', label: 'Gurus' },
-                            { id: 'battle', label: 'Battles' },
-                            { id: 'milestone', label: 'Milestones' }
-                        ].map((f) => (
-                            <button
-                                key={f.id}
-                                onClick={() => setFilter(f.id as any)}
-                                className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 border ${filter === f.id
-                                    ? 'bg-amber-500 text-slate-900 border-amber-500'
-                                    : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
-                                    }`}
-                            >
-                                {f.label}
-                            </button>
-                        ))}
-                    </div>
+        <section className="bg-slate-950 border-t border-slate-800/50">
+            {/* Section Header */}
+            <div className="py-32 text-center">
+                <motion.div {...fadeInUp}>
+                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4">
+                        Through the Ages
+                    </h2>
+                    <p className="text-2xl md:text-3xl text-amber-500/80 font-serif mb-6">
+                        ਇਤਿਹਾਸਕ ਸਫ਼ਰ
+                    </p>
+                    <p className="text-slate-400 text-lg max-w-2xl mx-auto px-6">
+                        550 years of faith, sacrifice, and unwavering devotion to truth.
+                        Scroll to journey through the defining moments of Sikh history.
+                    </p>
                 </motion.div>
-
-                {/* Timeline */}
-                <div className="overflow-x-auto pb-8 -mx-6 px-6" style={{ scrollbarWidth: 'none' }}>
-                    <div className="flex gap-6 min-w-max">
-                        <AnimatePresence mode="popLayout">
-                            {filteredEvents.map((event, index) => (
-                                <TimelineEvent key={event.id} event={event} index={index} />
-                            ))}
-                        </AnimatePresence>
-                    </div>
-                </div>
-
-                <p className="text-center text-slate-500 text-sm mt-6 flex items-center justify-center gap-2">
-                    <ChevronLeft size={14} /> Scroll to explore <ChevronRight size={14} />
-                </p>
             </div>
+
+            {/* Timeline Events */}
+            {timelineData.map((event, index) => (
+                <AppleTimelineEvent
+                    key={event.id}
+                    event={event}
+                    index={index}
+                    isReversed={index % 2 === 1}
+                />
+            ))}
+
+            {/* Closing Statement */}
+            <motion.div
+                className="py-32 text-center px-6"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+            >
+                <p className="text-2xl md:text-3xl text-slate-400 font-light max-w-3xl mx-auto leading-relaxed">
+                    The journey continues. Every Sikh carries this legacy forward,
+                    living the values of <span className="text-amber-400">equality</span>,
+                    <span className="text-amber-400"> service</span>, and
+                    <span className="text-amber-400"> devotion</span> in the modern world.
+                </p>
+            </motion.div>
         </section>
     );
 };
+
 
 // ============================================
 // FOOTER QUOTE
