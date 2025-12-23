@@ -30,10 +30,22 @@ const teacherSchema = z.object({
     videoIntro: z.string().url("Please provide a valid URL").optional().or(z.literal('')),
     weeklyAvailability: z.string().min(1, "Please select your availability"),
     sessionLengths: z.array(z.string()).min(1, "Select at least one session length"),
+    credentials: z.array(z.object({
+        blobName: z.string(),
+        docType: z.string(),
+        fileName: z.string(),
+    })).default([]),
     agreedToTerms: z.boolean().refine(val => val === true, "You must agree to the terms"),
 });
 
-type TeacherFormData = z.infer<typeof teacherSchema>;
+type TeacherFormData = z.input<typeof teacherSchema>;
+
+// Credential type for uploaded documents
+interface UploadedCredential {
+    blobName: string;
+    docType: string;
+    fileName: string;
+}
 
 // Timezone options
 const TIMEZONE_OPTIONS = [
@@ -86,6 +98,8 @@ export const TeacherOnboarding: React.FC = () => {
     const [photoUrl, setPhotoUrl] = useState('');
     const [uploading, setUploading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [credentials, setCredentials] = useState<UploadedCredential[]>([]);
+    const [uploadingCredential, setUploadingCredential] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, trigger, watch, setValue } = useForm<TeacherFormData>({
         resolver: zodResolver(teacherSchema),
@@ -95,10 +109,70 @@ export const TeacherOnboarding: React.FC = () => {
             targetAgeGroups: [],
             specializations: [],
             sessionLengths: ['60'],
+            credentials: [],
         }
     });
 
     const watchedFields = watch();
+
+    // Credential upload handler
+    const handleCredentialUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please upload a PDF or image file');
+            return;
+        }
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File must be under 5MB');
+            return;
+        }
+
+        setUploadingCredential(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('docType', docType);
+
+            const res = await fetch('/api/upload/credential', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!res.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const result = await res.json();
+            const newCredential: UploadedCredential = {
+                blobName: result.blobName,
+                docType: result.docType,
+                fileName: result.fileName || file.name,
+            };
+
+            const updatedCredentials = [...credentials, newCredential];
+            setCredentials(updatedCredentials);
+            setValue('credentials', updatedCredentials);
+        } catch (err) {
+            console.error('Credential upload error:', err);
+            alert('Failed to upload credential. Please try again.');
+        } finally {
+            setUploadingCredential(false);
+        }
+    };
+
+    // Remove a credential
+    const removeCredential = (index: number) => {
+        const updated = credentials.filter((_, i) => i !== index);
+        setCredentials(updated);
+        setValue('credentials', updated);
+    };
 
     // Photo upload handler with compression
     const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -444,6 +518,84 @@ export const TeacherOnboarding: React.FC = () => {
                                                 ))}
                                             </div>
                                             {errors.specializations && <p className="text-red-500 text-sm mt-1">{errors.specializations.message}</p>}
+                                        </div>
+
+                                        {/* Credentials Upload */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-secondary-700 mb-2">
+                                                Teaching Credentials (Optional)
+                                            </label>
+                                            <p className="text-xs text-secondary-500 mb-3">
+                                                Upload certificates, degrees, or qualifications. These help validate your profile and increase booking rates.
+                                            </p>
+
+                                            {/* Uploaded credentials list */}
+                                            {credentials.length > 0 && (
+                                                <div className="mb-3 space-y-2">
+                                                    {credentials.map((cred, index) => (
+                                                        <div key={index} className="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded-lg text-sm">
+                                                            <div className="flex items-center gap-2">
+                                                                <CheckCircle size={16} className="text-green-600" />
+                                                                <span className="text-secondary-700">{cred.fileName}</span>
+                                                                <span className="text-xs text-secondary-400">({cred.docType})</span>
+                                                            </div>
+                                                            <button type="button" onClick={() => removeCredential(index)} className="text-red-500 hover:text-red-700 text-xs">
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Upload buttons */}
+                                            <div className="flex flex-wrap gap-2">
+                                                <div>
+                                                    <input
+                                                        type="file"
+                                                        accept=".pdf,image/*"
+                                                        onChange={(e) => handleCredentialUpload(e, 'certificate')}
+                                                        className="hidden"
+                                                        id="cert-upload"
+                                                        disabled={uploadingCredential}
+                                                    />
+                                                    <label htmlFor="cert-upload">
+                                                        <Button type="button" variant="outline" size="sm" disabled={uploadingCredential} onClick={() => document.getElementById('cert-upload')?.click()}>
+                                                            {uploadingCredential ? 'Uploading...' : '+ Certificate'}
+                                                        </Button>
+                                                    </label>
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        type="file"
+                                                        accept=".pdf,image/*"
+                                                        onChange={(e) => handleCredentialUpload(e, 'degree')}
+                                                        className="hidden"
+                                                        id="degree-upload"
+                                                        disabled={uploadingCredential}
+                                                    />
+                                                    <label htmlFor="degree-upload">
+                                                        <Button type="button" variant="outline" size="sm" disabled={uploadingCredential} onClick={() => document.getElementById('degree-upload')?.click()}>
+                                                            {uploadingCredential ? 'Uploading...' : '+ Degree'}
+                                                        </Button>
+                                                    </label>
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        type="file"
+                                                        accept=".pdf,image/*"
+                                                        onChange={(e) => handleCredentialUpload(e, 'other')}
+                                                        className="hidden"
+                                                        id="other-upload"
+                                                        disabled={uploadingCredential}
+                                                    />
+                                                    <label htmlFor="other-upload">
+                                                        <Button type="button" variant="outline" size="sm" disabled={uploadingCredential} onClick={() => document.getElementById('other-upload')?.click()}>
+                                                            {uploadingCredential ? 'Uploading...' : '+ Other'}
+                                                        </Button>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-secondary-400 mt-2">PDF or images, max 5MB each</p>
                                         </div>
 
                                         <Input
