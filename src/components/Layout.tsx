@@ -104,6 +104,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <Link to="/learn" className="text-sm font-medium text-secondary-600 hover:text-primary-600">
                             Learn Free
                         </Link>
+                        <Link to="/history" className="text-sm font-medium text-secondary-600 hover:text-primary-600">
+                            History
+                        </Link>
                         {isLoading ? (
                             <span className="text-sm text-secondary-400">Loading...</span>
                         ) : user ? (

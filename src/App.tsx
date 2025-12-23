@@ -11,6 +11,7 @@ import { PaymentSuccess } from './pages/PaymentSuccess';
 import { PaymentCancelled } from './pages/PaymentCancelled';
 import { DashboardRouter } from './routes/DashboardRouter';
 import { LearnPage } from './pages/LearnPage';
+import { SikhHistoryPage } from './pages/SikhHistoryPage';
 import { useAuth } from './context/AuthContext';
 
 function AppContent() {
@@ -46,6 +47,7 @@ function AppContent() {
       <Route path="/availability" element={<AvailabilitySettings />} />
       <Route path="/messages" element={<ChatPage />} />
       <Route path="/learn" element={<LearnPage />} />
+      <Route path="/history" element={<SikhHistoryPage />} />
       <Route path="/payment/success" element={<PaymentSuccess />} />
       <Route path="/payment/cancelled" element={<PaymentCancelled />} />
     </Routes>
