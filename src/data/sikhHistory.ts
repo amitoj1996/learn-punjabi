@@ -19,13 +19,22 @@ export interface Guru {
     keyEvents: string[];
     color: string; // accent color for card
     image?: string; // path to image file
-    // New detailed fields
+    // Detailed fields
     family: GuruFamily;
     gurgaddi: string; // Date/Place of Guruship
     teachings: string[]; // Core principles
     baani?: string[]; // Major compositions
     battles?: string[]; // Major battles (for 6th and 10th Guru)
     legacy: string; // Long-term impact
+    // NEW: Extended profile fields
+    birthDate?: string; // Specific birth date
+    jotiJotDate?: string; // Date of passing (Joti Jot)
+    biography?: string; // Detailed life story (multiple paragraphs)
+    notableStories?: string[]; // Famous sakhis/stories
+    miracles?: string[]; // Notable miracles/divine events
+    historicalContext?: string; // What was happening in the world at that time
+    sahibzade?: string[]; // For Guru Gobind Singh Ji - four sons
+    martyrdom?: string; // For martyred Gurus
 }
 
 export interface HistoricalEvent {
@@ -58,12 +67,14 @@ export const gurus: Guru[] = [
         name: 'Guru Nanak Dev Ji',
         gurmukhiName: 'ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ',
         years: '1469 - 1539',
+        birthDate: 'April 15, 1469 (Vaisakh Sudhi 3)',
+        jotiJotDate: 'September 22, 1539',
         birthPlace: 'Talwandi (now Nankana Sahib, Pakistan)',
         contribution: 'Founder of Sikhism. Emphasized equality, honest living, and devotion to one God.',
         famousQuote: 'ਇਕੁ ਓਅੰਕਾਰ ਸਤਿ ਨਾਮੁ',
         famousQuoteEnglish: 'There is One God, His Name is True',
         keyEvents: ['Traveled extensively (Udasis) to spread message', 'Established Kartarpur community', 'Rejected caste system'],
-        color: '#F59E0B', // Saffron
+        color: '#F59E0B',
         image: '/images/history/guru_nanak_dev_ji.png',
         family: {
             father: 'Mehta Kalu Ji',
@@ -79,7 +90,31 @@ export const gurus: Guru[] = [
             'Equality of all humans regardless of caste/gender'
         ],
         baani: ['Japji Sahib', 'Asa Di Vaar', 'Sidh Gosht', 'Bara Maha'],
-        legacy: 'Founded the Sikh faith, rejected empty rituals, and established the institution of Langar.'
+        legacy: 'Founded the Sikh faith, rejected empty rituals, and established the institution of Langar.',
+        biography: `Guru Nanak Dev Ji was born on April 15, 1469, in the village of Rai Bhoi di Talwandi (now Nankana Sahib, Pakistan) to Mehta Kalu, a revenue official, and Mata Tripta. From an early age, Guru Nanak Ji displayed extraordinary spiritual wisdom, often questioning rituals and challenging the caste-based society.
+
+At age 7, when he was to be invested with the sacred thread (janeu), young Nanak refused, saying the true thread should be one of compassion and contentment that doesn't wear out. At age 9, he began his formal education with Pandit Gopal Das and later learned Persian and Arabic, becoming proficient in multiple languages.
+
+In 1487, Guru Nanak Ji married Mata Sulakhni Ji and had two sons: Sri Chand (1494) and Lakhmi Das (1497). At age 28, he worked as a storekeeper in Sultanpur Lodhi for Nawab Daulat Khan Lodi, earning a reputation for honesty and generosity.
+
+The pivotal moment came in 1499 when Guru Nanak Ji, while bathing in the Bein river, disappeared for three days. He returned with divine revelation, declaring "There is no Hindu, there is no Muslim" - emphasizing the oneness of God and humanity. This marked the beginning of his mission.
+
+Over the next 24 years, Guru Nanak Ji undertook four major journeys (Udasis), traveling over 28,000 kilometers by foot across India, Tibet, Sri Lanka, Afghanistan, Persia, Arabia (Mecca/Medina), and the Middle East. He engaged with scholars, saints, and common people, sharing his message of love, equality, and devotion to the One God.
+
+In 1521, he established Kartarpur, the first Sikh community, where he lived his final 18 years farming and teaching. Here he institutionalized Sangat (congregation) and Langar (community kitchen), revolutionary concepts that broke down barriers of caste and class. Before passing, he appointed his devoted disciple Bhai Lehna as his successor, renaming him Guru Angad (meaning "part of me").`,
+        notableStories: [
+            'The Sachi Sakhi (True Trade): Young Nanak was given 20 rupees by his father to do business. Instead, he fed hungry saints, calling it the truest trade.',
+            'Sleeping with feet toward Kaaba: In Mecca, when questioned for sleeping with feet toward the holy Kaaba, Guru Ji said "Please turn my feet where God does not exist."',
+            'The Cobra Shadow: While Guru Ji slept in a field, a cobra spread its hood to shade him from the sun, witnessed by the local ruler.',
+            'Sajjan Thug: Reformed the notorious robber Sajjan, who became a devoted Sikh and built a dharamsala.',
+            'Meeting with Babar: Guru Ji witnessed Babar\'s invasion and wrote Babar Vani, lamenting the suffering of innocent people.'
+        ],
+        miracles: [
+            'Disappeared in the Bein river for three days and returned with divine message',
+            'A dried-up spring began flowing at his touch near Kartarpur',
+            'Fed thousands with a small amount of food during his travels'
+        ],
+        historicalContext: 'Guru Nanak Dev Ji lived during a transformative period in South Asian history. The Lodhi Sultanate ruled Delhi, and the Mughal Empire was founded by Babar in 1526. The region experienced religious tension between Hindus and Muslims, rigid caste systems, and superstitious practices. Guru Ji\'s message of equality and one God was revolutionary.'
     },
     {
         id: 2,

@@ -387,23 +387,99 @@ const GuruDetailModal: React.FC<{ guru: Guru; onClose: () => void }> = ({ guru, 
                                 exit={{ opacity: 0, y: -10 }}
                                 className="space-y-6"
                             >
-                                <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
-                                    <h3 className="text-amber-400 font-bold mb-3 flex items-center gap-2">
-                                        <Heart size={18} /> Contribution
-                                    </h3>
-                                    <p className="text-slate-300 leading-relaxed">{guru.contribution}</p>
-                                </div>
-                                <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
-                                    <h3 className="text-amber-400 font-bold mb-3">Key Events</h3>
-                                    <ul className="space-y-2">
-                                        {guru.keyEvents.map((event, i) => (
-                                            <li key={i} className="flex items-start gap-3 text-slate-300">
-                                                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
-                                                {event}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
+                                {/* Dates */}
+                                {(guru.birthDate || guru.jotiJotDate) && (
+                                    <div className="flex flex-wrap gap-4">
+                                        {guru.birthDate && (
+                                            <div className="bg-amber-900/20 px-4 py-2 rounded-xl border border-amber-500/30">
+                                                <span className="text-amber-400 text-xs uppercase tracking-wider">Birth</span>
+                                                <p className="text-white font-medium">{guru.birthDate}</p>
+                                            </div>
+                                        )}
+                                        {guru.jotiJotDate && (
+                                            <div className="bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700/50">
+                                                <span className="text-slate-400 text-xs uppercase tracking-wider">Joti Jot</span>
+                                                <p className="text-white font-medium">{guru.jotiJotDate}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Full Biography */}
+                                {guru.biography ? (
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
+                                        <h3 className="text-amber-400 font-bold mb-4 flex items-center gap-2">
+                                            <BookOpen size={18} /> Life Story
+                                        </h3>
+                                        <div className="text-slate-300 leading-relaxed space-y-4">
+                                            {guru.biography.split('\n\n').map((para, i) => (
+                                                <p key={i}>{para}</p>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
+                                        <h3 className="text-amber-400 font-bold mb-3 flex items-center gap-2">
+                                            <Heart size={18} /> Contribution
+                                        </h3>
+                                        <p className="text-slate-300 leading-relaxed">{guru.contribution}</p>
+                                    </div>
+                                )}
+
+                                {/* Notable Sakhis/Stories */}
+                                {guru.notableStories && guru.notableStories.length > 0 && (
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
+                                        <h3 className="text-amber-400 font-bold mb-4">Notable Sakhis (Stories)</h3>
+                                        <div className="space-y-4">
+                                            {guru.notableStories.map((story, i) => (
+                                                <div key={i} className="flex items-start gap-3 p-4 bg-slate-900/50 rounded-xl">
+                                                    <div className="w-8 h-8 bg-amber-500/20 rounded-full flex items-center justify-center flex-shrink-0 text-amber-400 font-bold text-sm">
+                                                        {i + 1}
+                                                    </div>
+                                                    <p className="text-slate-300">{story}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Miracles */}
+                                {guru.miracles && guru.miracles.length > 0 && (
+                                    <div className="bg-indigo-900/20 p-6 rounded-2xl border border-indigo-500/30">
+                                        <h3 className="text-indigo-400 font-bold mb-4">Divine Manifestations</h3>
+                                        <ul className="space-y-2">
+                                            {guru.miracles.map((miracle, i) => (
+                                                <li key={i} className="flex items-start gap-3 text-slate-300">
+                                                    <span className="text-indigo-400">✦</span>
+                                                    {miracle}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Historical Context */}
+                                {guru.historicalContext && (
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
+                                        <h3 className="text-amber-400 font-bold mb-3">Historical Context</h3>
+                                        <p className="text-slate-300 leading-relaxed">{guru.historicalContext}</p>
+                                    </div>
+                                )}
+
+                                {/* Key Events fallback */}
+                                {!guru.biography && (
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
+                                        <h3 className="text-amber-400 font-bold mb-3">Key Events</h3>
+                                        <ul className="space-y-2">
+                                            {guru.keyEvents.map((event, i) => (
+                                                <li key={i} className="flex items-start gap-3 text-slate-300">
+                                                    <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
+                                                    {event}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </motion.div>
                         )}
 
