@@ -1,5 +1,12 @@
 // Sikh History Section - Data and Content
 
+export interface GuruFamily {
+    father: string;
+    mother: string;
+    spouse: string;
+    children: string[];
+}
+
 export interface Guru {
     id: number;
     name: string;
@@ -12,6 +19,13 @@ export interface Guru {
     keyEvents: string[];
     color: string; // accent color for card
     image?: string; // path to image file
+    // New detailed fields
+    family: GuruFamily;
+    gurgaddi: string; // Date/Place of Guruship
+    teachings: string[]; // Core principles
+    baani?: string[]; // Major compositions
+    battles?: string[]; // Major battles (for 6th and 10th Guru)
+    legacy: string; // Long-term impact
 }
 
 export interface HistoricalEvent {
@@ -45,20 +59,49 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'There is One God, His Name is True',
         keyEvents: ['Traveled extensively (Udasis) to spread message', 'Established Kartarpur community', 'Rejected caste system'],
         color: '#F59E0B', // Saffron
-        image: '/images/history/guru_nanak.jpg'
+        image: '/images/history/guru_nanak.jpg',
+        family: {
+            father: 'Mehta Kalu Ji',
+            mother: 'Mata Tripta Ji',
+            spouse: 'Mata Sulakhni Ji',
+            children: ['Baba Sri Chand', 'Baba Lakhmi Das']
+        },
+        gurgaddi: 'Direct divine revelation from Akal Purakh (God)',
+        teachings: [
+            'Simran (Meditation on God)',
+            'Kirat Karo (Earn honest living)',
+            'Vand Chakko (Share with others)',
+            'Equality of all humans regardless of caste/gender'
+        ],
+        baani: ['Japji Sahib', 'Asa Di Vaar', 'Sidh Gosht', 'Bara Maha'],
+        legacy: 'Founded the Sikh faith, rejected empty rituals, and established the institution of Langar.'
     },
     {
         id: 2,
         name: 'Guru Angad Dev Ji',
         gurmukhiName: 'ਗੁਰੂ ਅੰਗਦ ਦੇਵ ਜੀ',
         years: '1504 - 1552',
-        birthPlace: 'Harike, Punjab',
+        birthPlace: 'Matte Di Sarai, Muktsar',
         contribution: 'Standardized Gurmukhi script. Started tradition of Mall Akhara (wrestling).',
         famousQuote: 'ਜੇ ਸਉ ਚੰਦਾ ਉਗਵਹਿ ਸੂਰਜ ਚੜਹਿ ਹਜਾਰ',
         famousQuoteEnglish: 'Even if a hundred moons and a thousand suns were to rise',
         keyEvents: ['Developed Gurmukhi script', 'Collected Guru Nanak\'s hymns', 'Promoted physical fitness'],
         color: '#10B981', // Emerald
-        image: '/images/history/guru_angad.jpg'
+        image: '/images/history/guru_angad.jpg',
+        family: {
+            father: 'Baba Pheru Mal Ji',
+            mother: 'Mata Ramo Ji',
+            spouse: 'Mata Khivi Ji',
+            children: ['Baba Dasu', 'Baba Datu', 'Bibi Amro', 'Bibi Anokhi']
+        },
+        gurgaddi: '1539 at Kartarpur (conferred by Guru Nanak Dev Ji)',
+        teachings: [
+            'Submission to the Will of the Master (Hukam)',
+            'Physical fitness alongside spiritual health',
+            'Importance of education and literacy'
+        ],
+        baani: ['63 Saloks in Guru Granth Sahib'],
+        legacy: 'Formalized Gurmukhi script which preserved Gurbani, and prioritized physical well-being (Mall Akhara).'
     },
     {
         id: 3,
@@ -71,7 +114,21 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'First the Pangat (Langar), then the Sangat',
         keyEvents: ['Built Baoli at Goindwal', 'Appointed Manji system', 'Advocated for women\'s rights'],
         color: '#3B82F6', // Blue
-        image: '/images/history/guru_amar_das.jpg'
+        image: '/images/history/guru_amar_das.jpg',
+        family: {
+            father: 'Baba Tej Bhan Ji',
+            mother: 'Mata Sulakhni Ji',
+            spouse: 'Mata Mansa Devi Ji',
+            children: ['Baba Mohan', 'Baba Mohri', 'Bibi Dani', 'Bibi Bhani']
+        },
+        gurgaddi: '1552 at Khadur Sahib',
+        teachings: [
+            'Equality in Langar (free kitchen)',
+            'Rejection of Sati and Purdah systems',
+            'Humility and service (Seva)'
+        ],
+        baani: ['Anand Sahib', 'Allocated Raags to Bani'],
+        legacy: 'Institutionalized Langar and Manji system for preaching. Championed women\'s rights.'
     },
     {
         id: 4,
@@ -84,7 +141,21 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'My mind longs for the Guru\'s Darshan',
         keyEvents: ['Founded Amritsar', 'Started construction of Sarovar', 'Composed Laavan for Anand Karaj'],
         color: '#8B5CF6', // Purple
-        image: '/images/history/guru_ram_das.jpg'
+        image: '/images/history/guru_ram_das.jpg',
+        family: {
+            father: 'Baba Hari Das Ji',
+            mother: 'Mata Anup Kaur Ji',
+            spouse: 'Mata Bhani Ji',
+            children: ['Prithi Chand', 'Mahadev', 'Guru Arjan Dev Ji']
+        },
+        gurgaddi: '1574 at Goindwal Sahib',
+        teachings: [
+            'Devotion and love for the Divine',
+            'Selfless service (building of Amritsar)',
+            'Ideal householder life'
+        ],
+        baani: ['Laavan (Wedding Hymns)', 'Ghorian'],
+        legacy: 'Founded Amritsar, the central religious place for Sikhs. Defined the Sikh marriage ceremony.'
     },
     {
         id: 5,
@@ -97,20 +168,48 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'Your Will seems sweet to me',
         keyEvents: ['Compiled Adi Granth', 'Completed Harmandir Sahib', 'Martyred on hot plate (first Sikh martyr)'],
         color: '#EF4444', // Red (martyrdom)
-        image: '/images/history/guru_arjan.jpg'
+        image: '/images/history/guru_arjan.jpg',
+        family: {
+            father: 'Guru Ram Das Ji',
+            mother: 'Mata Bhani Ji',
+            spouse: 'Mata Ganga Ji',
+            children: ['Guru Hargobind Sahib Ji']
+        },
+        gurgaddi: '1581 at Goindwal Sahib',
+        teachings: [
+            'Acceptance of God\'s Will (Bhana)',
+            'Integration of scriptures (Adi Granth)',
+            'Sacrifice for righteousness'
+        ],
+        baani: ['Sukhmani Sahib', 'Major contributor to Guru Granth Sahib'],
+        legacy: 'Constructed Harmandir Sahib (Golden Temple) and compiled Adi Granth. First Sikh Martyr.'
     },
     {
         id: 6,
         name: 'Guru Hargobind Sahib Ji',
         gurmukhiName: 'ਗੁਰੂ ਹਰਿਗੋਬਿੰਦ ਸਾਹਿਬ ਜੀ',
         years: '1595 - 1644',
-        birthPlace: 'Amritsar, Punjab',
+        birthPlace: 'Wadali, Amritsar',
         contribution: 'Introduced Miri-Piri (spiritual and temporal authority). Built Akal Takht.',
         famousQuote: 'ਮੀਰੀ ਪੀਰੀ',
         famousQuoteEnglish: 'Miri (temporal) and Piri (spiritual) - two swords of power',
         keyEvents: ['Wore two swords (Miri-Piri)', 'Built Akal Takht', 'Freed 52 Hindu kings from Gwalior Fort'],
         color: '#F97316', // Orange
-        image: '/images/history/guru_hargobind.jpg'
+        image: '/images/history/guru_hargobind.jpg',
+        family: {
+            father: 'Guru Arjan Dev Ji',
+            mother: 'Mata Ganga Ji',
+            spouse: 'Mata Damodari Ji, Mata Nanaki Ji, Mata Mahadevi Ji',
+            children: ['Baba Gurditta', 'Baba Ani Rai', 'Baba Atal Rai', 'Guru Tegh Bahadur Ji', 'Baba Suraj Mal', 'Bibi Viro']
+        },
+        gurgaddi: '1606 at Amritsar',
+        teachings: [
+            'Saint-Soldier concept (Sant Sipahi)',
+            'Protection of the oppressed',
+            'Justice along with spirituality'
+        ],
+        battles: ['Battle of Amritsar', 'Battle of Hargobindpur', 'Battle of Lahira'],
+        legacy: 'Transformed Sikhs into a martial community. Built Akal Takht (Throne of Timeless One).'
     },
     {
         id: 7,
@@ -123,7 +222,20 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'Compassion and Righteousness',
         keyEvents: ['Maintained army of 2,200 soldiers', 'Promoted herbal medicine', 'Protected followers during Mughal conflicts'],
         color: '#22C55E', // Green (nature/medicine)
-        image: '/images/history/guru_har_rai.jpg'
+        image: '/images/history/guru_har_rai.jpg',
+        family: {
+            father: 'Baba Gurditta Ji',
+            mother: 'Mata Nihal Kaur Ji',
+            spouse: 'Mata Kishan Kaur Ji',
+            children: ['Baba Ram Rai', 'Guru Har Krishan Ji']
+        },
+        gurgaddi: '1644 at Kiratpur Sahib',
+        teachings: [
+            'Compassion for all living beings',
+            'Environment and nature preservation',
+            'Self-discipline'
+        ],
+        legacy: 'Maintained a strong army but never fought a battle. Established Ayurvedic hospitals.'
     },
     {
         id: 8,
@@ -136,7 +248,20 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'The Child Guru',
         keyEvents: ['Became Guru at age 5', 'Healed smallpox victims in Delhi', 'Said "Baba Bakale" before passing (pointing to 9th Guru)'],
         color: '#06B6D4', // Cyan
-        image: '/images/history/guru_har_krishan.jpg'
+        image: '/images/history/guru_har_krishan.jpg',
+        family: {
+            father: 'Guru Har Rai Ji',
+            mother: 'Mata Kishan Kaur Ji',
+            spouse: 'N/A',
+            children: ['N/A']
+        },
+        gurgaddi: '1661 at Kiratpur Sahib',
+        teachings: [
+            'Service to humanity without fear',
+            'Purity of heart',
+            'Humility'
+        ],
+        legacy: 'Sacrificed life serving smallpox patients in Delhi. Symbol of purity and divinity in childhood.'
     },
     {
         id: 9,
@@ -149,7 +274,21 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'He gave his head but not his faith',
         keyEvents: ['Martyred in Delhi (Chandni Chowk)', 'Protected Kashmiri Pandits', 'Called "Hind di Chadar" (Shield of India)'],
         color: '#DC2626', // Deep red (martyrdom)
-        image: '/images/history/guru_tegh_bahadur.jpg'
+        image: '/images/history/guru_tegh_bahadur.jpg',
+        family: {
+            father: 'Guru Hargobind Sahib Ji',
+            mother: 'Mata Nanaki Ji',
+            spouse: 'Mata Gujri Ji',
+            children: ['Guru Gobind Singh Ji']
+        },
+        gurgaddi: '1664 at Baba Bakala',
+        teachings: [
+            'Defense of human rights and religious freedom',
+            'Fearlessness ("Fear no one, frighten no one")',
+            'Detachment from worldly Maya'
+        ],
+        baani: ['59 Shabad and 57 Saloks in Guru Granth Sahib'],
+        legacy: 'Supreme sacrifice for the protection of another religion (Hindus), establishing universal religious freedom.'
     },
     {
         id: 10,
@@ -162,7 +301,22 @@ export const gurus: Guru[] = [
         famousQuoteEnglish: 'I shall make one fight against 125,000',
         keyEvents: ['Created Khalsa in 1699', 'Gave the 5 Ks', 'Sacrifice of four Sahibzade', 'Declared Guru Granth Sahib as eternal Guru'],
         color: '#7C3AED', // Royal purple
-        image: '/images/history/guru_gobind_singh.jpg'
+        image: '/images/history/guru_gobind_singh.jpg',
+        family: {
+            father: 'Guru Tegh Bahadur Ji',
+            mother: 'Mata Gujri Ji',
+            spouse: 'Mata Jito Ji, Mata Sundari Ji, Mata Sahib Kaur Ji',
+            children: ['Sahibzada Ajit Singh', 'Sahibzada Jujhar Singh', 'Sahibzada Zorawar Singh', 'Sahibzada Fateh Singh']
+        },
+        gurgaddi: '1675 at Anandpur Sahib',
+        teachings: [
+            'Saint-Soldier (Khalsa)',
+            'Equality of all human race ("Manas ki jaat sabhai ekai pehchanbo")',
+            'Bravery and high moral character'
+        ],
+        baani: ['Jaap Sahib', 'Tav-Prasad Savaiye', 'Chaupai Sahib', 'Zafarnama'],
+        battles: ['Battle of Bhangani', 'Battle of Anandpur', 'Battle of Chamkaur', 'Battle of Muktsar'],
+        legacy: 'Created the Khalsa Panth (Brotherhood of Pure Ones), ending the lineage of human Gurus and bestowing Guruship to the Scripture.'
     }
 ];
 

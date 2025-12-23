@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/Layout';
-import { gurus, historicalEvents, sikhValues, fiveKs } from '../data/sikhHistory';
-import { ChevronLeft, ChevronRight, BookOpen, Sword, Calendar, MapPin } from 'lucide-react';
+import { gurus, historicalEvents, sikhValues, fiveKs, type Guru } from '../data/sikhHistory';
+import { ChevronLeft, ChevronRight, BookOpen, Sword, Calendar, MapPin, X, Users, Scroll, Heart } from 'lucide-react';
 
 // Khanda SVG Component
 const KhandaSVG: React.FC<{ className?: string }> = ({ className }) => (
@@ -14,6 +14,201 @@ const KhandaSVG: React.FC<{ className?: string }> = ({ className }) => (
         <path d="M30 80 Q50 95, 70 80" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
 );
+
+// Detail Modal Component
+const GuruDetailModal: React.FC<{ guru: Guru; onClose: () => void }> = ({ guru, onClose }) => {
+    const [activeTab, setActiveTab] = useState<'bio' | 'family' | 'teachings'>('bio');
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-slate-900 w-full max-w-4xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col"
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="relative h-48 bg-slate-800 overflow-hidden flex-shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900 to-transparent z-10" />
+                    <div className="absolute inset-0 opacity-30" style={{ backgroundColor: guru.color }} />
+                    {guru.image && <img src={guru.image} alt={guru.name} className="absolute right-0 top-0 h-full w-2/3 object-cover opacity-50" />}
+
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+
+                    <div className="absolute bottom-6 left-8 z-20">
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="px-3 py-1 rounded-full text-xs font-bold text-slate-900 bg-white shadow-lg">
+                                #{guru.id}
+                            </span>
+                            <span className="text-amber-400 font-serif text-xl">{guru.gurmukhiName}</span>
+                        </div>
+                        <h2 className="text-4xl font-bold text-white mb-1">{guru.name}</h2>
+                        <p className="text-slate-300">{guru.years} • {guru.birthPlace}</p>
+                    </div>
+                </div>
+
+                {/* Navigation Tabs */}
+                <div className="flex border-b border-slate-700 bg-slate-800/50 flex-shrink-0 overflow-x-auto">
+                    {[
+                        { id: 'bio', label: 'Biography', icon: BookOpen },
+                        { id: 'family', label: 'Family Tree', icon: Users },
+                        { id: 'teachings', label: 'Teachings & Legacy', icon: Scroll }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors relative whitespace-nowrap ${activeTab === tab.id ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+                                }`}
+                        >
+                            <tab.icon size={18} />
+                            {tab.label}
+                            {activeTab === tab.id && (
+                                <motion.div
+                                    layoutId="activeTab"
+                                    className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"
+                                />
+                            )}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Content Area */}
+                <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-slate-900/50">
+                    <AnimatePresence mode="wait">
+                        {activeTab === 'bio' && (
+                            <motion.div
+                                key="bio"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="space-y-6"
+                            >
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
+                                        <h3 className="text-amber-400 font-bold mb-3 flex items-center gap-2">
+                                            <Heart size={18} /> Gurgaddi (Guruship)
+                                        </h3>
+                                        <p className="text-slate-300 leading-relaxed">{guru.gurgaddi}</p>
+                                    </div>
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50">
+                                        <h3 className="text-amber-400 font-bold mb-3 flex items-center gap-2">
+                                            <Calendar size={18} /> Key Contribution
+                                        </h3>
+                                        <p className="text-slate-300 leading-relaxed">{guru.contribution}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-white font-bold text-xl mb-4">Major Events</h3>
+                                    <div className="space-y-3">
+                                        {guru.keyEvents.map((event, i) => (
+                                            <div key={i} className="flex gap-4 items-start">
+                                                <div className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: guru.color }} />
+                                                <p className="text-slate-300">{event}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'family' && (
+                            <motion.div
+                                key="family"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                            >
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div className="space-y-6">
+                                        <div className="bg-slate-800/30 p-5 rounded-xl border border-slate-700">
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Parents</span>
+                                            <div className="mt-2 text-white font-medium text-lg">
+                                                <p>Father: <span className="text-slate-300">{guru.family.father}</span></p>
+                                                <p>Mother: <span className="text-slate-300">{guru.family.mother}</span></p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-800/30 p-5 rounded-xl border border-slate-700">
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Spouse</span>
+                                            <p className="mt-2 text-white font-medium text-lg">{guru.family.spouse}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-800/30 p-5 rounded-xl border border-slate-700">
+                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Children</span>
+                                        <ul className="mt-4 space-y-3">
+                                            {guru.family.children.map((child, i) => (
+                                                <li key={i} className="flex items-center gap-3 text-slate-300">
+                                                    <div className="w-1.5 h-1.5 bg-amber-500/50 rounded-full" />
+                                                    {child}
+                                                </li>
+                                            ))}
+                                            {guru.family.children.length === 1 && guru.family.children[0] === 'N/A' && (
+                                                <li className="text-slate-500 italic">No historical record of children</li>
+                                            )}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'teachings' && (
+                            <motion.div
+                                key="teachings"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="space-y-8"
+                            >
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-4">Core Principles</h3>
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        {guru.teachings.map((teaching, i) => (
+                                            <div key={i} className="flex gap-3 p-3 bg-slate-800/30 rounded-lg">
+                                                <div className="text-amber-500 mt-1">✦</div>
+                                                <p className="text-slate-300">{teaching}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {guru.baani && (
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white mb-4">Sacred Baani (Compositions)</h3>
+                                        <div className="flex flex-wrap gap-3">
+                                            {guru.baani.map((baani, i) => (
+                                                <span key={i} className="px-4 py-2 bg-indigo-900/30 border border-indigo-500/30 text-indigo-400 rounded-full text-sm">
+                                                    {baani}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3">Legacy</h3>
+                                    <p className="text-slate-300 leading-relaxed text-lg">{guru.legacy}</p>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
 
 // Hero Section Component
 const HeroSection: React.FC = () => (
@@ -97,101 +292,118 @@ const HeroSection: React.FC = () => (
 );
 
 // Guru Card Component
-const GuruCard: React.FC<{ guru: typeof gurus[0]; index: number; isActive: boolean; onClick: () => void }> = ({
-    guru, index: _index, isActive, onClick
+const GuruCard: React.FC<{
+    guru: typeof gurus[0];
+    index: number;
+    isActive: boolean;
+    onClick: () => void;
+    onReadMore: () => void;
+}> = ({
+    guru, index: _index, isActive, onClick, onReadMore
 }) => (
-    <motion.div
-        className={`relative cursor-pointer transition-all duration-500 ${isActive ? 'scale-105 z-20' : 'scale-95 opacity-70'
-            }`}
-        onClick={onClick}
-        whileHover={{ scale: isActive ? 1.05 : 1 }}
-        layout
-    >
-        <div
-            className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 overflow-hidden min-h-[450px]"
-            style={{
-                boxShadow: isActive ? `0 0 60px ${guru.color}30` : 'none'
-            }}
+        <motion.div
+            className={`relative cursor-pointer transition-all duration-500 ${isActive ? 'scale-105 z-20' : 'scale-95 opacity-70'
+                }`}
+            onClick={onClick}
+            whileHover={{ scale: isActive ? 1.05 : 1 }}
+            layout
         >
-            {/* Accent color bar */}
             <div
-                className="absolute top-0 left-0 right-0 h-1"
-                style={{ backgroundColor: guru.color }}
-            />
-
-            {/* Guru number badge */}
-            <div
-                className="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl"
-                style={{ backgroundColor: guru.color }}
+                className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 overflow-hidden min-h-[450px]"
+                style={{
+                    boxShadow: isActive ? `0 0 60px ${guru.color}30` : 'none'
+                }}
             >
-                {guru.id}
-            </div>
-
-            {/* Guru Image or Placeholder */}
-            {guru.image ? (
+                {/* Accent color bar */}
                 <div
-                    className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white overflow-hidden shadow-lg"
-                    style={{ borderColor: guru.color }}
-                >
-                    <img
-                        src={guru.image}
-                        alt={guru.name}
-                        className="w-full h-full object-cover"
-                    />
-                </div>
-            ) : (
+                    className="absolute top-0 left-0 right-0 h-1"
+                    style={{ backgroundColor: guru.color }}
+                />
+
+                {/* Guru number badge */}
                 <div
-                    className="w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center text-5xl bg-slate-800"
-                    style={{
-                        backgroundColor: `${guru.color}20`,
-                        border: `2px solid ${guru.color}`,
-                        boxShadow: `0 0 20px ${guru.color}40`
-                    }}
+                    className="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl"
+                    style={{ backgroundColor: guru.color }}
                 >
-                    🙏
+                    {guru.id}
                 </div>
-            )}
 
-            <h3 className="text-2xl font-bold text-white text-center">{guru.name}</h3>
-            <p className="text-xl text-amber-400 text-center font-serif mt-1">{guru.gurmukhiName}</p>
-            <p className="text-slate-400 text-center mt-2">{guru.years}</p>
-
-            <AnimatePresence>
-                {isActive && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-6"
+                {/* Guru Image or Placeholder */}
+                {guru.image ? (
+                    <div
+                        className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white overflow-hidden shadow-lg"
+                        style={{ borderColor: guru.color }}
                     >
-                        <p className="text-slate-300 text-sm leading-relaxed">{guru.contribution}</p>
-
-                        <div className="mt-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                            <p className="text-amber-400 text-lg font-serif italic">"{guru.famousQuote}"</p>
-                            <p className="text-slate-400 text-sm mt-2">{guru.famousQuoteEnglish}</p>
-                        </div>
-
-                        <div className="mt-4">
-                            <h4 className="text-white text-sm font-semibold mb-2">Key Events:</h4>
-                            <ul className="space-y-1">
-                                {guru.keyEvents.map((event, i) => (
-                                    <li key={i} className="text-slate-400 text-sm flex items-start gap-2">
-                                        <span style={{ color: guru.color }}>•</span>
-                                        {event}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </motion.div>
+                        <img
+                            src={guru.image}
+                            alt={guru.name}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                ) : (
+                    <div
+                        className="w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center text-5xl bg-slate-800"
+                        style={{
+                            backgroundColor: `${guru.color}20`,
+                            border: `2px solid ${guru.color}`,
+                            boxShadow: `0 0 20px ${guru.color}40`
+                        }}
+                    >
+                        🙏
+                    </div>
                 )}
-            </AnimatePresence>
-        </div>
-    </motion.div>
-);
+
+                <h3 className="text-2xl font-bold text-white text-center">{guru.name}</h3>
+                <p className="text-xl text-amber-400 text-center font-serif mt-1">{guru.gurmukhiName}</p>
+                <p className="text-slate-400 text-center mt-2">{guru.years}</p>
+
+                <AnimatePresence>
+                    {isActive && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-6"
+                        >
+                            <p className="text-slate-300 text-sm leading-relaxed">{guru.contribution}</p>
+
+                            <div className="mt-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                                <p className="text-amber-400 text-lg font-serif italic">"{guru.famousQuote}"</p>
+                                <p className="text-slate-400 text-sm mt-2">{guru.famousQuoteEnglish}</p>
+                            </div>
+
+                            <div className="mt-4">
+                                <h4 className="text-white text-sm font-semibold mb-2">Key Events:</h4>
+                                <ul className="space-y-1">
+                                    {guru.keyEvents.slice(0, 2).map((event, i) => (
+                                        <li key={i} className="text-slate-400 text-sm flex items-start gap-2">
+                                            <span style={{ color: guru.color }}>•</span>
+                                            {event}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onReadMore();
+                                }}
+                                className="mt-6 w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition-colors flex items-center justify-center gap-2"
+                            >
+                                Read Full Profile <ChevronRight size={16} />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </motion.div>
+    );
 
 // Gurus Section with Carousel
 const GurusSection: React.FC = () => {
     const [activeGuru, setActiveGuru] = useState(0);
+    const [selectedGuru, setSelectedGuru] = useState<Guru | null>(null);
 
     const nextGuru = () => setActiveGuru((prev) => (prev + 1) % gurus.length);
     const prevGuru = () => setActiveGuru((prev) => (prev - 1 + gurus.length) % gurus.length);
@@ -249,6 +461,7 @@ const GurusSection: React.FC = () => {
                         index={activeGuru}
                         isActive={true}
                         onClick={() => { }}
+                        onReadMore={() => setSelectedGuru(gurus[activeGuru])}
                     />
                 </div>
 
@@ -268,6 +481,15 @@ const GurusSection: React.FC = () => {
                     ))}
                 </div>
             </div>
+
+            <AnimatePresence>
+                {selectedGuru && (
+                    <GuruDetailModal
+                        guru={selectedGuru}
+                        onClose={() => setSelectedGuru(null)}
+                    />
+                )}
+            </AnimatePresence>
         </section>
     );
 };
