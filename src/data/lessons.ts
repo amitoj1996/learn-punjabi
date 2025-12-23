@@ -448,7 +448,7 @@ Try reading: ਕਾ, ਕੀ, ਕੂ, ਕੇ, ਕੋ
                 duration: '12 min',
                 xpReward: 20,
                 difficulty: 'beginner',
-                unlockRequirements: ['vowel-sounds'],
+                unlockRequirements: [],
                 vocabulary: [
                     { gurmukhi: 'ਰੋਟੀ', transliteration: 'Roti', english: 'Bread/Chapati', pronunciation: 'ਰੋਟੀ' },
                     { gurmukhi: 'ਪਾਣੀ', transliteration: 'Paani', english: 'Water', pronunciation: 'ਪਾਣੀ' },

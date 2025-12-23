@@ -68,6 +68,7 @@ export const LearnPage: React.FC = () => {
     const [quizSubmitted, setQuizSubmitted] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [hasShownGoalCelebration, setHasShownGoalCelebration] = useState(false);
+    const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
 
     // Gamification hook
     const {
@@ -158,26 +159,55 @@ export const LearnPage: React.FC = () => {
                         dailyGoal={dailyGoal}
                     />
 
-                    {/* Skill Trees for each module */}
-                    {modules.map((module, moduleIndex) => (
-                        <Card key={module.id} className="p-8 bg-white/60 backdrop-blur-sm">
-                            <div className="text-center mb-6">
-                                <h2 className="text-xl font-bold text-secondary-800 flex items-center justify-center gap-2">
-                                    <span className="text-2xl">{module.icon}</span>
-                                    Module {moduleIndex + 1}: {module.title}
-                                </h2>
-                                <p className="text-secondary-500 text-sm mt-1">
-                                    {module.description}
-                                </p>
-                            </div>
+                    {/* Module Tabs */}
+                    <div className="flex justify-center gap-2 mb-6">
+                        {modules.map((module, index) => (
+                            <button
+                                key={module.id}
+                                onClick={() => setSelectedModuleIndex(index)}
+                                className={`
+                                    px-6 py-3 rounded-xl font-semibold transition-all duration-200
+                                    flex items-center gap-2
+                                    ${selectedModuleIndex === index
+                                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-200'
+                                        : 'bg-white text-secondary-600 hover:bg-secondary-50 border border-secondary-200'
+                                    }
+                                `}
+                            >
+                                <span className="text-xl">{module.icon}</span>
+                                <span className="hidden sm:inline">Module {index + 1}</span>
+                            </button>
+                        ))}
+                    </div>
 
-                            <SkillTree
-                                lessons={module.lessons}
-                                completedLessons={completedLessons}
-                                onLessonSelect={openLesson}
-                            />
-                        </Card>
-                    ))}
+                    {/* Selected Module Skill Tree */}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={modules[selectedModuleIndex].id}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <Card className="p-8 bg-white/60 backdrop-blur-sm">
+                                <div className="text-center mb-6">
+                                    <h2 className="text-xl font-bold text-secondary-800 flex items-center justify-center gap-2">
+                                        <span className="text-2xl">{modules[selectedModuleIndex].icon}</span>
+                                        Module {selectedModuleIndex + 1}: {modules[selectedModuleIndex].title}
+                                    </h2>
+                                    <p className="text-secondary-500 text-sm mt-1">
+                                        {modules[selectedModuleIndex].description}
+                                    </p>
+                                </div>
+
+                                <SkillTree
+                                    lessons={modules[selectedModuleIndex].lessons}
+                                    completedLessons={completedLessons}
+                                    onLessonSelect={openLesson}
+                                />
+                            </Card>
+                        </motion.div>
+                    </AnimatePresence>
 
                     {/* CTA for booking */}
                     <motion.div
