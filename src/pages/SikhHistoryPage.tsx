@@ -47,9 +47,10 @@ const HeroSection: React.FC = () => (
                 transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             >
                 <img
-                    src="/images/history/khanda.png"
+                    src="/images/history/khanda.webp"
                     alt="Khanda - Sikh Symbol"
-                    className="w-32 h-40 md:w-40 md:h-48 mx-auto drop-shadow-[0_0_60px_rgba(251,191,36,0.5)]"
+                    className="w-32 h-32 md:w-40 md:h-40 mx-auto object-contain drop-shadow-[0_0_60px_rgba(251,191,36,0.5)]"
+                    loading="eager"
                 />
             </motion.div>
 
