@@ -1062,6 +1062,67 @@ Adjectives describe nouns. In Punjabi, they often come before the noun they desc
                         correctIndex: 1
                     }
                 ]
+            },
+            {
+                id: 'negation',
+                moduleId: 'building-sentences',
+                title: 'Saying No',
+                description: 'Learn to make negative sentences',
+                icon: '🚫',
+                duration: '10 min',
+                xpReward: 15,
+                difficulty: 'intermediate',
+                unlockRequirements: ['common-adjectives'],
+                vocabulary: [
+                    { gurmukhi: 'ਨਹੀਂ', transliteration: 'Naheen', english: 'No/Not', pronunciation: 'ਨਹੀਂ' },
+                    { gurmukhi: 'ਨਾ', transliteration: 'Naa', english: 'No (informal)', pronunciation: 'ਨਾ' },
+                    { gurmukhi: 'ਕਦੇ ਨਹੀਂ', transliteration: 'Kade naheen', english: 'Never', pronunciation: 'ਕਦੇ ਨਹੀਂ' },
+                    { gurmukhi: 'ਕੁਝ ਨਹੀਂ', transliteration: 'Kujh naheen', english: 'Nothing', pronunciation: 'ਕੁਝ ਨਹੀਂ' },
+                    { gurmukhi: 'ਕੋਈ ਨਹੀਂ', transliteration: 'Koi naheen', english: 'Nobody', pronunciation: 'ਕੋਈ ਨਹੀਂ' },
+                ],
+                content: `
+# Saying No in Punjabi
+
+Learn how to make negative sentences and say no politely!
+
+## The Word "ਨਹੀਂ" (Naheen)
+
+This is the main word for "no" or "not" in Punjabi. It comes before the verb.
+
+## Making Negative Sentences
+
+| Positive | Negative |
+|----------|----------|
+| ਮੈਂ ਜਾਂਦਾ ਹਾਂ (I go) | ਮੈਂ ਨਹੀਂ ਜਾਂਦਾ (I don't go) |
+| ਉਹ ਖਾਂਦਾ ਹੈ (He eats) | ਉਹ ਨਹੀਂ ਖਾਂਦਾ (He doesn't eat) |
+
+## Useful Negative Words
+
+- **ਕਦੇ ਨਹੀਂ** (Kade naheen) - Never
+- **ਕੁਝ ਨਹੀਂ** (Kujh naheen) - Nothing
+- **ਕੋਈ ਨਹੀਂ** (Koi naheen) - Nobody
+
+## Polite Refusal
+
+- **ਨਹੀਂ, ਧੰਨਵਾਦ** - No, thank you
+                `,
+                quiz: [
+                    {
+                        question: 'How do you say "No" in Punjabi?',
+                        options: ['ਹਾਂ', 'ਨਹੀਂ', 'ਕੀ', 'ਠੀਕ'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: '"ਕਦੇ ਨਹੀਂ" means:',
+                        options: ['Nothing', 'Nobody', 'Never', 'Nowhere'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'Where does ਨਹੀਂ go in a sentence?',
+                        options: ['At the end', 'Before the verb', 'At the start', 'After the verb'],
+                        correctIndex: 1
+                    }
+                ]
             }
         ]
     }
