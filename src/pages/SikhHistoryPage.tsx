@@ -570,7 +570,7 @@ const timelineData = [
         title: "Birth of Guru Nanak Dev Ji",
         subtitle: "ਗੁਰੂ ਨਾਨਕ ਦੇਵ ਜੀ ਦਾ ਜਨਮ",
         description: "In the village of Talwandi (now Nankana Sahib, Pakistan), a child was born who would change the spiritual landscape of South Asia forever. Guru Nanak Dev Ji, the founder of Sikhism, brought a message of equality, devotion to one God, and honest living.",
-        image: "/images/history/timeline/event_1.png",
+        image: "/images/history/timeline/event_1.webp",
         category: "birth"
     },
     {
@@ -579,7 +579,7 @@ const timelineData = [
         title: "Kartarpur Established",
         subtitle: "ਕਰਤਾਰਪੁਰ ਦੀ ਸਥਾਪਨਾ",
         description: "After decades of traveling across India, Tibet, Arabia, and beyond, Guru Nanak Dev Ji settled on the banks of the Ravi River. Here, he established Kartarpur - the first Sikh community - where people lived together as equals, working the land and sharing meals regardless of caste.",
-        image: "/images/history/timeline/event_2.png",
+        image: "/images/history/timeline/event_2.webp",
         category: "milestone"
     },
     {
@@ -588,7 +588,7 @@ const timelineData = [
         title: "Gurmukhi Script Standardized",
         subtitle: "ਗੁਰਮੁਖੀ ਲਿਪੀ",
         description: "Guru Angad Dev Ji refined and standardized the Gurmukhi script, creating a writing system that would preserve Gurbani for eternity. This democratized spiritual knowledge - no longer was it locked in Sanskrit known only to Brahmins.",
-        image: "/images/history/timeline/event_3.png",
+        image: "/images/history/timeline/event_3.webp",
         category: "milestone"
     },
     {
@@ -597,7 +597,7 @@ const timelineData = [
         title: "Langar Institution Formalized",
         subtitle: "ਲੰਗਰ ਦੀ ਸੰਸਥਾ",
         description: "\"Pehle Pangat, Phir Sangat\" - First eat together, then worship together. Guru Amar Das Ji made the community kitchen mandatory for all visitors, including Emperor Akbar. Kings and beggars sat as equals, destroying centuries of caste discrimination.",
-        image: "/images/history/timeline/event_4.png",
+        image: "/images/history/timeline/event_4.webp",
         category: "milestone"
     },
     {
@@ -606,7 +606,7 @@ const timelineData = [
         title: "Amritsar Founded",
         subtitle: "ਅੰਮ੍ਰਿਤਸਰ ਦੀ ਸਥਾਪਨਾ",
         description: "Guru Ram Das Ji began excavating the sacred pool that would become the heart of Sikhism. He invited artisans from 52 trades to settle there, creating both a spiritual center and a thriving commercial hub - the city of Ramdaspur, now known as Amritsar.",
-        image: "/images/history/timeline/event_5.png",
+        image: "/images/history/timeline/event_5.webp",
         category: "milestone"
     },
     {
@@ -615,7 +615,7 @@ const timelineData = [
         title: "Adi Granth Compiled",
         subtitle: "ਆਦਿ ਗ੍ਰੰਥ ਦਾ ਸੰਕਲਨ",
         description: "Guru Arjan Dev Ji compiled the sacred scriptures of the Sikhs, including writings from Hindu and Muslim saints alongside the Gurus - revolutionary for its time. Bhai Gurdas served as scribe, and the Adi Granth was installed in the newly completed Harmandir Sahib.",
-        image: "/images/history/timeline/event_6.png",
+        image: "/images/history/timeline/event_6.webp",
         category: "milestone"
     },
     {
@@ -624,7 +624,7 @@ const timelineData = [
         title: "First Sikh Martyrdom",
         subtitle: "ਪਹਿਲੀ ਸ਼ਹੀਦੀ",
         description: "Guru Arjan Dev Ji became the first Sikh martyr, tortured for five days by Mughal Emperor Jahangir. Made to sit on a burning hot plate with hot sand poured on him, he remained in divine peace, reciting \"Tera Bhana Meetha Laage\" - Sweet is Your Will, O Lord.",
-        image: "/images/history/timeline/event_7.png",
+        image: "/images/history/timeline/event_7.webp",
         category: "martyrdom"
     },
     {
@@ -633,7 +633,7 @@ const timelineData = [
         title: "Akal Takht Established",
         subtitle: "ਅਕਾਲ ਤਖ਼ਤ ਦੀ ਸਥਾਪਨਾ",
         description: "Guru Hargobind Sahib Ji, just 11 years old, donned two swords representing Miri (temporal power) and Piri (spiritual power). He built the Akal Takht - Throne of the Timeless One - transforming Sikhs into Saint-Soldiers prepared to defend the oppressed.",
-        image: "/images/history/timeline/event_8.png",
+        image: "/images/history/timeline/event_8.webp",
         category: "milestone"
     },
     {
@@ -642,7 +642,7 @@ const timelineData = [
         title: "Hind di Chadar",
         subtitle: "ਹਿੰਦ ਦੀ ਚਾਦਰ",
         description: "When Kashmiri Pandits begged for protection from forced conversion, Guru Tegh Bahadur Ji offered his own head. \"Protect them by converting me first,\" he told Aurangzeb. Martyred at Chandni Chowk, Delhi, he became the Shield of India - a leader of one faith dying for another.",
-        image: "/images/history/timeline/event_9.png",
+        image: "/images/history/timeline/event_9.webp",
         category: "martyrdom"
     },
     {
@@ -651,7 +651,7 @@ const timelineData = [
         title: "Birth of the Khalsa",
         subtitle: "ਖ਼ਾਲਸਾ ਪੰਥ ਦੀ ਸਾਜਨਾ",
         description: "On Vaisakhi, before thousands, Guru Gobind Singh Ji asked for heads. Five brave men stepped forward from five different castes - becoming the Panj Pyare. The Khalsa was born: a brotherhood of equals, bound by the Five Ks, ready to fight tyranny anywhere.",
-        image: "/images/history/timeline/event_10.png",
+        image: "/images/history/timeline/event_10.webp",
         category: "milestone"
     },
     {
@@ -660,7 +660,7 @@ const timelineData = [
         title: "Battle of Chamkaur",
         subtitle: "ਚਮਕੌਰ ਦੀ ਜੰਗ",
         description: "Forty Sikhs against ten thousand. In a small mud fortress, Guru Gobind Singh Ji's elder sons - Sahibzada Ajit Singh and Jujhar Singh - fought to their last breath. This legendary last stand exemplifies courage against impossible odds.",
-        image: "/images/history/timeline/event_11.png",
+        image: "/images/history/timeline/event_11.webp",
         category: "battle"
     },
     {
@@ -669,7 +669,7 @@ const timelineData = [
         title: "Martyrdom of the Sahibzade",
         subtitle: "ਛੋਟੇ ਸਾਹਿਬਜ਼ਾਦਿਆਂ ਦੀ ਸ਼ਹੀਦੀ",
         description: "At Sirhind, the youngest sons of Guru Gobind Singh Ji - Sahibzada Zorawar Singh (9) and Fateh Singh (6) - refused to convert to Islam. They were bricked alive inside a wall. Their grandmother Mata Gujri Ji died upon hearing the news.",
-        image: "/images/history/timeline/event_12.png",
+        image: "/images/history/timeline/event_12.webp",
         category: "martyrdom"
     },
     {
@@ -678,7 +678,7 @@ const timelineData = [
         title: "Guru Granth Sahib Eternal",
         subtitle: "ਸ਼ਬਦ ਗੁਰੂ",
         description: "At Nanded, Guru Gobind Singh Ji bowed before the Guru Granth Sahib, declaring: \"All Sikhs are commanded to accept the Granth as their Guru.\" The line of human Gurus ended. The eternal Word became the everlasting guide.",
-        image: "/images/history/timeline/event_13.png",
+        image: "/images/history/timeline/event_13.webp",
         category: "milestone"
     },
     {
@@ -687,26 +687,8 @@ const timelineData = [
         title: "Rise of the Sikh Empire",
         subtitle: "ਸਿੱਖ ਰਾਜ",
         description: "Maharaja Ranjit Singh unified the Sikh confederacies and established the powerful Sikh Empire. From the Khyber Pass to the Himalayas, the Khalsa Raj brought peace, religious tolerance, and prosperity to Punjab for half a century.",
-        image: "/images/history/timeline/event_14.png",
+        image: "/images/history/timeline/event_14.webp",
         category: "milestone"
-    },
-    {
-        id: 15,
-        year: 1984,
-        title: "Resilience & Healing",
-        subtitle: "ਸਿਦਕ ਤੇ ਇਲਾਜ",
-        description: "June 1984 left deep wounds in the Sikh community. Yet, like a flame that cannot be extinguished, the spirit of the Khalsa endured. The community rebuilt, healed, and emerged stronger - a testament to the unbreakable faith passed down through generations.",
-        image: "/images/history/timeline/event_15.png",
-        category: "remembrance"
-    },
-    {
-        id: 16,
-        year: 2019,
-        title: "550th Prakash Purab",
-        subtitle: "550ਵਾਂ ਪ੍ਰਕਾਸ਼ ਪੁਰਬ",
-        description: "The world celebrated 550 years of Guru Nanak Dev Ji. The Kartarpur Corridor opened, connecting Sikhs across borders. Millions gathered globally, united in gratitude for the timeless message: There is One God, and all humanity is one.",
-        image: "/images/history/timeline/event_16.png",
-        category: "celebration"
     }
 ];
 
