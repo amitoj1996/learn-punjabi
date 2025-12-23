@@ -11,6 +11,7 @@ export interface Guru {
     famousQuoteEnglish: string;
     keyEvents: string[];
     color: string; // accent color for card
+    image?: string; // path to image file
 }
 
 export interface HistoricalEvent {

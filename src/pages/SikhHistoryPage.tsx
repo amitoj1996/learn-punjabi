@@ -127,13 +127,30 @@ const GuruCard: React.FC<{ guru: typeof gurus[0]; index: number; isActive: boole
                 {guru.id}
             </div>
 
-            {/* Guru icon placeholder */}
-            <div
-                className="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center text-4xl"
-                style={{ backgroundColor: `${guru.color}20`, border: `2px solid ${guru.color}` }}
-            >
-                🙏
-            </div>
+            {/* Guru Image or Placeholder */}
+            {guru.image ? (
+                <div
+                    className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white overflow-hidden shadow-lg"
+                    style={{ borderColor: guru.color }}
+                >
+                    <img
+                        src={guru.image}
+                        alt={guru.name}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+            ) : (
+                <div
+                    className="w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center text-5xl bg-slate-800"
+                    style={{
+                        backgroundColor: `${guru.color}20`,
+                        border: `2px solid ${guru.color}`,
+                        boxShadow: `0 0 20px ${guru.color}40`
+                    }}
+                >
+                    🙏
+                </div>
+            )}
 
             <h3 className="text-2xl font-bold text-white text-center">{guru.name}</h3>
             <p className="text-xl text-amber-400 text-center font-serif mt-1">{guru.gurmukhiName}</p>
