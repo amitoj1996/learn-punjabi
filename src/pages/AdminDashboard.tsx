@@ -19,6 +19,20 @@ interface Application {
     hourlyRate: number;
     status: 'pending' | 'approved' | 'rejected' | 'suspended' | 'deleted';
     submittedAt: string;
+    // New enhanced fields
+    photoUrl?: string;
+    timezone?: string;
+    languagesSpoken?: string[];
+    proficiencyLevel?: string;
+    experienceLevel?: string;
+    yearsExperience?: string;
+    teachingPhilosophy?: string;
+    targetAgeGroups?: string[];
+    specializations?: string[];
+    sessionLengths?: string[];
+    videoIntro?: string;
+    weeklyAvailability?: string;
+    credentials?: { blobName: string; docType: string; fileName: string; }[];
 }
 
 interface Report {
@@ -183,6 +197,209 @@ const ActionDropdown: React.FC<{
     );
 };
 
+// Application Detail Modal for full application review
+const ApplicationDetailModal: React.FC<{
+    application: Application | null;
+    onClose: () => void;
+    onApprove: () => void;
+    onReject: () => void;
+    isProcessing: boolean;
+}> = ({ application, onClose, onApprove, onReject, isProcessing }) => {
+    if (!application) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl my-8"
+            >
+                {/* Header with Photo */}
+                <div className="sticky top-0 bg-gradient-to-r from-primary-600 to-primary-700 p-6 text-white rounded-t-2xl">
+                    <div className="flex items-start gap-4">
+                        {application.photoUrl ? (
+                            <img
+                                src={application.photoUrl}
+                                alt={application.fullName}
+                                className="w-20 h-20 rounded-full object-cover border-4 border-white/30"
+                            />
+                        ) : (
+                            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold">
+                                {application.fullName?.charAt(0) || '?'}
+                            </div>
+                        )}
+                        <div className="flex-1">
+                            <h2 className="text-2xl font-bold">{application.fullName || application.name}</h2>
+                            <p className="text-white/80">{application.email}</p>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
+                                    ${application.hourlyRate}/hr
+                                </span>
+                                {application.experienceLevel && (
+                                    <span className="px-2 py-1 bg-white/20 rounded-full text-xs capitalize">
+                                        {application.experienceLevel}
+                                    </span>
+                                )}
+                                {application.timezone && (
+                                    <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
+                                        {application.timezone}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+                            <XCircle size={24} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-6">
+                    {/* Bio */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-secondary-500 uppercase tracking-wide mb-2">About</h3>
+                        <p className="text-secondary-700">{application.bio}</p>
+                    </div>
+
+                    {/* Teaching Philosophy */}
+                    {application.teachingPhilosophy && (
+                        <div>
+                            <h3 className="text-sm font-semibold text-secondary-500 uppercase tracking-wide mb-2">Teaching Philosophy</h3>
+                            <p className="text-secondary-700">{application.teachingPhilosophy}</p>
+                        </div>
+                    )}
+
+                    {/* Key Info Grid */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {/* Languages */}
+                        {application.languagesSpoken && application.languagesSpoken.length > 0 && (
+                            <div className="p-4 bg-secondary-50 rounded-xl">
+                                <h4 className="text-xs font-semibold text-secondary-500 uppercase mb-2">Languages</h4>
+                                <div className="flex flex-wrap gap-1">
+                                    {application.languagesSpoken.map((lang, i) => (
+                                        <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">{lang}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Target Age Groups */}
+                        {application.targetAgeGroups && application.targetAgeGroups.length > 0 && (
+                            <div className="p-4 bg-secondary-50 rounded-xl">
+                                <h4 className="text-xs font-semibold text-secondary-500 uppercase mb-2">Teaches</h4>
+                                <div className="flex flex-wrap gap-1">
+                                    {application.targetAgeGroups.map((age, i) => (
+                                        <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs capitalize">{age}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Specializations */}
+                        {application.specializations && application.specializations.length > 0 && (
+                            <div className="p-4 bg-secondary-50 rounded-xl">
+                                <h4 className="text-xs font-semibold text-secondary-500 uppercase mb-2">Specializations</h4>
+                                <div className="flex flex-wrap gap-1">
+                                    {application.specializations.map((spec, i) => (
+                                        <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs capitalize">{spec}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Session Lengths */}
+                        {application.sessionLengths && application.sessionLengths.length > 0 && (
+                            <div className="p-4 bg-secondary-50 rounded-xl">
+                                <h4 className="text-xs font-semibold text-secondary-500 uppercase mb-2">Session Lengths</h4>
+                                <div className="flex flex-wrap gap-1">
+                                    {application.sessionLengths.map((len, i) => (
+                                        <span key={i} className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">{len} min</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Experience & Availability */}
+                    <div className="grid md:grid-cols-3 gap-4 text-center">
+                        <div className="p-4 bg-primary-50 rounded-xl">
+                            <p className="text-2xl font-bold text-primary-600">{application.yearsExperience || 'N/A'}</p>
+                            <p className="text-xs text-secondary-500">Years Teaching</p>
+                        </div>
+                        <div className="p-4 bg-primary-50 rounded-xl">
+                            <p className="text-2xl font-bold text-primary-600 capitalize">{application.proficiencyLevel || 'N/A'}</p>
+                            <p className="text-xs text-secondary-500">Punjabi Level</p>
+                        </div>
+                        <div className="p-4 bg-primary-50 rounded-xl">
+                            <p className="text-2xl font-bold text-primary-600">{application.weeklyAvailability || 'N/A'}</p>
+                            <p className="text-xs text-secondary-500">Weekly Hours</p>
+                        </div>
+                    </div>
+
+                    {/* Video Intro */}
+                    {application.videoIntro && (
+                        <div>
+                            <h3 className="text-sm font-semibold text-secondary-500 uppercase tracking-wide mb-2">Intro Video</h3>
+                            <a
+                                href={application.videoIntro}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                            >
+                                🎬 Watch Video Introduction
+                            </a>
+                        </div>
+                    )}
+
+                    {/* Credentials */}
+                    {application.credentials && application.credentials.length > 0 && (
+                        <div>
+                            <h3 className="text-sm font-semibold text-secondary-500 uppercase tracking-wide mb-2">
+                                Uploaded Credentials ({application.credentials.length})
+                            </h3>
+                            <div className="space-y-2">
+                                {application.credentials.map((cred, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle size={16} className="text-amber-600" />
+                                            <span className="text-secondary-700">{cred.fileName}</span>
+                                            <span className="text-xs text-secondary-400 capitalize">({cred.docType})</span>
+                                        </div>
+                                        <span className="text-xs text-secondary-400">
+                                            Stored: {cred.blobName.split('-').slice(-1)[0]?.split('.')[0] ? 'Yes' : 'Yes'}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-xs text-secondary-400 mt-2">
+                                Note: Credentials are stored in private storage. Contact dev team to view actual files.
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="sticky bottom-0 bg-white border-t border-secondary-200 p-4 flex gap-3 justify-end rounded-b-2xl">
+                    <Button variant="outline" onClick={onClose}>
+                        Close
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        onClick={onReject}
+                        disabled={isProcessing}
+                    >
+                        <XCircle size={16} className="mr-1" /> Reject
+                    </Button>
+                    <Button onClick={onApprove} disabled={isProcessing}>
+                        {isProcessing ? 'Processing...' : <><CheckCircle size={16} className="mr-1" /> Approve</>}
+                    </Button>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
 export const AdminDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('applications');
     const [applications, setApplications] = useState<Application[]>([]);
@@ -198,6 +415,7 @@ export const AdminDashboard: React.FC = () => {
     } | null>(null);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
 
     // Filters
     const [roleFilter, setRoleFilter] = useState<'all' | 'student' | 'teacher' | 'admin'>('all');
@@ -579,31 +797,50 @@ export const AdminDashboard: React.FC = () => {
                                     <table className="w-full">
                                         <thead className="bg-secondary-50">
                                             <tr>
-                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Name</th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Applicant</th>
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Email</th>
-                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Rate</th>
-                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Status</th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Info</th>
                                                 <th className="px-4 py-3 text-left text-sm font-semibold text-secondary-700">Date</th>
                                                 <th className="px-4 py-3 text-right text-sm font-semibold text-secondary-700">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-secondary-100">
                                             {applications.filter(a => a.status === 'pending').map(app => (
-                                                <tr key={app.id} className="hover:bg-secondary-50">
+                                                <tr key={app.id} className="hover:bg-secondary-50 cursor-pointer" onClick={() => setSelectedApplication(app)}>
                                                     <td className="px-4 py-3">
-                                                        <div className="font-medium text-secondary-900">{app.name || app.fullName}</div>
-                                                        <div className="text-xs text-secondary-500 truncate max-w-[200px]">{app.bio}</div>
+                                                        <div className="flex items-center gap-3">
+                                                            {app.photoUrl ? (
+                                                                <img src={app.photoUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-10 h-10 rounded-full bg-secondary-200 flex items-center justify-center text-secondary-500 font-medium">
+                                                                    {(app.fullName || app.name)?.charAt(0) || '?'}
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <div className="font-medium text-secondary-900">{app.name || app.fullName}</div>
+                                                                <div className="text-xs text-secondary-500">${app.hourlyRate}/hr</div>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-secondary-600">{app.email}</td>
-                                                    <td className="px-4 py-3 text-sm font-medium">${app.hourlyRate}/hr</td>
                                                     <td className="px-4 py-3">
-                                                        <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {app.specializations?.slice(0, 2).map((spec, i) => (
+                                                                <span key={i} className="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700 capitalize">{spec}</span>
+                                                            ))}
+                                                            {(app.credentials?.length || 0) > 0 && (
+                                                                <span className="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700">📄 Credentials</span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-secondary-500">
                                                         {new Date(app.submittedAt).toLocaleDateString()}
                                                     </td>
-                                                    <td className="px-4 py-3">
+                                                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                                         <div className="flex gap-2 justify-end">
+                                                            <Button size="sm" variant="outline" onClick={() => setSelectedApplication(app)}>
+                                                                View
+                                                            </Button>
                                                             <Button size="sm" onClick={() => handleApprove(app.id)} disabled={isProcessing}>
                                                                 <CheckCircle size={14} className="mr-1" /> Approve
                                                             </Button>
@@ -1010,6 +1247,23 @@ export const AdminDashboard: React.FC = () => {
                     }}
                     onCancel={() => setConfirmModal(null)}
                     isLoading={isProcessing}
+                />
+            )}
+
+            {/* Application Detail Modal */}
+            {selectedApplication && (
+                <ApplicationDetailModal
+                    application={selectedApplication}
+                    onClose={() => setSelectedApplication(null)}
+                    onApprove={() => {
+                        handleApprove(selectedApplication.id);
+                        setSelectedApplication(null);
+                    }}
+                    onReject={() => {
+                        handleReject(selectedApplication.id);
+                        setSelectedApplication(null);
+                    }}
+                    isProcessing={isProcessing}
                 />
             )}
 
