@@ -21,23 +21,26 @@ const staggerContainer = {
 };
 
 // ============================================
-// KHANDA SVG COMPONENT - Proper Sikh Symbol
+// KHANDA SVG COMPONENT - Accurate Sikh Symbol
 // ============================================
 const KhandaSVG: React.FC<{ className?: string }> = ({ className }) => (
-    <svg viewBox="0 0 200 200" className={className} fill="currentColor">
-        {/* Central Double-Edged Sword (Khanda) */}
-        <path d="M100 10 L104 10 L104 85 L108 85 L108 88 L104 88 L104 170 L108 175 L108 180 L100 190 L92 180 L92 175 L96 170 L96 88 L92 88 L92 85 L96 85 L96 10 L100 10 Z" />
+    <svg viewBox="0 0 100 120" className={className} fill="currentColor">
+        {/* Central vertical sword (Khanda blade) with pointed top */}
+        <path d="M50 0 L54 8 L52 8 L52 45 L54 45 L54 48 L52 48 L52 95 L54 97 L54 100 L50 105 L46 100 L46 97 L48 95 L48 48 L46 48 L46 45 L48 45 L48 8 L46 8 Z" />
 
         {/* Chakkar (Circle) */}
-        <circle cx="100" cy="100" r="55" fill="none" stroke="currentColor" strokeWidth="8" />
+        <ellipse cx="50" cy="55" rx="22" ry="22" fill="none" stroke="currentColor" strokeWidth="5" />
 
-        {/* Left Kirpan (Curved Sword) */}
-        <path d="M45 35 C25 55, 20 100, 45 145 L50 145 C30 105, 35 60, 50 40 Z" />
-        <path d="M45 145 L40 155 L50 155 L50 145 Z" />
+        {/* Left Kirpan - curved sword sweeping outward then inward */}
+        <path d="M28 25 C5 45, 5 75, 30 95 L33 95 C12 78, 12 50, 32 30 Z" />
+        <path d="M30 95 C28 100, 26 105, 30 108 C34 105, 32 100, 30 95 Z" />
 
-        {/* Right Kirpan (Curved Sword) */}
-        <path d="M155 35 C175 55, 180 100, 155 145 L150 145 C170 105, 165 60, 150 40 Z" />
-        <path d="M155 145 L160 155 L150 155 L150 145 Z" />
+        {/* Right Kirpan - curved sword sweeping outward then inward */}
+        <path d="M72 25 C95 45, 95 75, 70 95 L67 95 C88 78, 88 50, 68 30 Z" />
+        <path d="M70 95 C72 100, 74 105, 70 108 C66 105, 68 100, 70 95 Z" />
+
+        {/* Bottom decorative element */}
+        <circle cx="50" cy="115" r="4" />
     </svg>
 );
 
