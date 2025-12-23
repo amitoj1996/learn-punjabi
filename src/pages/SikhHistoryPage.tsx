@@ -307,6 +307,289 @@ const GurusSection: React.FC = () => {
 };
 
 // ============================================
+// SRI GURU GRANTH SAHIB JI SECTION
+// ============================================
+const GuruGranthSahibSection: React.FC = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start end", "end start"]
+    });
+
+    const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+
+    const granthSahibData = {
+        compositions: [
+            { author: "Guru Nanak Dev Ji", shabads: 974 },
+            { author: "Guru Angad Dev Ji", shabads: 62 },
+            { author: "Guru Amar Das Ji", shabads: 907 },
+            { author: "Guru Ram Das Ji", shabads: 679 },
+            { author: "Guru Arjan Dev Ji", shabads: 2218 },
+            { author: "Guru Tegh Bahadur Ji", shabads: 116 },
+            { author: "Bhagats (Saints)", shabads: 937 }
+        ],
+        bhagats: [
+            "Bhagat Kabir Ji", "Bhagat Ravidas Ji", "Bhagat Namdev Ji",
+            "Bhagat Farid Ji", "Bhagat Trilochan Ji", "Bhagat Dhanna Ji",
+            "Bhagat Pipa Ji", "Bhagat Sain Ji", "Bhagat Bhikhan Ji",
+            "Bhagat Parmanand Ji", "Bhagat Sadhna Ji", "Bhagat Beni Ji",
+            "Bhagat Ramanand Ji", "Bhagat Jaidev Ji", "Bhagat Surdas Ji"
+        ],
+        raags: 31,
+        totalShabads: 5894,
+        totalPages: 1430,
+        languages: ["Punjabi", "Hindi", "Sanskrit", "Persian", "Marathi", "Sindhi"]
+    };
+
+    return (
+        <section ref={containerRef} className="relative py-32 bg-slate-950 overflow-hidden">
+            {/* Animated Background */}
+            <motion.div
+                className="absolute inset-0 z-0"
+                style={{ y: backgroundY }}
+            >
+                <div className="absolute inset-0 bg-gradient-to-b from-amber-900/20 via-slate-950 to-slate-950" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-amber-500/5 rounded-full blur-3xl" />
+            </motion.div>
+
+            <div className="container mx-auto px-6 relative z-10">
+                {/* Header */}
+                <motion.div
+                    className="text-center mb-20"
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="mb-8"
+                    >
+                        <div className="w-24 h-24 mx-auto bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
+                            <Scroll className="w-12 h-12 text-white" />
+                        </div>
+                    </motion.div>
+
+                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4">
+                        Sri Guru Granth Sahib Ji
+                    </h2>
+                    <p className="text-2xl md:text-3xl text-amber-500 font-serif mb-6">
+                        ਸ੍ਰੀ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ
+                    </p>
+                    <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
+                        The Eternal Living Guru - A unique scripture where the Word itself is revered as the Guru.
+                        It contains the divine wisdom of six Gurus and 15 Bhagats (saints) from different religions and castes.
+                    </p>
+                </motion.div>
+
+                {/* Key Stats */}
+                <motion.div
+                    className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                >
+                    {[
+                        { number: "1430", label: "Angs (Pages)", icon: "📜" },
+                        { number: "5894", label: "Shabads (Hymns)", icon: "🎵" },
+                        { number: "31", label: "Raags (Musical Modes)", icon: "🎶" },
+                        { number: "36", label: "Contributors", icon: "✍️" }
+                    ].map((stat, index) => (
+                        <motion.div
+                            key={stat.label}
+                            className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 text-center hover:border-amber-500/30 transition-all duration-300"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 }}
+                        >
+                            <span className="text-4xl mb-2 block">{stat.icon}</span>
+                            <p className="text-3xl md:text-4xl font-bold text-amber-400 mb-1">{stat.number}</p>
+                            <p className="text-slate-400 text-sm">{stat.label}</p>
+                        </motion.div>
+                    ))}
+                </motion.div>
+
+                {/* Main Content Grid */}
+                <div className="grid md:grid-cols-2 gap-12 mb-20">
+                    {/* About Section */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                    >
+                        <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                            <BookOpen className="w-6 h-6 text-amber-500" />
+                            The Living Guru
+                        </h3>
+                        <div className="space-y-4 text-slate-300 leading-relaxed">
+                            <p>
+                                Guru Granth Sahib Ji is not merely a holy book - it is the <span className="text-amber-400 font-semibold">eternal, living Guru</span> of the Sikhs.
+                                In 1708, Guru Gobind Singh Ji bestowed Guruship upon the scripture, declaring:
+                            </p>
+                            <blockquote className="border-l-4 border-amber-500 pl-4 py-2 bg-amber-500/5 rounded-r-lg italic">
+                                "ਸੱਭ ਸਿੱਖਨ ਕੋ ਹੁਕਮ ਹੈ ਗੁਰੂ ਮਾਨਿਓ ਗ੍ਰੰਥ"
+                                <br />
+                                <span className="text-sm text-slate-400 not-italic">"All Sikhs are commanded to accept the Granth as their Guru"</span>
+                            </blockquote>
+                            <p>
+                                The scripture is treated with the same reverence as a living king. It is ceremonially placed on a throne,
+                                fanned with a chaur sahib, and has its own bedroom where it "rests" at night.
+                            </p>
+                        </div>
+                    </motion.div>
+
+                    {/* Compilation History */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                    >
+                        <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                            <Heart className="w-6 h-6 text-amber-500" />
+                            Compilation History
+                        </h3>
+                        <div className="space-y-4 text-slate-300 leading-relaxed">
+                            <p>
+                                <span className="text-amber-400 font-semibold">1604 - Adi Granth:</span> Guru Arjan Dev Ji compiled the first version
+                                at Ramsar Sarovar, Amritsar. Bhai Gurdas Ji served as the scribe.
+                            </p>
+                            <p>
+                                <span className="text-amber-400 font-semibold">1708 - Final Form:</span> Guru Gobind Singh Ji added the compositions
+                                of Guru Tegh Bahadur Ji at Damdama Sahib, completing the scripture.
+                            </p>
+                            <p>
+                                <span className="text-amber-400 font-semibold">Unique Feature:</span> It is written entirely in poetry, organized by
+                                31 raags (musical modes), and includes writings from Hindu and Muslim saints -
+                                a revolutionary statement of religious unity.
+                            </p>
+                        </div>
+                    </motion.div>
+                </div>
+
+                {/* Contributors Section */}
+                <motion.div
+                    className="mb-20"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <h3 className="text-2xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3">
+                        <Users className="w-6 h-6 text-amber-500" />
+                        Divine Contributors
+                    </h3>
+
+                    {/* Gurus' Contributions */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+                        {granthSahibData.compositions.map((item, index) => (
+                            <motion.div
+                                key={item.author}
+                                className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-4 text-center border border-white/10 hover:border-amber-500/30 transition-all duration-300"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.05 }}
+                            >
+                                <p className="text-2xl font-bold text-amber-400 mb-1">{item.shabads}</p>
+                                <p className="text-xs text-slate-400 leading-tight">{item.author}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    {/* Bhagats */}
+                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+                        <h4 className="text-lg font-semibold text-amber-400 mb-4">15 Bhagats (Saints from Different Traditions)</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {granthSahibData.bhagats.map((bhagat, index) => (
+                                <motion.span
+                                    key={bhagat}
+                                    className="px-3 py-1 bg-slate-800 rounded-full text-sm text-slate-300 border border-slate-700"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.03 }}
+                                >
+                                    {bhagat}
+                                </motion.span>
+                            ))}
+                        </div>
+                        <p className="text-slate-500 text-sm mt-4">
+                            Including saints from Hindu, Muslim, and various caste backgrounds - emphasizing the universal nature of divine truth.
+                        </p>
+                    </div>
+                </motion.div>
+
+                {/* Core Teachings */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <h3 className="text-2xl font-bold text-white mb-8 text-center">Core Teachings</h3>
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {[
+                            {
+                                title: "Ik Onkar",
+                                gurmukhi: "ੴ",
+                                description: "There is One Universal Creator - the fundamental truth that opens the scripture."
+                            },
+                            {
+                                title: "Equality of All",
+                                gurmukhi: "ਮਾਨਸ ਕੀ ਜਾਤ ਸਬੈ ਏਕੈ ਪਹਿਚਾਨਬੋ",
+                                description: "Recognize all of humanity as one race - breaking barriers of caste, gender, and religion."
+                            },
+                            {
+                                title: "Nam Simran",
+                                gurmukhi: "ਨਾਮ ਸਿਮਰਨ",
+                                description: "Meditation on the Divine Name - the path to union with the Creator."
+                            }
+                        ].map((teaching, index) => (
+                            <motion.div
+                                key={teaching.title}
+                                className="bg-gradient-to-br from-amber-500/10 to-transparent rounded-2xl p-6 border border-amber-500/20 text-center"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                            >
+                                <p className="text-4xl md:text-5xl text-amber-400 font-serif mb-3">{teaching.gurmukhi}</p>
+                                <h4 className="text-xl font-bold text-white mb-2">{teaching.title}</h4>
+                                <p className="text-slate-400 text-sm">{teaching.description}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Closing Quote */}
+                <motion.div
+                    className="mt-20 text-center"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <p className="text-2xl md:text-3xl text-amber-500/80 font-serif italic max-w-3xl mx-auto">
+                        "ਸ਼ਬਦ ਗੁਰੂ ਸੁਰਤਿ ਧੁਨਿ ਚੇਲਾ"
+                    </p>
+                    <p className="text-slate-400 mt-2">
+                        "The Word is the Guru, and the consciousness attuned to it is the disciple"
+                    </p>
+                    <p className="text-slate-500 text-sm mt-1">— Guru Nanak Dev Ji</p>
+                </motion.div>
+            </div>
+        </section>
+    );
+};
+
+// ============================================
 // GURU DETAIL MODAL (kept from original)
 // ============================================
 const GuruDetailModal: React.FC<{ guru: Guru; onClose: () => void }> = ({ guru, onClose }) => {
@@ -916,6 +1199,7 @@ export const SikhHistoryPage: React.FC = () => {
                 <HeroSection />
                 <ValuesSection />
                 <GurusSection />
+                <GuruGranthSahibSection />
                 <TimelineSection />
                 <FooterQuote />
             </div>
