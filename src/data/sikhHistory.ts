@@ -646,7 +646,7 @@ export const sikhValues = [
 // Five Ks
 export const fiveKs = [
     { name: 'Kesh', gurmukhi: 'ਕੇਸ', meaning: 'Uncut hair - spirituality and devotion', icon: '💇' },
-    { name: 'Kangha', gurmukhi: 'ਕੰਘਾ', meaning: 'Wooden comb - cleanliness and discipline', icon: '🪥' },
+    { name: 'Kangha', gurmukhi: 'ਕੰਘਾ', meaning: 'Wooden comb - cleanliness and discipline', icon: '🪮' },
     { name: 'Kara', gurmukhi: 'ਕੜਾ', meaning: 'Steel bracelet - eternal bond with God', icon: '⭕' },
     { name: 'Kachera', gurmukhi: 'ਕਛਹਿਰਾ', meaning: 'Cotton undergarment - self-control', icon: '👖' },
     { name: 'Kirpan', gurmukhi: 'ਕਿਰਪਾਨ', meaning: 'Ceremonial sword - courage to defend the weak', icon: '⚔️' },
