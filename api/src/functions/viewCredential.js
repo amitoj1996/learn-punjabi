@@ -1,5 +1,5 @@
 const { app } = require('@azure/functions');
-const { BlobServiceClient, generateBlobSASQueryParameters, BlobSASPermissions, StorageSharedKeyCredential } = require('@azure/storage-blob');
+const { generateBlobSASQueryParameters, BlobSASPermissions, StorageSharedKeyCredential } = require('@azure/storage-blob');
 
 // Helper to get client principal from Azure Static Web Apps
 function getClientPrincipal(request) {
@@ -18,7 +18,7 @@ function getClientPrincipal(request) {
 app.http('viewCredential', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'admin/credential/{blobName}',
+    route: 'admin/credential',  // Changed: use query param instead of URL segment
     handler: async (request, context) => {
         context.log('Processing credential view request');
 
@@ -42,14 +42,18 @@ app.http('viewCredential', {
                 };
             }
 
-            // 3. Parse blob name from URL
-            const blobName = request.params.blobName;
+            // 3. Parse blob name from query parameter (URL decoded automatically)
+            const url = new URL(request.url);
+            const blobName = url.searchParams.get('blob');
+
             if (!blobName) {
                 return {
                     status: 400,
                     jsonBody: { error: 'No blob name provided' }
                 };
             }
+
+            context.log(`Requested blob name: ${blobName}`);
 
             // 4. Parse connection string to get account name and key
             const accountNameMatch = connectionString.match(/AccountName=([^;]+)/);
@@ -81,7 +85,7 @@ app.http('viewCredential', {
             }, sharedKeyCredential).toString();
 
             // 6. Build the full URL
-            const blobUrl = `https://${accountName}.blob.core.windows.net/credentials/${blobName}?${sasToken}`;
+            const blobUrl = `https://${accountName}.blob.core.windows.net/credentials/${encodeURIComponent(blobName)}?${sasToken}`;
 
             context.log(`Generated SAS URL for credential: ${blobName}`);
 
