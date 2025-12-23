@@ -44,7 +44,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਇਕੁ ਓਅੰਕਾਰ ਸਤਿ ਨਾਮੁ',
         famousQuoteEnglish: 'There is One God, His Name is True',
         keyEvents: ['Traveled extensively (Udasis) to spread message', 'Established Kartarpur community', 'Rejected caste system'],
-        color: '#F59E0B' // Saffron
+        color: '#F59E0B', // Saffron
+        image: '/images/history/guru_nanak.jpg'
     },
     {
         id: 2,
@@ -56,7 +57,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਜੇ ਸਉ ਚੰਦਾ ਉਗਵਹਿ ਸੂਰਜ ਚੜਹਿ ਹਜਾਰ',
         famousQuoteEnglish: 'Even if a hundred moons and a thousand suns were to rise',
         keyEvents: ['Developed Gurmukhi script', 'Collected Guru Nanak\'s hymns', 'Promoted physical fitness'],
-        color: '#10B981' // Emerald
+        color: '#10B981', // Emerald
+        image: '/images/history/guru_angad.jpg'
     },
     {
         id: 3,
@@ -68,7 +70,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਪਹਿਲਾ ਪੰਗਤ ਪਾਛੈ ਸੰਗਤ',
         famousQuoteEnglish: 'First the Pangat (Langar), then the Sangat',
         keyEvents: ['Built Baoli at Goindwal', 'Appointed Manji system', 'Advocated for women\'s rights'],
-        color: '#3B82F6' // Blue
+        color: '#3B82F6', // Blue
+        image: '/images/history/guru_amar_das.jpg'
     },
     {
         id: 4,
@@ -80,7 +83,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਮੇਰਾ ਮਨੁ ਲੋਚੈ ਗੁਰ ਦਰਸਨ ਤਾਈ',
         famousQuoteEnglish: 'My mind longs for the Guru\'s Darshan',
         keyEvents: ['Founded Amritsar', 'Started construction of Sarovar', 'Composed Laavan for Anand Karaj'],
-        color: '#8B5CF6' // Purple
+        color: '#8B5CF6', // Purple
+        image: '/images/history/guru_ram_das.jpg'
     },
     {
         id: 5,
@@ -92,7 +96,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਤੇਰਾ ਭਾਣਾ ਮੀਠਾ ਲਾਗੈ',
         famousQuoteEnglish: 'Your Will seems sweet to me',
         keyEvents: ['Compiled Adi Granth', 'Completed Harmandir Sahib', 'Martyred on hot plate (first Sikh martyr)'],
-        color: '#EF4444' // Red (martyrdom)
+        color: '#EF4444', // Red (martyrdom)
+        image: '/images/history/guru_arjan.jpg'
     },
     {
         id: 6,
@@ -104,7 +109,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਮੀਰੀ ਪੀਰੀ',
         famousQuoteEnglish: 'Miri (temporal) and Piri (spiritual) - two swords of power',
         keyEvents: ['Wore two swords (Miri-Piri)', 'Built Akal Takht', 'Freed 52 Hindu kings from Gwalior Fort'],
-        color: '#F97316' // Orange
+        color: '#F97316', // Orange
+        image: '/images/history/guru_hargobind.jpg'
     },
     {
         id: 7,
@@ -116,7 +122,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਦਯਾ ਅਤੇ ਧਰਮ',
         famousQuoteEnglish: 'Compassion and Righteousness',
         keyEvents: ['Maintained army of 2,200 soldiers', 'Promoted herbal medicine', 'Protected followers during Mughal conflicts'],
-        color: '#22C55E' // Green (nature/medicine)
+        color: '#22C55E', // Green (nature/medicine)
+        image: '/images/history/guru_har_rai.jpg'
     },
     {
         id: 8,
@@ -128,7 +135,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਬਾਲਾ ਪੀਰ',
         famousQuoteEnglish: 'The Child Guru',
         keyEvents: ['Became Guru at age 5', 'Healed smallpox victims in Delhi', 'Said "Baba Bakale" before passing (pointing to 9th Guru)'],
-        color: '#06B6D4' // Cyan
+        color: '#06B6D4', // Cyan
+        image: '/images/history/guru_har_krishan.jpg'
     },
     {
         id: 9,
@@ -140,7 +148,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਸੀਸੁ ਦੀਆ ਪਰ ਸਿਰਰੁ ਨ ਦੀਆ',
         famousQuoteEnglish: 'He gave his head but not his faith',
         keyEvents: ['Martyred in Delhi (Chandni Chowk)', 'Protected Kashmiri Pandits', 'Called "Hind di Chadar" (Shield of India)'],
-        color: '#DC2626' // Deep red (martyrdom)
+        color: '#DC2626', // Deep red (martyrdom)
+        image: '/images/history/guru_tegh_bahadur.jpg'
     },
     {
         id: 10,
@@ -152,7 +161,8 @@ export const gurus: Guru[] = [
         famousQuote: 'ਸਵਾ ਲਾਖ ਸੇ ਏਕ ਲੜਾਊਂ',
         famousQuoteEnglish: 'I shall make one fight against 125,000',
         keyEvents: ['Created Khalsa in 1699', 'Gave the 5 Ks', 'Sacrifice of four Sahibzade', 'Declared Guru Granth Sahib as eternal Guru'],
-        color: '#7C3AED' // Royal purple
+        color: '#7C3AED', // Royal purple
+        image: '/images/history/guru_gobind_singh.jpg'
     }
 ];
 
