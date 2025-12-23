@@ -85,8 +85,9 @@ export const TeacherOnboarding: React.FC = () => {
     const [step, setStep] = useState(1);
     const [photoUrl, setPhotoUrl] = useState('');
     const [uploading, setUploading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
-    const { register, handleSubmit, formState: { errors, isSubmitting }, trigger, watch, setValue } = useForm<TeacherFormData>({
+    const { register, handleSubmit, formState: { errors }, trigger, watch, setValue } = useForm<TeacherFormData>({
         resolver: zodResolver(teacherSchema),
         defaultValues: {
             agreedToTerms: false,
@@ -148,6 +149,9 @@ export const TeacherOnboarding: React.FC = () => {
     };
 
     const onSubmit = async (data: TeacherFormData) => {
+        if (submitting) return; // Prevent double-click
+        setSubmitting(true);
+
         try {
             const response = await fetch('/api/teachers/apply', {
                 method: 'POST',
@@ -164,6 +168,8 @@ export const TeacherOnboarding: React.FC = () => {
         } catch (e) {
             console.error(e);
             alert("Network error. Please try again.");
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -531,11 +537,11 @@ export const TeacherOnboarding: React.FC = () => {
                                         )}
 
                                         <div className="flex justify-between pt-4">
-                                            <Button type="button" variant="outline" onClick={() => setStep(2)}>
+                                            <Button type="button" variant="outline" onClick={() => setStep(2)} disabled={submitting}>
                                                 Back
                                             </Button>
-                                            <Button type="submit" size="lg" isLoading={isSubmitting}>
-                                                Submit Application
+                                            <Button type="submit" size="lg" isLoading={submitting} disabled={submitting}>
+                                                {submitting ? 'Submitting...' : 'Submit Application'}
                                             </Button>
                                         </div>
                                     </motion.div>
