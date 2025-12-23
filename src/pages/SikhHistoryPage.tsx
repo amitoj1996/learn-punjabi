@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/Layout';
-import { gurus, historicalEvents, sikhValues, fiveKs, type Guru } from '../data/sikhHistory';
-import { ChevronLeft, ChevronRight, BookOpen, Sword, Calendar, MapPin, X, Users, Scroll, Heart } from 'lucide-react';
+import { gurus, historicalEvents, sikhValues, fiveKs, type Guru, type HistoricalEvent } from '../data/sikhHistory';
+import { ChevronLeft, ChevronRight, BookOpen, Sword, Calendar, MapPin, X, Users, Scroll, Heart, Info, Target, History } from 'lucide-react';
 
 // Khanda SVG Component
 const KhandaSVG: React.FC<{ className?: string }> = ({ className }) => (
@@ -204,6 +204,101 @@ const GuruDetailModal: React.FC<{ guru: Guru; onClose: () => void }> = ({ guru, 
                             </motion.div>
                         )}
                     </AnimatePresence>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+// Event Detail Modal Component
+const EventDetailModal: React.FC<{ event: HistoricalEvent; onClose: () => void }> = ({ event, onClose }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="bg-slate-900 w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col"
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="relative h-40 bg-slate-800 overflow-hidden flex-shrink-0 flex items-end p-8">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent z-10" />
+                    <div className={`absolute inset-0 opacity-20 ${event.category === 'battle' ? 'bg-red-900' :
+                            event.category === 'guru' ? 'bg-amber-900' :
+                                event.category === 'milestone' ? 'bg-blue-900' : 'bg-green-900'
+                        }`} />
+
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+
+                    <div className="relative z-20">
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold text-white shadow-lg ${event.category === 'battle' ? 'bg-red-500' :
+                                    event.category === 'guru' ? 'bg-amber-500' :
+                                        event.category === 'milestone' ? 'bg-blue-500' : 'bg-green-500'
+                                }`}>
+                                {event.year}
+                            </span>
+                            <span className="text-slate-300 font-serif uppercase tracking-wider text-sm">{event.category}</span>
+                        </div>
+                        <h2 className="text-3xl font-bold text-white mb-1">{event.title}</h2>
+                    </div>
+                </div>
+
+                {/* Content Area */}
+                <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-slate-900">
+                    <div className="space-y-8">
+                        <div>
+                            <p className="text-lg text-slate-300 leading-relaxed font-light">
+                                {event.longDescription || event.description}
+                            </p>
+                        </div>
+
+                        {event.context && (
+                            <div className="bg-slate-800/30 p-5 rounded-xl border-l-4 border-slate-600">
+                                <h4 className="text-white font-bold flex items-center gap-2 mb-2">
+                                    <History size={18} className="text-slate-400" /> Historical Context
+                                </h4>
+                                <p className="text-slate-400 italic">"{event.context}"</p>
+                            </div>
+                        )}
+
+                        {event.significance && (
+                            <div className="bg-amber-900/10 p-5 rounded-xl border border-amber-500/20">
+                                <h4 className="text-amber-400 font-bold flex items-center gap-2 mb-2">
+                                    <Target size={18} /> Significance
+                                </h4>
+                                <p className="text-slate-300">{event.significance}</p>
+                            </div>
+                        )}
+
+                        {event.details && event.details.length > 0 && (
+                            <div>
+                                <h4 className="text-white font-bold flex items-center gap-2 mb-4">
+                                    <Info size={18} className="text-blue-400" /> Key Details
+                                </h4>
+                                <ul className="space-y-3">
+                                    {event.details.map((detail, i) => (
+                                        <li key={i} className="flex gap-3 text-slate-300">
+                                            <div className="mt-2 w-1.5 h-1.5 bg-slate-500 rounded-full flex-shrink-0" />
+                                            <span className="leading-relaxed">{detail}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </motion.div>
         </motion.div>
@@ -495,7 +590,11 @@ const GurusSection: React.FC = () => {
 };
 
 // Timeline Event Component
-const TimelineEvent: React.FC<{ event: typeof historicalEvents[0]; index: number }> = ({ event, index }) => {
+const TimelineEvent: React.FC<{
+    event: HistoricalEvent;
+    index: number;
+    onClick: () => void;
+}> = ({ event, index, onClick }) => {
     const getCategoryIcon = () => {
         switch (event.category) {
             case 'guru': return <BookOpen className="w-4 h-4" />;
@@ -516,67 +615,119 @@ const TimelineEvent: React.FC<{ event: typeof historicalEvents[0]; index: number
 
     return (
         <motion.div
-            className="flex-shrink-0 w-72 p-6 bg-slate-800/80 backdrop-blur rounded-2xl border border-slate-700/50"
+            className="flex-shrink-0 w-80 group cursor-pointer"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}
+            transition={{ delay: index * 0.05 }}
+            onClick={onClick}
         >
-            <div className="flex items-center gap-2 mb-3">
-                <div className={`p-2 rounded-lg ${getCategoryColor()} text-white`}>
-                    {getCategoryIcon()}
+            <div className="relative p-6 bg-slate-800/40 hover:bg-slate-800/80 backdrop-blur rounded-2xl border border-slate-700/50 hover:border-amber-500/30 transition-all duration-300 h-full flex flex-col group-hover:-translate-y-2 group-hover:shadow-xl">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2.5 rounded-xl ${getCategoryColor()} text-white shadow-lg`}>
+                        {getCategoryIcon()}
+                    </div>
+                    <span className="text-3xl font-bold text-slate-700/20 absolute right-6 top-6 transition-colors group-hover:text-white/10">{event.year}</span>
+                    <span className="text-amber-400 font-bold text-xl">{event.year}</span>
                 </div>
-                <span className="text-amber-400 font-bold text-xl">{event.year}</span>
+
+                <h4 className="text-white font-bold text-lg mb-2 leading-snug group-hover:text-amber-400 transition-colors">{event.title}</h4>
+                <p className="text-slate-400 text-sm leading-relaxed line-clamp-3 mb-4 flex-grow">{event.description}</p>
+
+                <div className="flex items-center text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-amber-500 transition-colors mt-auto">
+                    Read More <ChevronRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform" />
+                </div>
             </div>
-            <h4 className="text-white font-semibold text-lg">{event.title}</h4>
-            <p className="text-slate-400 text-sm mt-2">{event.description}</p>
+
+            {/* Timeline connector visual */}
+            <div className="absolute top-1/2 -right-3 w-6 h-0.5 bg-slate-800 -z-10 group-hover:bg-amber-500/20 transition-colors hidden md:block" />
         </motion.div>
     );
 };
 
-// Timeline Section
-const TimelineSection: React.FC = () => (
-    <section className="py-20 bg-slate-900">
-        <div className="container mx-auto px-6">
-            <motion.div
-                className="text-center mb-12"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-            >
-                <h2 className="text-4xl md:text-5xl font-bold text-white">Historical Timeline</h2>
-                <p className="text-2xl text-amber-400 font-serif mt-2">ਇਤਿਹਾਸਕ ਸਮਾਂ-ਰੇਖਾ</p>
-                <p className="text-slate-400 mt-4">Scroll through 550+ years of Sikh history</p>
-            </motion.div>
+// Timeline Section with Filters
+const TimelineSection: React.FC = () => {
+    const [filter, setFilter] = useState<'all' | 'guru' | 'battle' | 'milestone'>('all');
+    const [selectedEvent, setSelectedEvent] = useState<HistoricalEvent | null>(null);
 
-            {/* Horizontal scrolling timeline */}
-            <div className="overflow-x-auto pb-6 -mx-6 px-6">
-                <div className="flex gap-6 min-w-max">
-                    {historicalEvents.map((event, index) => (
-                        <TimelineEvent key={event.id} event={event} index={index} />
+    const filteredEvents = filter === 'all'
+        ? historicalEvents
+        : historicalEvents.filter(e => e.category === filter);
+
+    return (
+        <section className="py-24 bg-slate-900 border-t border-slate-800/50">
+            <div className="container mx-auto px-6">
+                <motion.div
+                    className="text-center mb-12"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                >
+                    <h2 className="text-4xl md:text-5xl font-bold text-white">Historical Timeline</h2>
+                    <p className="text-2xl text-amber-400 font-serif mt-2">ਇਤਿਹਾਸਕ ਸਮਾਂ-ਰੇਖਾ</p>
+                    <p className="text-slate-400 mt-4 max-w-2xl mx-auto">
+                        Explore major events that shaped the Sikh faith. Select a category to filter the timeline.
+                    </p>
+                </motion.div>
+
+                {/* Filters */}
+                <div className="flex justify-center flex-wrap gap-4 mb-12">
+                    {[
+                        { id: 'all', label: 'All Events' },
+                        { id: 'guru', label: 'Gurus' },
+                        { id: 'battle', label: 'Battles' },
+                        { id: 'milestone', label: 'Milestones' }
+                    ].map((f) => (
+                        <button
+                            key={f.id}
+                            onClick={() => setFilter(f.id as any)}
+                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border ${filter === f.id
+                                ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
+                                : 'bg-slate-800/50 text-slate-400 border-slate-700 hover:bg-slate-800 hover:text-white'
+                                }`}
+                        >
+                            {f.label}
+                        </button>
                     ))}
                 </div>
+
+                {/* Horizontal continuous timeline */}
+                <div className="relative">
+                    {/* Connecting line */}
+                    <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 -translate-y-1/2 hidden md:block" />
+
+                    <div className="overflow-x-auto pb-12 pt-4 -mx-6 px-6 custom-scrollbar">
+                        <div className="flex gap-8 min-w-max px-4">
+                            <AnimatePresence mode='popLayout'>
+                                {filteredEvents.map((event, index) => (
+                                    <TimelineEvent
+                                        key={event.id}
+                                        event={event}
+                                        index={index}
+                                        onClick={() => setSelectedEvent(event)}
+                                    />
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                </div>
+
+                <p className="text-center text-slate-500 text-sm mt-4 italic flex items-center justify-center gap-2">
+                    <ChevronLeft size={14} /> Scroll or swipe to explore <ChevronRight size={14} />
+                </p>
             </div>
 
-            {/* Timeline legend */}
-            <div className="flex justify-center gap-6 mt-8 flex-wrap">
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-amber-500" />
-                    <span className="text-slate-400 text-sm">Gurus</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                    <span className="text-slate-400 text-sm">Battles</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-500" />
-                    <span className="text-slate-400 text-sm">Milestones</span>
-                </div>
-            </div>
-        </div>
-    </section>
-);
+            <AnimatePresence>
+                {selectedEvent && (
+                    <EventDetailModal
+                        event={selectedEvent}
+                        onClose={() => setSelectedEvent(null)}
+                    />
+                )}
+            </AnimatePresence>
+        </section>
+    );
+};
 
 // Core Values Section
 const ValuesSection: React.FC = () => (
