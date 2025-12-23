@@ -385,6 +385,34 @@ const GuruGranthSahibSection: React.FC = () => {
                     </p>
                 </motion.div>
 
+                {/* Hero Image */}
+                <motion.div
+                    className="relative max-w-4xl mx-auto mb-20 rounded-3xl overflow-hidden"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10" />
+                    <img
+                        src="/images/history/guru_granth_sahib.webp"
+                        alt="Sri Guru Granth Sahib Ji - The Eternal Living Guru"
+                        className="w-full h-auto object-cover rounded-3xl shadow-2xl shadow-amber-500/10"
+                        loading="lazy"
+                        onError={(e) => {
+                            // Hide if image not found yet
+                            (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-center">
+                        <p className="text-amber-400 font-serif text-lg italic">
+                            "ਸਭ ਸਿਖਨ ਕੋ ਹੁਕਮ ਹੈ ਗੁਰੂ ਮਾਨਿਓ ਗ੍ਰੰਥ"
+                        </p>
+                        <p className="text-slate-400 text-sm mt-1">
+                            "All Sikhs are commanded to accept the Granth as their Guru"
+                        </p>
+                    </div>
+                </motion.div>
                 {/* Key Stats */}
                 <motion.div
                     className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
