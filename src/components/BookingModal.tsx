@@ -49,10 +49,10 @@ const convertUtcToLocal = (utcTime: string, dateStr: string): string => {
 };
 
 const RECURRING_OPTIONS = [
-    { weeks: 1, label: '1 week', discount: 0 },
+    { weeks: 1, label: '1 week', discount: 5 },
     { weeks: 2, label: '2 weeks', discount: 5 },
     { weeks: 4, label: '4 weeks', discount: 10 },
-    { weeks: 8, label: '8 weeks', discount: 10 },
+    { weeks: 8, label: '8 weeks', discount: 15 },
 ];
 
 export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSuccess: _onSuccess }) => {
@@ -143,13 +143,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
             return tutor.hourlyRate;
         }
 
-        // Recurring pricing with tiered discounts (1wk=0%, 2wk=5%, 4-8wk=10%)
+        // Recurring pricing with tiered discounts (1-2wk=5%, 4wk=10%, 8wk=15%)
         const regularTotal = tutor.hourlyRate * recurringWeeks;
-        let discountPercent = 0;
-        if (recurringWeeks >= 4) {
+        let discountPercent = 5; // Default 5% for 1-2 weeks
+        if (recurringWeeks >= 8) {
+            discountPercent = 15;
+        } else if (recurringWeeks >= 4) {
             discountPercent = 10;
-        } else if (recurringWeeks >= 2) {
-            discountPercent = 5;
         }
         const discount = regularTotal * (discountPercent / 100);
         return regularTotal - discount;

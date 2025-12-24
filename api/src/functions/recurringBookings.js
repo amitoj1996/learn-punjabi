@@ -106,13 +106,13 @@ app.http('createRecurringBookings', {
                 };
             }
 
-            // Calculate pricing with tiered discounts (1wk=0%, 2wk=5%, 4-8wk=10%)
+            // Calculate pricing with tiered discounts (1wk=5%, 2wk=5%, 4wk=10%, 8wk=15%)
             const regularPrice = tutor.hourlyRate * weeks;
-            let discountPercent = 0;
-            if (weeks >= 4) {
+            let discountPercent = 5; // Default 5% for 1-2 weeks
+            if (weeks >= 8) {
+                discountPercent = 15;
+            } else if (weeks >= 4) {
                 discountPercent = 10;
-            } else if (weeks >= 2) {
-                discountPercent = 5;
             }
             const discountedTotal = regularPrice * (1 - discountPercent / 100);
             const pricePerLesson = discountedTotal / weeks;
