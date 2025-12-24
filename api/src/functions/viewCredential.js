@@ -18,9 +18,9 @@ function getClientPrincipal(request) {
 app.http('viewCredential', {
     methods: ['GET'],
     authLevel: 'anonymous',
-    route: 'admin/credential',
+    route: 'viewCredential',  // Simplified route - will be /api/viewCredential
     handler: async (request, context) => {
-        context.log('Processing credential view request');
+        context.log('viewCredential function triggered');
 
         try {
             // 1. Verify user is authenticated
@@ -32,7 +32,6 @@ app.http('viewCredential', {
                     jsonBody: { error: 'Please log in' }
                 };
             }
-            context.log(`User authenticated: ${clientPrincipal.userId}`);
 
             // 2. Get connection string
             const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
@@ -49,21 +48,19 @@ app.http('viewCredential', {
             const blobName = url.searchParams.get('blob');
 
             if (!blobName) {
-                context.log.error('No blob name in query params');
                 return {
                     status: 400,
                     jsonBody: { error: 'No blob name provided' }
                 };
             }
 
-            context.log(`Requested blob name: ${blobName}`);
+            context.log(`Requested blob: ${blobName}`);
 
-            // 4. Parse connection string to get account name and key
+            // 4. Parse connection string
             const accountNameMatch = connectionString.match(/AccountName=([^;]+)/);
             const accountKeyMatch = connectionString.match(/AccountKey=([^;]+)/);
 
             if (!accountNameMatch || !accountKeyMatch) {
-                context.log.error('Invalid connection string format');
                 return {
                     status: 500,
                     jsonBody: { error: 'Storage configuration error' }
@@ -72,7 +69,6 @@ app.http('viewCredential', {
 
             const accountName = accountNameMatch[1];
             const accountKey = accountKeyMatch[1];
-            context.log(`Storage account: ${accountName}`);
 
             // 5. Verify blob exists
             const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
@@ -81,32 +77,28 @@ app.http('viewCredential', {
 
             const exists = await blobClient.exists();
             if (!exists) {
-                context.log.error(`Blob does not exist: ${blobName}`);
+                context.log.error(`Blob not found: ${blobName}`);
                 return {
                     status: 404,
-                    jsonBody: { error: 'Credential file not found' }
+                    jsonBody: { error: 'Credential file not found in storage' }
                 };
             }
-            context.log(`Blob exists: ${blobName}`);
 
-            // 6. Create shared key credential and generate SAS token
+            // 6. Generate SAS token
             const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
-
-            // SAS token expires in 10 minutes (short-lived for security)
             const expiresOn = new Date();
             expiresOn.setMinutes(expiresOn.getMinutes() + 10);
 
             const sasToken = generateBlobSASQueryParameters({
                 containerName: 'credentials',
                 blobName: blobName,
-                permissions: BlobSASPermissions.parse('r'), // Read only
+                permissions: BlobSASPermissions.parse('r'),
                 expiresOn: expiresOn,
             }, sharedKeyCredential).toString();
 
-            // 7. Build the full URL (don't encode blobName twice - sasToken handles it)
             const blobUrl = `https://${accountName}.blob.core.windows.net/credentials/${blobName}?${sasToken}`;
 
-            context.log(`Generated SAS URL for credential: ${blobName}`);
+            context.log('SAS URL generated successfully');
 
             return {
                 status: 200,
@@ -117,12 +109,11 @@ app.http('viewCredential', {
             };
 
         } catch (error) {
-            context.log.error('Error generating credential URL:', error.message);
-            context.log.error('Stack:', error.stack);
+            context.log.error('Error:', error.message);
             return {
                 status: 500,
                 jsonBody: {
-                    error: 'Failed to generate credential URL',
+                    error: 'Server error',
                     message: error.message
                 }
             };

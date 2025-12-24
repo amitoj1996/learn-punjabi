@@ -368,7 +368,7 @@ const ApplicationDetailModal: React.FC<{
                                         <button
                                             onClick={async () => {
                                                 try {
-                                                    const res = await fetch(`/api/admin/credential?blob=${encodeURIComponent(cred.blobName)}`);
+                                                    const res = await fetch(`/api/viewCredential?blob=${encodeURIComponent(cred.blobName)}`);
                                                     const data = await res.json();
                                                     if (res.ok && data.url) {
                                                         window.open(data.url, '_blank');
