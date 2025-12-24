@@ -8,6 +8,10 @@
       "rewrite": "/.auth/login/aad?prompt=select_account"
     },
     {
+      "route": "/login/google",
+      "rewrite": "/.auth/login/google"
+    },
+    {
       "route": "/logout",
       "rewrite": "/.auth/logout"
     },
