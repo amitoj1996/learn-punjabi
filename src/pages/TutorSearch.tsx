@@ -400,12 +400,10 @@ export const TutorSearch: React.FC = () => {
                                                         {tutor.targetAgeGroups.map(age => AGE_ICONS[age] || '').join(' ')}
                                                     </span>
                                                 )}
-                                                {tutor.sessionLengths && tutor.sessionLengths.length > 0 && (
-                                                    <span className="flex items-center gap-1">
-                                                        <Clock size={14} />
-                                                        {tutor.sessionLengths.map((s: string) => s + 'm').join(', ')}
-                                                    </span>
-                                                )}
+                                                <span className="flex items-center gap-1">
+                                                    <Clock size={14} />
+                                                    60 min sessions
+                                                </span>
                                             </div>
                                         </div>
 
