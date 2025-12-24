@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 
@@ -34,123 +34,6 @@ const providers: AuthProvider[] = [
         url: '/login/microsoft',
     }
 ];
-
-// Spacetime Grid Component
-const SpacetimeGrid: React.FC = () => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const mouseRef = useRef({ x: 0, y: 0 });
-    const animationRef = useRef<number>(0);
-
-    const drawGrid = useCallback(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        const width = canvas.width;
-        const height = canvas.height;
-        const gridSize = 40;
-        const mouseX = mouseRef.current.x;
-        const mouseY = mouseRef.current.y;
-        const warpRadius = 150;
-        const warpStrength = 30;
-
-        ctx.clearRect(0, 0, width, height);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-        ctx.lineWidth = 1;
-
-        // Draw horizontal lines with warping
-        for (let y = 0; y <= height; y += gridSize) {
-            ctx.beginPath();
-            for (let x = 0; x <= width; x += 5) {
-                const dx = x - mouseX;
-                const dy = y - mouseY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                let warpedY = y;
-                if (distance < warpRadius && distance > 0) {
-                    const warpFactor = (1 - distance / warpRadius) * warpStrength;
-                    warpedY = y + (dy / distance) * warpFactor * (1 - distance / warpRadius);
-                }
-
-                if (x === 0) {
-                    ctx.moveTo(x, warpedY);
-                } else {
-                    ctx.lineTo(x, warpedY);
-                }
-            }
-            ctx.stroke();
-        }
-
-        // Draw vertical lines with warping
-        for (let x = 0; x <= width; x += gridSize) {
-            ctx.beginPath();
-            for (let y = 0; y <= height; y += 5) {
-                const dx = x - mouseX;
-                const dy = y - mouseY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                let warpedX = x;
-                if (distance < warpRadius && distance > 0) {
-                    const warpFactor = (1 - distance / warpRadius) * warpStrength;
-                    warpedX = x + (dx / distance) * warpFactor * (1 - distance / warpRadius);
-                }
-
-                if (y === 0) {
-                    ctx.moveTo(warpedX, y);
-                } else {
-                    ctx.lineTo(warpedX, y);
-                }
-            }
-            ctx.stroke();
-        }
-
-        // Draw a subtle glow at mouse position
-        const gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, warpRadius);
-        gradient.addColorStop(0, 'rgba(251, 191, 36, 0.15)');
-        gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-
-        animationRef.current = requestAnimationFrame(drawGrid);
-    }, []);
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        };
-
-        const handleMouseMove = (e: MouseEvent) => {
-            mouseRef.current = { x: e.clientX, y: e.clientY };
-        };
-
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('mousemove', handleMouseMove);
-
-        animationRef.current = requestAnimationFrame(drawGrid);
-
-        return () => {
-            window.removeEventListener('resize', resizeCanvas);
-            window.removeEventListener('mousemove', handleMouseMove);
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
-        };
-    }, [drawGrid]);
-
-    return (
-        <canvas
-            ref={canvasRef}
-            className="absolute inset-0 pointer-events-none"
-        />
-    );
-};
 
 export const LoginPage: React.FC = () => {
     return (
@@ -198,8 +81,12 @@ export const LoginPage: React.FC = () => {
                 />
             </div>
 
-            {/* Spacetime Warping Grid */}
-            <SpacetimeGrid />
+            {/* Decorative Pattern */}
+            <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                }} />
+            </div>
 
             {/* Content */}
             <div className="relative z-10 w-full max-w-md px-4">
