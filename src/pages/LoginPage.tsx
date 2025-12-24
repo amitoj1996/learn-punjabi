@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 
@@ -36,36 +36,11 @@ const providers: AuthProvider[] = [
 ];
 
 export const LoginPage: React.FC = () => {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            setMousePosition({
-                x: (e.clientX / window.innerWidth) * 100,
-                y: (e.clientY / window.innerHeight) * 100,
-            });
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
-
     return (
         <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
             {/* Animated Gradient Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-primary-800 to-amber-900">
-                {/* Interactive Mouse Glow */}
-                <div
-                    className="absolute w-[600px] h-[600px] rounded-full transition-all duration-300 ease-out pointer-events-none"
-                    style={{
-                        background: 'radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, transparent 70%)',
-                        left: `${mousePosition.x}%`,
-                        top: `${mousePosition.y}%`,
-                        transform: 'translate(-50%, -50%)',
-                    }}
-                />
-
-                {/* Animated Orbs that also respond to mouse */}
+                {/* Animated Orbs */}
                 <motion.div
                     animate={{
                         x: [0, 100, 0],
@@ -76,10 +51,6 @@ export const LoginPage: React.FC = () => {
                         duration: 20,
                         repeat: Infinity,
                         ease: "easeInOut"
-                    }}
-                    style={{
-                        x: (mousePosition.x - 50) * 0.3,
-                        y: (mousePosition.y - 50) * 0.3,
                     }}
                     className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/30 rounded-full blur-3xl"
                 />
@@ -94,10 +65,6 @@ export const LoginPage: React.FC = () => {
                         repeat: Infinity,
                         ease: "easeInOut"
                     }}
-                    style={{
-                        x: (mousePosition.x - 50) * -0.2,
-                        y: (mousePosition.y - 50) * -0.2,
-                    }}
                     className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary-400/20 rounded-full blur-3xl"
                 />
                 <motion.div
@@ -110,26 +77,16 @@ export const LoginPage: React.FC = () => {
                         repeat: Infinity,
                         ease: "easeInOut"
                     }}
-                    style={{
-                        x: (mousePosition.x - 50) * 0.15,
-                        y: (mousePosition.y - 50) * 0.15,
-                    }}
                     className="absolute top-1/2 right-1/3 w-64 h-64 bg-orange-400/20 rounded-full blur-3xl"
                 />
             </div>
 
-            {/* Interactive Grid Pattern */}
-            <div
-                className="absolute inset-0 opacity-10 transition-all duration-500"
-                style={{
-                    backgroundImage: `
-                        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
-                    `,
-                    backgroundSize: '50px 50px',
-                    backgroundPosition: `${mousePosition.x * 0.5}px ${mousePosition.y * 0.5}px`,
-                }}
-            />
+            {/* Decorative Pattern */}
+            <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                }} />
+            </div>
 
             {/* Content */}
             <div className="relative z-10 w-full max-w-md px-4">
@@ -219,25 +176,24 @@ export const LoginPage: React.FC = () => {
                     New here? Signing in creates your account automatically
                 </motion.p>
 
-                {/* Floating particles that follow mouse slightly */}
+                {/* Floating particles */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(6)].map((_, i) => (
                         <motion.div
                             key={i}
                             className="absolute w-2 h-2 bg-amber-400/40 rounded-full"
                             style={{
-                                left: `${15 + i * 12}%`,
-                                top: `${10 + (i % 4) * 25}%`,
+                                left: `${20 + i * 15}%`,
+                                top: `${10 + (i % 3) * 30}%`,
                             }}
                             animate={{
                                 y: [0, -20, 0],
                                 opacity: [0.3, 0.8, 0.3],
-                                x: (mousePosition.x - 50) * 0.1 * (i % 2 === 0 ? 1 : -1),
                             }}
                             transition={{
-                                y: { duration: 3 + i * 0.5, repeat: Infinity, delay: i * 0.3 },
-                                opacity: { duration: 3 + i * 0.5, repeat: Infinity, delay: i * 0.3 },
-                                x: { duration: 0.5 },
+                                duration: 3 + i * 0.5,
+                                repeat: Infinity,
+                                delay: i * 0.3,
                             }}
                         />
                     ))}
