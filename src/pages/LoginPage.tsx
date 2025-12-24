@@ -1,14 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Layout } from '../components/Layout';
-import { Logo } from '../components/Logo';
+import { Sparkles } from 'lucide-react';
 
 interface AuthProvider {
     name: string;
     icon: React.ReactNode;
     url: string;
-    color: string;
-    bgColor: string;
 }
 
 const providers: AuthProvider[] = [
@@ -23,8 +20,6 @@ const providers: AuthProvider[] = [
             </svg>
         ),
         url: '/.auth/login/google',
-        color: 'text-gray-700',
-        bgColor: 'bg-white hover:bg-gray-50 border border-gray-300'
     },
     {
         name: 'Microsoft',
@@ -37,78 +32,173 @@ const providers: AuthProvider[] = [
             </svg>
         ),
         url: '/login/microsoft',
-        color: 'text-gray-700',
-        bgColor: 'bg-white hover:bg-gray-50 border border-gray-300'
     }
 ];
 
 export const LoginPage: React.FC = () => {
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
-    };
-
     return (
-        <Layout>
-            <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+            {/* Animated Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-primary-800 to-amber-900">
+                {/* Animated Orbs */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md"
-                >
-                    {/* Card */}
-                    <div className="bg-white rounded-2xl shadow-xl p-8 border border-secondary-100">
-                        {/* Header */}
-                        <div className="text-center mb-8">
-                            <div className="flex justify-center mb-4">
-                                <Logo size="lg" showText={false} />
-                            </div>
-                            <h1 className="text-2xl font-bold text-secondary-900 mb-2">Welcome to PunjabiLearn</h1>
-                            <p className="text-secondary-500">Sign in to start your language journey</p>
-                        </div>
+                    animate={{
+                        x: [0, 100, 0],
+                        y: [0, -50, 0],
+                        scale: [1, 1.2, 1],
+                    }}
+                    transition={{
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/30 rounded-full blur-3xl"
+                />
+                <motion.div
+                    animate={{
+                        x: [0, -80, 0],
+                        y: [0, 80, 0],
+                        scale: [1, 1.3, 1],
+                    }}
+                    transition={{
+                        duration: 25,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary-400/20 rounded-full blur-3xl"
+                />
+                <motion.div
+                    animate={{
+                        x: [0, 60, 0],
+                        y: [0, 60, 0],
+                    }}
+                    transition={{
+                        duration: 15,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className="absolute top-1/2 right-1/3 w-64 h-64 bg-orange-400/20 rounded-full blur-3xl"
+                />
+            </div>
 
-                        {/* Provider Buttons */}
+            {/* Decorative Pattern */}
+            <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                }} />
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 w-full max-w-md px-4">
+                {/* Glassmorphism Card */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="backdrop-blur-xl bg-white/10 rounded-3xl p-8 md:p-10 shadow-2xl border border-white/20"
+                >
+                    {/* Logo & Header */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-center mb-8"
+                    >
+                        {/* Animated Logo */}
                         <motion.div
-                            variants={containerVariants}
-                            initial="hidden"
-                            animate="visible"
-                            className="space-y-3"
+                            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/30 mb-6"
+                            whileHover={{ scale: 1.05, rotate: 5 }}
+                            transition={{ type: "spring", stiffness: 300 }}
                         >
-                            {providers.map((provider) => (
-                                <motion.a
-                                    key={provider.name}
-                                    href={provider.url}
-                                    variants={itemVariants}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className={`flex items-center justify-center gap-3 w-full py-3 px-4 rounded-xl font-medium transition-all ${provider.bgColor} ${provider.color}`}
-                                >
-                                    {provider.icon}
-                                    <span>Continue with {provider.name}</span>
-                                </motion.a>
-                            ))}
+                            <span className="text-4xl font-display font-bold text-white">ਪ</span>
                         </motion.div>
 
-                        {/* Terms */}
-                        <p className="text-xs text-secondary-400 text-center">
-                            By signing in, you agree to our{' '}
-                            <a href="#" className="text-primary-600 hover:underline">Terms of Service</a>
-                            {' '}and{' '}
-                            <a href="#" className="text-primary-600 hover:underline">Privacy Policy</a>
+                        <h1 className="text-3xl font-display font-bold text-white mb-2">
+                            Welcome Back
+                        </h1>
+                        <p className="text-white/60">
+                            Sign in to continue your Punjabi journey
                         </p>
+                    </motion.div>
+
+                    {/* Login Buttons */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        className="space-y-4"
+                    >
+                        {providers.map((provider, index) => (
+                            <motion.a
+                                key={provider.name}
+                                href={provider.url}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.5 + index * 0.1 }}
+                                whileHover={{ scale: 1.02, x: 4 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl font-semibold text-secondary-800 bg-white hover:bg-white/90 transition-all shadow-lg hover:shadow-xl"
+                            >
+                                {provider.icon}
+                                <span>Continue with {provider.name}</span>
+                            </motion.a>
+                        ))}
+                    </motion.div>
+
+                    {/* Divider */}
+                    <div className="flex items-center gap-4 my-8">
+                        <div className="flex-1 h-px bg-white/20" />
+                        <Sparkles size={16} className="text-amber-400" />
+                        <div className="flex-1 h-px bg-white/20" />
                     </div>
 
-                    {/* Footer */}
-                    <p className="text-center text-secondary-500 text-sm mt-6">
-                        New here? Signing in will create your account automatically.
-                    </p>
+                    {/* Terms */}
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.7 }}
+                        className="text-xs text-white/40 text-center"
+                    >
+                        By signing in, you agree to our{' '}
+                        <a href="#" className="text-amber-400 hover:text-amber-300 transition-colors">Terms of Service</a>
+                        {' '}and{' '}
+                        <a href="#" className="text-amber-400 hover:text-amber-300 transition-colors">Privacy Policy</a>
+                    </motion.p>
                 </motion.div>
+
+                {/* Footer Text */}
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="text-center text-white/50 text-sm mt-8"
+                >
+                    New here? Signing in creates your account automatically
+                </motion.p>
+
+                {/* Floating particles */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    {[...Array(6)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            className="absolute w-2 h-2 bg-amber-400/40 rounded-full"
+                            style={{
+                                left: `${20 + i * 15}%`,
+                                top: `${10 + (i % 3) * 30}%`,
+                            }}
+                            animate={{
+                                y: [0, -20, 0],
+                                opacity: [0.3, 0.8, 0.3],
+                            }}
+                            transition={{
+                                duration: 3 + i * 0.5,
+                                repeat: Infinity,
+                                delay: i * 0.3,
+                            }}
+                        />
+                    ))}
+                </div>
             </div>
-        </Layout>
+        </div>
     );
 };
