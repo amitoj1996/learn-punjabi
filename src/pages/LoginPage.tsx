@@ -94,13 +94,6 @@ export const LoginPage: React.FC = () => {
                             ))}
                         </motion.div>
 
-                        {/* Divider */}
-                        <div className="flex items-center gap-4 my-6">
-                            <div className="flex-1 h-px bg-secondary-200" />
-                            <span className="text-sm text-secondary-400">or</span>
-                            <div className="flex-1 h-px bg-secondary-200" />
-                        </div>
-
                         {/* Terms */}
                         <p className="text-xs text-secondary-400 text-center">
                             By signing in, you agree to our{' '}
