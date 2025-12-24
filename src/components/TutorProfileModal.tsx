@@ -47,55 +47,57 @@ export const TutorProfileModal: React.FC<TutorProfileModalProps> = ({ tutor, onC
                     onClick={(e) => e.stopPropagation()}
                     className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
                 >
-                    <Card className="bg-white rounded-3xl overflow-hidden">
-                        {/* Header with photo */}
-                        <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 p-6 pb-24">
-                            <button
-                                onClick={onClose}
-                                className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                            <div className="text-white/80 text-sm font-medium">Tutor Profile</div>
-                        </div>
-
-                        {/* Profile content */}
-                        <div className="px-6 pb-6 relative z-10 bg-white">
-                            {/* Avatar - overlapping header */}
-                            <div className="flex items-end gap-4 -mt-16 mb-4">
+                    <Card className="bg-white rounded-2xl overflow-hidden">
+                        {/* Header with Photo - same style as admin dashboard */}
+                        <div className="sticky top-0 bg-gradient-to-r from-primary-600 to-primary-700 p-6 text-white rounded-t-2xl">
+                            <div className="flex items-start gap-4">
                                 {tutor.photoUrl ? (
                                     <img
                                         src={tutor.photoUrl}
                                         alt={tutor.name}
-                                        className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-lg"
+                                        className="w-20 h-20 rounded-full object-cover border-4 border-white/30"
                                     />
                                 ) : tutor.avatarUrl ? (
                                     <img
                                         src={tutor.avatarUrl}
                                         alt={tutor.name}
-                                        className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-lg"
+                                        className="w-20 h-20 rounded-full object-cover border-4 border-white/30"
                                     />
                                 ) : (
-                                    <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-4xl border-4 border-white shadow-lg">
+                                    <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold">
                                         {tutor.name?.charAt(0) || 'T'}
                                     </div>
                                 )}
-                                <div className="pb-2">
-                                    <h2 className="text-2xl font-bold text-secondary-900">{tutor.name}</h2>
-                                    <div className="flex items-center gap-3 mt-1">
-                                        <div className="flex items-center gap-1">
-                                            <Star size={16} className="text-amber-400 fill-amber-400" />
-                                            <span className="font-semibold text-secondary-700">{tutor.rating || 'New'}</span>
-                                        </div>
+                                <div className="flex-1">
+                                    <h2 className="text-2xl font-bold">{tutor.name}</h2>
+                                    <div className="flex items-center gap-2 text-white/80 mt-1">
+                                        <Star size={16} className="text-amber-300 fill-amber-300" />
+                                        <span>{tutor.rating || 'New'}</span>
                                         {tutor.timezone && (
-                                            <span className="flex items-center gap-1 text-secondary-500 text-sm">
+                                            <>
+                                                <span className="text-white/50">•</span>
                                                 <Globe size={14} />
-                                                {tutor.timezone.split('/')[1]?.replace('_', ' ') || tutor.timezone}
-                                            </span>
+                                                <span>{tutor.timezone.split('/')[1]?.replace('_', ' ') || tutor.timezone}</span>
+                                            </>
                                         )}
                                     </div>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
+                                            ${tutor.hourlyRate}/hr
+                                        </span>
+                                        <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
+                                            60 min sessions
+                                        </span>
+                                    </div>
                                 </div>
+                                <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+                                    <X size={24} />
+                                </button>
                             </div>
+                        </div>
+
+                        {/* Profile content */}
+                        <div className="p-6 space-y-6">
 
                             {/* Video intro button */}
                             {tutor.videoIntro && (
