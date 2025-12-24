@@ -60,7 +60,7 @@ export const TutorProfileModal: React.FC<TutorProfileModalProps> = ({ tutor, onC
                         </div>
 
                         {/* Profile content */}
-                        <div className="px-6 pb-6">
+                        <div className="px-6 pb-6 relative z-10 bg-white">
                             {/* Avatar - overlapping header */}
                             <div className="flex items-end gap-4 -mt-16 mb-4">
                                 {tutor.photoUrl ? (
