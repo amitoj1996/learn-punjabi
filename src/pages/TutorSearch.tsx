@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/Layout';
 import { Button } from '../components/ui/Button';
 import { BookingModal } from '../components/BookingModal';
+import { TutorProfileModal } from '../components/TutorProfileModal';
 import {
     Star, MessageCircle, Search, Clock, Users,
     Filter, X, Globe, Sparkles, BookOpen,
@@ -38,6 +39,7 @@ export const TutorSearch: React.FC = () => {
     const [maxPrice, setMaxPrice] = useState<number | ''>('');
     const [selectedSpecialization, setSelectedSpecialization] = useState<string>('');
     const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
+    const [viewingTutor, setViewingTutor] = useState<Tutor | null>(null);
     const [showFilters, setShowFilters] = useState(false);
     const [hoveredTutor, setHoveredTutor] = useState<string | null>(null);
 
@@ -317,7 +319,8 @@ export const TutorSearch: React.FC = () => {
                                     transition={{ delay: index * 0.05 }}
                                     onMouseEnter={() => setHoveredTutor(tutor.id)}
                                     onMouseLeave={() => setHoveredTutor(null)}
-                                    className="group"
+                                    className="group cursor-pointer"
+                                    onClick={() => setViewingTutor(tutor)}
                                 >
                                     <div className={`relative bg-white rounded-3xl overflow-hidden border-2 transition-all duration-300 ${hoveredTutor === tutor.id ? 'border-primary-300 shadow-2xl shadow-primary-100 -translate-y-2' : 'border-secondary-100 shadow-sm hover:shadow-lg'}`}>
                                         {/* Card Header */}
@@ -337,7 +340,7 @@ export const TutorSearch: React.FC = () => {
                                                     {/* Video badge */}
                                                     {tutor.videoIntro && (
                                                         <button
-                                                            onClick={() => window.open(tutor.videoIntro, '_blank')}
+                                                            onClick={(e) => { e.stopPropagation(); window.open(tutor.videoIntro, '_blank'); }}
                                                             className="absolute -bottom-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-red-600 transition-colors"
                                                             title="Watch intro video"
                                                         >
@@ -413,7 +416,7 @@ export const TutorSearch: React.FC = () => {
                                                 <span className="text-2xl font-bold text-secondary-900">${tutor.hourlyRate}</span>
                                                 <span className="text-secondary-500 text-sm">/hour</span>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                                 <Button variant="ghost" size="sm" className="px-3 text-secondary-600 hover:text-primary-600" title="Message">
                                                     <MessageCircle size={18} />
                                                 </Button>
@@ -472,6 +475,18 @@ export const TutorSearch: React.FC = () => {
                     tutor={selectedTutor}
                     onClose={() => setSelectedTutor(null)}
                     onSuccess={handleBookingSuccess}
+                />
+            )}
+
+            {/* Tutor Profile Modal */}
+            {viewingTutor && (
+                <TutorProfileModal
+                    tutor={viewingTutor}
+                    onClose={() => setViewingTutor(null)}
+                    onBook={() => {
+                        setViewingTutor(null);
+                        setSelectedTutor(viewingTutor);
+                    }}
                 />
             )}
         </Layout>
