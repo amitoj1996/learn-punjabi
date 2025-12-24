@@ -29,7 +29,7 @@ const teacherSchema = z.object({
     specializations: z.array(z.string()).min(1, "Select at least one specialization"),
     videoIntro: z.string().url("Please provide a valid URL").optional().or(z.literal('')),
     weeklyAvailability: z.string().min(1, "Please select your availability"),
-    sessionLengths: z.array(z.string()).min(1, "Select at least one session length"),
+    sessionLengths: z.array(z.string()).default(['60']),
     credentials: z.array(z.object({
         blobName: z.string(),
         docType: z.string(),
@@ -85,13 +85,7 @@ const SPECIALIZATIONS = [
     { value: 'business', label: 'Business Punjabi' },
 ];
 
-// Session lengths
-const SESSION_LENGTHS = [
-    { value: '30', label: '30 minutes' },
-    { value: '45', label: '45 minutes' },
-    { value: '60', label: '60 minutes' },
-    { value: '90', label: '90 minutes' },
-];
+// All sessions are 60 minutes (no selection needed)
 
 export const TeacherOnboarding: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -645,23 +639,11 @@ export const TeacherOnboarding: React.FC = () => {
                                             />
                                         </div>
 
-                                        {/* Session Lengths */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-secondary-700 mb-2">Session Lengths You Offer *</label>
-                                            <div className="flex flex-wrap gap-3">
-                                                {SESSION_LENGTHS.map(opt => (
-                                                    <label key={opt.value} className="flex items-center gap-2 text-sm px-4 py-2 rounded-full border border-secondary-200 hover:border-primary-300 hover:bg-primary-50 cursor-pointer transition-colors">
-                                                        <input
-                                                            type="checkbox"
-                                                            value={opt.value}
-                                                            {...register('sessionLengths')}
-                                                            className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
-                                                        />
-                                                        {opt.label}
-                                                    </label>
-                                                ))}
-                                            </div>
-                                            {errors.sessionLengths && <p className="text-red-500 text-sm mt-1">{errors.sessionLengths.message}</p>}
+                                        {/* Session Length - Fixed at 60 minutes */}
+                                        <div className="p-4 bg-secondary-50 rounded-xl">
+                                            <p className="text-sm text-secondary-600">
+                                                <span className="font-medium text-secondary-900">Session Length:</span> All lessons are 60 minutes
+                                            </p>
                                         </div>
 
                                         <Card className="p-4 bg-secondary-50 space-y-3">
