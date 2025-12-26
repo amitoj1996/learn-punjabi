@@ -85,6 +85,29 @@ app.http('approveTeacher', {
             application.status = 'approved';
             await appsContainer.item(application.id, application.id).replace(application);
 
+            // 4.5 Update user record role to 'teacher' immediately
+            try {
+                const usersContainer = await getContainer('users');
+                const { resources: users } = await usersContainer.items
+                    .query({
+                        query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                        parameters: [{ name: '@email', value: application.email }]
+                    })
+                    .fetchAll();
+
+                if (users.length > 0) {
+                    const user = users[0];
+                    user.role = 'teacher';
+                    user.teacherApprovedAt = new Date().toISOString();
+                    user.updatedAt = new Date().toISOString();
+                    await usersContainer.item(user.id, user.id).replace(user);
+                    context.log('Updated user role to teacher for:', application.email);
+                }
+            } catch (userUpdateError) {
+                context.log.error('Failed to update user role:', userUpdateError.message);
+                // Don't fail the approval if user update fails
+            }
+
             // 5. Send approval email
             try {
                 await sendTeacherApproved(application.email, newTutor.name);

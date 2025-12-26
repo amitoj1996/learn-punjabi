@@ -85,6 +85,23 @@ app.http('suspendTeacher', {
                 await tutorsContainer.item(tutor.id, tutor.id).replace(tutor);
             }
 
+            // Also update user record role to 'student'
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                    parameters: [{ name: '@email', value: teacherEmail }]
+                })
+                .fetchAll();
+
+            if (users.length > 0) {
+                const user = users[0];
+                user.role = 'student';  // Revoke teacher role
+                user.suspendedAt = new Date().toISOString();
+                user.updatedAt = new Date().toISOString();
+                await usersContainer.item(user.id, user.id).replace(user);
+            }
+
             return {
                 jsonBody: {
                     success: true,
@@ -191,6 +208,23 @@ app.http('reinstateTeacher', {
                 const application = applications[0];
                 application.status = 'approved';
                 await appsContainer.item(application.id, application.id).replace(application);
+            }
+
+            // Also update user record role to 'teacher'
+            const usersContainer = await getContainer('users');
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: 'SELECT * FROM c WHERE c.userDetails = @email',
+                    parameters: [{ name: '@email', value: teacherEmail }]
+                })
+                .fetchAll();
+
+            if (users.length > 0) {
+                const user = users[0];
+                user.role = 'teacher';
+                user.reinstatedAt = new Date().toISOString();
+                user.updatedAt = new Date().toISOString();
+                await usersContainer.item(user.id, user.id).replace(user);
             }
 
             return {
