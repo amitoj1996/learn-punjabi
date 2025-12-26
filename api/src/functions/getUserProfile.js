@@ -14,15 +14,16 @@ app.http('getUserProfile', {
         const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
         const userId = clientPrincipal.userId;
         const userEmail = clientPrincipal.userDetails;
+        const identityProvider = clientPrincipal.identityProvider;
 
         try {
             const usersContainer = await getContainer("users");
 
-            // 2. Check if user exists in Cosmos DB
+            // 2. Check if user exists by EMAIL (not userId) to prevent duplicates
             const { resources: users } = await usersContainer.items
                 .query({
-                    query: "SELECT * FROM c WHERE c.userId = @userId",
-                    parameters: [{ name: "@userId", value: userId }]
+                    query: "SELECT * FROM c WHERE c.userDetails = @email",
+                    parameters: [{ name: "@email", value: userEmail }]
                 })
                 .fetchAll();
 
@@ -54,23 +55,46 @@ app.http('getUserProfile', {
             // 5. If user doesn't exist, create them
             if (!user) {
                 const newUser = {
-                    id: userId,
-                    userId: userId,
+                    id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    userId: userId,  // Current session userId
                     userDetails: userEmail,
-                    identityProvider: clientPrincipal.identityProvider,
+                    identityProvider: identityProvider,
+                    identityProviders: [identityProvider],  // Track all providers used
                     role: role,
-                    hasUsedTrial: false,  // New users are eligible for trial
+                    hasUsedTrial: false,
                     createdAt: new Date().toISOString()
                 };
                 const { resource: createdUser } = await usersContainer.items.create(newUser);
                 user = createdUser;
             } else {
-                // 6. Update role if changed (e.g., just became approved teacher)
+                // 6. Update user if needed
+                let needsUpdate = false;
+
+                // Update role if changed to a higher role
                 if (user.role !== role && role !== 'student') {
                     user.role = role;
-                    user.updatedAt = new Date().toISOString();
-                    await usersContainer.item(user.id, user.userId).replace(user);
+                    needsUpdate = true;
                 }
+
+                // Track this identity provider if not already tracked
+                if (!user.identityProviders) {
+                    user.identityProviders = [user.identityProvider || identityProvider];
+                }
+                if (!user.identityProviders.includes(identityProvider)) {
+                    user.identityProviders.push(identityProvider);
+                    needsUpdate = true;
+                }
+
+                // Update current session userId (may be different each login)
+                user.lastUserId = userId;
+                user.lastIdentityProvider = identityProvider;
+                user.lastLoginAt = new Date().toISOString();
+
+                if (needsUpdate) {
+                    user.updatedAt = new Date().toISOString();
+                }
+
+                await usersContainer.item(user.id, user.id).replace(user);
             }
 
             // Include trial eligibility in response
@@ -102,14 +126,14 @@ app.http('getTrialStatus', {
         }
 
         const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
-        const userId = clientPrincipal.userId;
+        const userEmail = clientPrincipal.userDetails;
 
         try {
             const usersContainer = await getContainer("users");
             const { resources: users } = await usersContainer.items
                 .query({
-                    query: "SELECT * FROM c WHERE c.userId = @userId",
-                    parameters: [{ name: "@userId", value: userId }]
+                    query: "SELECT * FROM c WHERE c.userDetails = @email",
+                    parameters: [{ name: "@email", value: userEmail }]
                 })
                 .fetchAll();
 
