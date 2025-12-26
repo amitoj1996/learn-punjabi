@@ -1,7 +1,20 @@
 const { app } = require('@azure/functions');
 const { getContainer } = require('./config/cosmos');
 
-// POST - Create recurring bookings (multiple lessons at same time each week)
+// Calculate discount based on total lessons (LAUNCH PRICING)
+function calculateDiscount(totalLessons, isTrial) {
+    if (isTrial && totalLessons === 1) return 75;  // First lesson discount
+    if (totalLessons >= 16) return 35;  // 🔥 Max savings
+    if (totalLessons >= 8) return 30;   // ⭐ Best value
+    if (totalLessons >= 4) return 20;   // Popular
+    if (totalLessons >= 2) return 10;   // Save 10%
+    return 0;
+}
+
+// Get day name from date
+const DAYS_OF_WEEK = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+// POST - Create recurring bookings (multiple slots per week, repeated over weeks)
 app.http('createRecurringBookings', {
     methods: ['POST'],
     authLevel: 'anonymous',
@@ -37,15 +50,29 @@ app.http('createRecurringBookings', {
             }
 
             const body = await request.json();
-            const { tutorId, startDate, time, weeks, duration } = body;
+            const { tutorId, slots, weeks, duration, isTrial } = body;
 
-            if (!tutorId || !startDate || !time || !weeks) {
-                return { status: 400, jsonBody: { error: "Missing required fields (tutorId, startDate, time, weeks)" } };
+            // Support both old format (startDate+time) and new format (slots array)
+            let processedSlots = slots;
+            if (!slots && body.startDate && body.time) {
+                // Legacy format - convert to new format
+                const startDateObj = new Date(body.startDate + 'T12:00:00Z');
+                const dayOfWeek = DAYS_OF_WEEK[startDateObj.getDay()];
+                processedSlots = [{ dayOfWeek, time: body.time }];
+            }
+
+            if (!tutorId || !processedSlots || !weeks) {
+                return { status: 400, jsonBody: { error: "Missing required fields (tutorId, slots, weeks)" } };
             }
 
             // Validate weeks (1, 2, 4, or 8)
             if (![1, 2, 4, 8].includes(weeks)) {
                 return { status: 400, jsonBody: { error: "Weeks must be 1, 2, 4, or 8" } };
+            }
+
+            // Validate slots (1-5)
+            if (processedSlots.length < 1 || processedSlots.length > 5) {
+                return { status: 400, jsonBody: { error: "Must have 1-5 slots per week" } };
             }
 
             // Get tutor info
@@ -67,32 +94,50 @@ app.http('createRecurringBookings', {
             // Generate recurring ID to link all bookings
             const recurringId = `rec_${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-            // Calculate dates for each week
-            const bookingDates = [];
-            const startDateObj = new Date(startDate + 'T12:00:00Z');
+            // Calculate all booking dates for each slot over all weeks
+            const allBookings = [];
+            const today = new Date();
 
-            for (let i = 0; i < weeks; i++) {
-                const date = new Date(startDateObj);
-                date.setDate(date.getDate() + (i * 7)); // Add weeks
-                bookingDates.push(date.toISOString().split('T')[0]);
+            for (const slot of processedSlots) {
+                // Find the next occurrence of this day of week
+                let nextDate = new Date(today);
+                nextDate.setDate(nextDate.getDate() + 1); // Start from tomorrow
+
+                while (DAYS_OF_WEEK[nextDate.getDay()] !== slot.dayOfWeek) {
+                    nextDate.setDate(nextDate.getDate() + 1);
+                }
+
+                // Create bookings for each week
+                for (let weekNum = 0; weekNum < weeks; weekNum++) {
+                    const bookingDate = new Date(nextDate);
+                    bookingDate.setDate(bookingDate.getDate() + (weekNum * 7));
+                    const dateStr = bookingDate.toISOString().split('T')[0];
+
+                    allBookings.push({
+                        date: dateStr,
+                        time: slot.time,
+                        dayOfWeek: slot.dayOfWeek,
+                        weekNumber: weekNum + 1
+                    });
+                }
             }
 
             // Check for conflicts on all dates
             const conflicts = [];
-            for (const date of bookingDates) {
+            for (const booking of allBookings) {
                 const { resources: existingBookings } = await bookingsContainer.items
                     .query({
                         query: "SELECT * FROM c WHERE c.tutorId = @tutorId AND c.date = @date AND c.time = @time AND c.status != 'cancelled'",
                         parameters: [
                             { name: "@tutorId", value: tutorId },
-                            { name: "@date", value: date },
-                            { name: "@time", value: time }
+                            { name: "@date", value: booking.date },
+                            { name: "@time", value: booking.time }
                         ]
                     })
                     .fetchAll();
 
                 if (existingBookings.length > 0) {
-                    conflicts.push(date);
+                    conflicts.push(`${booking.date} ${booking.time}`);
                 }
             }
 
@@ -100,26 +145,27 @@ app.http('createRecurringBookings', {
                 return {
                     status: 409,
                     jsonBody: {
-                        error: `Some slots are not available: ${conflicts.join(', ')}`,
+                        error: `Some slots are not available: ${conflicts.slice(0, 3).join(', ')}${conflicts.length > 3 ? ' and more...' : ''}`,
                         conflicts
                     }
                 };
             }
 
-            // Calculate pricing with tiered discounts (1wk=5%, 2wk=5%, 4wk=10%, 8wk=15%)
-            const regularPrice = tutor.hourlyRate * weeks;
-            let discountPercent = 5; // Default 5% for 1-2 weeks
-            if (weeks >= 8) {
-                discountPercent = 15;
-            } else if (weeks >= 4) {
-                discountPercent = 10;
-            }
+            // Check trial eligibility
+            const user = users[0];
+            const isTrialBooking = isTrial && allBookings.length === 1 && user?.hasUsedTrial !== true;
+
+            // Calculate pricing with tiered discounts
+            const totalLessons = allBookings.length;
+            const discountPercent = calculateDiscount(totalLessons, isTrialBooking);
+            const regularPrice = tutor.hourlyRate * totalLessons;
             const discountedTotal = regularPrice * (1 - discountPercent / 100);
-            const pricePerLesson = discountedTotal / weeks;
+            const pricePerLesson = discountedTotal / totalLessons;
 
             // Create all bookings
-            const bookings = [];
-            for (let i = 0; i < weeks; i++) {
+            const createdBookings = [];
+            for (let i = 0; i < allBookings.length; i++) {
+                const bookingData = allBookings[i];
                 const booking = {
                     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${i}`,
                     tutorId: tutor.id,
@@ -127,8 +173,8 @@ app.http('createRecurringBookings', {
                     tutorEmail: tutor.email,
                     studentId: studentId,
                     studentEmail: studentEmail,
-                    date: bookingDates[i],
-                    time: time,
+                    date: bookingData.date,
+                    time: bookingData.time,
                     duration: duration || 60,
                     hourlyRate: tutor.hourlyRate,
                     status: 'confirmed',
@@ -138,28 +184,37 @@ app.http('createRecurringBookings', {
                     // Recurring fields
                     recurringId: recurringId,
                     recurringIndex: i + 1,
-                    recurringTotal: weeks,
-                    isRecurring: true,
+                    recurringTotal: totalLessons,
+                    isRecurring: totalLessons > 1,
+                    isTrial: isTrialBooking && i === 0,
                     createdAt: new Date().toISOString()
                 };
 
                 await bookingsContainer.items.create(booking);
-                bookings.push(booking);
+                createdBookings.push(booking);
             }
 
-            context.log(`Created ${weeks} recurring bookings with ID: ${recurringId}`);
+            // Mark trial as used if applicable
+            if (isTrialBooking && user) {
+                user.hasUsedTrial = true;
+                user.trialUsedAt = new Date().toISOString();
+                await usersContainer.item(user.id, user.userId).replace(user);
+            }
+
+            context.log(`Created ${totalLessons} bookings with recurringId: ${recurringId}`);
 
             return {
                 status: 201,
                 jsonBody: {
-                    message: `Successfully created ${weeks} weekly lessons!`,
+                    message: `Successfully created ${totalLessons} lesson${totalLessons > 1 ? 's' : ''}!`,
                     recurringId: recurringId,
-                    bookings: bookings,
+                    bookings: createdBookings,
                     pricing: {
                         regularPrice: regularPrice,
                         discountPercent: discountPercent,
                         discountedTotal: discountedTotal,
-                        savings: regularPrice - discountedTotal
+                        savings: regularPrice - discountedTotal,
+                        isTrial: isTrialBooking
                     }
                 }
             };
@@ -184,6 +239,7 @@ app.http('getRecurringSeries', {
 
             const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
             const userEmail = clientPrincipal.userDetails;
+
             const recurringId = request.params.recurringId;
 
             const bookingsContainer = await getContainer("bookings");
@@ -200,25 +256,15 @@ app.http('getRecurringSeries', {
 
             // Verify user owns these bookings
             if (bookings[0].studentEmail !== userEmail && bookings[0].tutorEmail !== userEmail) {
-                return { status: 403, jsonBody: { error: "Access denied" } };
+                return { status: 403, jsonBody: { error: "Not authorized" } };
             }
-
-            // Calculate stats
-            const completed = bookings.filter(b => b.status === 'completed').length;
-            const upcoming = bookings.filter(b => b.status === 'confirmed' && new Date(b.date) >= new Date()).length;
-            const cancelled = bookings.filter(b => b.status === 'cancelled').length;
 
             return {
                 status: 200,
                 jsonBody: {
                     recurringId,
-                    bookings,
-                    stats: {
-                        total: bookings.length,
-                        completed,
-                        upcoming,
-                        cancelled
-                    }
+                    totalLessons: bookings.length,
+                    bookings
                 }
             };
         } catch (error) {
@@ -228,7 +274,7 @@ app.http('getRecurringSeries', {
     }
 });
 
-// DELETE - Cancel remaining bookings in a recurring series
+// DELETE - Cancel entire recurring series
 app.http('cancelRecurringSeries', {
     methods: ['DELETE'],
     authLevel: 'anonymous',
@@ -242,44 +288,41 @@ app.http('cancelRecurringSeries', {
 
             const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
             const userEmail = clientPrincipal.userDetails;
+
             const recurringId = request.params.recurringId;
 
             const bookingsContainer = await getContainer("bookings");
             const { resources: bookings } = await bookingsContainer.items
                 .query({
-                    query: "SELECT * FROM c WHERE c.recurringId = @recurringId AND c.status = 'confirmed' AND c.date >= @today",
-                    parameters: [
-                        { name: "@recurringId", value: recurringId },
-                        { name: "@today", value: new Date().toISOString().split('T')[0] }
-                    ]
+                    query: "SELECT * FROM c WHERE c.recurringId = @recurringId",
+                    parameters: [{ name: "@recurringId", value: recurringId }]
                 })
                 .fetchAll();
 
             if (bookings.length === 0) {
-                return { status: 404, jsonBody: { error: "No upcoming bookings found in this series" } };
+                return { status: 404, jsonBody: { error: "Recurring series not found" } };
             }
 
             // Verify user owns these bookings
-            if (bookings[0].studentEmail !== userEmail && bookings[0].tutorEmail !== userEmail) {
-                return { status: 403, jsonBody: { error: "You cannot cancel this series" } };
+            if (bookings[0].studentEmail !== userEmail) {
+                return { status: 403, jsonBody: { error: "Only the student can cancel bookings" } };
             }
 
-            // Cancel all future bookings
+            // Cancel all bookings in the series
             let cancelledCount = 0;
             for (const booking of bookings) {
-                booking.status = 'cancelled';
-                booking.cancelledAt = new Date().toISOString();
-                booking.cancelledBy = userEmail;
-                await bookingsContainer.item(booking.id, booking.id).replace(booking);
-                cancelledCount++;
+                if (booking.status !== 'cancelled') {
+                    booking.status = 'cancelled';
+                    booking.cancelledAt = new Date().toISOString();
+                    await bookingsContainer.item(booking.id, booking.id).replace(booking);
+                    cancelledCount++;
+                }
             }
-
-            context.log(`Cancelled ${cancelledCount} recurring bookings in series ${recurringId}`);
 
             return {
                 status: 200,
                 jsonBody: {
-                    message: `Cancelled ${cancelledCount} upcoming lessons`,
+                    message: `Cancelled ${cancelledCount} lessons in the series`,
                     cancelledCount
                 }
             };
