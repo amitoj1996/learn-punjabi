@@ -122,12 +122,13 @@ app.http('createRecurringBookings', {
                 }
             }
 
-            // Check for conflicts on all dates
+            // Check for conflicts on all dates (only PAID bookings count as conflicts)
+            // Unpaid/pending bookings from abandoned checkouts should NOT block new bookings
             const conflicts = [];
             for (const booking of allBookings) {
                 const { resources: existingBookings } = await bookingsContainer.items
                     .query({
-                        query: "SELECT * FROM c WHERE c.tutorId = @tutorId AND c.date = @date AND c.time = @time AND c.status != 'cancelled'",
+                        query: "SELECT * FROM c WHERE c.tutorId = @tutorId AND c.date = @date AND c.time = @time AND c.status != 'cancelled' AND c.paymentStatus = 'paid'",
                         parameters: [
                             { name: "@tutorId", value: tutorId },
                             { name: "@date", value: booking.date },

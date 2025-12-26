@@ -298,3 +298,74 @@ app.http('getPaymentStatus', {
         }
     }
 });
+
+// Cancel/cleanup unpaid bookings (called when user abandons Stripe checkout)
+app.http('cancelUnpaidBooking', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'checkout/cancel',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+            const userEmail = clientPrincipal.userDetails;
+            const body = await request.json();
+            const { bookingId, recurringId } = body;
+
+            const bookingsContainer = await getContainer("bookings");
+
+            // If recurringId provided, delete all unpaid bookings in that series
+            if (recurringId) {
+                const { resources: bookings } = await bookingsContainer.items
+                    .query({
+                        query: "SELECT * FROM c WHERE c.recurringId = @recurringId AND c.studentEmail = @email AND c.paymentStatus != 'paid'",
+                        parameters: [
+                            { name: "@recurringId", value: recurringId },
+                            { name: "@email", value: userEmail }
+                        ]
+                    })
+                    .fetchAll();
+
+                let deleted = 0;
+                for (const booking of bookings) {
+                    await bookingsContainer.item(booking.id, booking.id).delete();
+                    deleted++;
+                }
+
+                context.log(`Deleted ${deleted} unpaid bookings for cancelled checkout (recurringId: ${recurringId})`);
+                return {
+                    status: 200,
+                    jsonBody: { message: `Cancelled ${deleted} unpaid bookings`, deleted }
+                };
+            }
+
+            // Single booking cancellation
+            if (bookingId) {
+                const { resources: bookings } = await bookingsContainer.items
+                    .query({
+                        query: "SELECT * FROM c WHERE c.id = @id AND c.studentEmail = @email",
+                        parameters: [
+                            { name: "@id", value: bookingId },
+                            { name: "@email", value: userEmail }
+                        ]
+                    })
+                    .fetchAll();
+
+                if (bookings.length > 0 && bookings[0].paymentStatus !== 'paid') {
+                    await bookingsContainer.item(bookings[0].id, bookings[0].id).delete();
+                    context.log(`Deleted unpaid booking: ${bookingId}`);
+                    return { status: 200, jsonBody: { message: 'Unpaid booking cancelled', deleted: 1 } };
+                }
+            }
+
+            return { status: 200, jsonBody: { message: 'No unpaid bookings to cancel', deleted: 0 } };
+        } catch (error) {
+            context.log.error("Error cancelling unpaid bookings:", error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});

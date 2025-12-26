@@ -1,11 +1,33 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Layout } from '../components/Layout';
 import { XCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 
 export const PaymentCancelled: React.FC = () => {
+    const [searchParams] = useSearchParams();
+    const bookingId = searchParams.get('booking_id');
+
+    // Cleanup unpaid booking when user lands on cancel page
+    useEffect(() => {
+        const cleanupUnpaidBooking = async () => {
+            if (!bookingId) return;
+
+            try {
+                await fetch('/api/checkout/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId })
+                });
+                console.log('Cleaned up unpaid booking:', bookingId);
+            } catch (err) {
+                console.log('Could not cleanup booking:', err);
+            }
+        };
+
+        cleanupUnpaidBooking();
+    }, [bookingId]);
 
     return (
         <Layout>
@@ -26,21 +48,23 @@ export const PaymentCancelled: React.FC = () => {
                         </motion.div>
                         <h1 className="text-2xl font-bold text-secondary-900 mb-2">Payment Cancelled</h1>
                         <p className="text-secondary-600 mb-6">
-                            Your payment was not completed. Your booking is still pending and will be cancelled if not paid.
+                            Your payment was not completed. Don't worry – you can try again anytime!
                         </p>
 
-                        <div className="bg-orange-50 rounded-xl p-4 mb-6 text-left">
-                            <p className="text-sm text-orange-800">
-                                Don't worry – no charges were made to your card. You can retry the payment or book a different time slot.
+                        <div className="bg-green-50 rounded-xl p-4 mb-6 text-left">
+                            <p className="text-sm text-green-800">
+                                ✓ No charges were made to your card<br />
+                                ✓ Your time slot has been released<br />
+                                ✓ You can book again whenever you're ready
                             </p>
                         </div>
 
                         <div className="flex gap-3">
-                            <Link to="/dashboard" className="flex-1">
-                                <Button className="w-full">Go to Dashboard</Button>
-                            </Link>
                             <Link to="/tutors" className="flex-1">
-                                <Button variant="outline" className="w-full">Find Tutors</Button>
+                                <Button className="w-full">Book Again</Button>
+                            </Link>
+                            <Link to="/dashboard" className="flex-1">
+                                <Button variant="outline" className="w-full">Dashboard</Button>
                             </Link>
                         </div>
                     </div>
