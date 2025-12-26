@@ -195,12 +195,13 @@ app.http('createRecurringBookings', {
                 createdBookings.push(booking);
             }
 
-            // Mark trial as used if applicable
-            if (isTrialBooking && user) {
-                user.hasUsedTrial = true;
-                user.trialUsedAt = new Date().toISOString();
-                await usersContainer.item(user.id, user.userId).replace(user);
-            }
+            // Mark trial as used if applicable - REMOVED
+            // Trial usage should only be marked AFTER payment is confirmed via webhook
+            // if (isTrialBooking && user) {
+            //     user.hasUsedTrial = true;
+            //     user.trialUsedAt = new Date().toISOString();
+            //     await usersContainer.item(user.id, user.userId).replace(user);
+            // }
 
             context.log(`Created ${totalLessons} bookings with recurringId: ${recurringId}`);
 
