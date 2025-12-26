@@ -369,3 +369,50 @@ app.http('cancelUnpaidBooking', {
         }
     }
 });
+
+// Cleanup ALL unpaid bookings for current user (admin utility)
+app.http('cleanupAllUnpaidBookings', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'checkout/cleanup-all',
+    handler: async (request, context) => {
+        try {
+            const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+            if (!clientPrincipalHeader) {
+                return { status: 401, jsonBody: { error: "Please log in" } };
+            }
+
+            const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+            const userEmail = clientPrincipal.userDetails;
+
+            const bookingsContainer = await getContainer("bookings");
+
+            // Find all unpaid bookings for this user
+            const { resources: unpaidBookings } = await bookingsContainer.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.studentEmail = @email AND c.paymentStatus != 'paid'",
+                    parameters: [{ name: "@email", value: userEmail }]
+                })
+                .fetchAll();
+
+            let deleted = 0;
+            for (const booking of unpaidBookings) {
+                await bookingsContainer.item(booking.id, booking.id).delete();
+                deleted++;
+            }
+
+            context.log(`Cleaned up ${deleted} unpaid bookings for user: ${userEmail}`);
+            return {
+                status: 200,
+                jsonBody: {
+                    message: `Cleaned up ${deleted} unpaid bookings`,
+                    deleted,
+                    userEmail
+                }
+            };
+        } catch (error) {
+            context.log.error("Error cleaning up unpaid bookings:", error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
