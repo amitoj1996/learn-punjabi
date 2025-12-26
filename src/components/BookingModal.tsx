@@ -83,7 +83,38 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
     const [selectedTime, setSelectedTime] = useState<string>('');
 
     // Track pending booking for cleanup on browser-back
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pendingBookingRef = React.useRef<{ bookingId?: string; recurringId?: string } | null>(null);
+
+    // Handle browser back button (BFCache) restore
+    React.useEffect(() => {
+        const handlePageShow = async (event: PageTransitionEvent) => {
+            // If page is restored from cache OR just general back navigation where component remained mounted
+            if (event.persisted || step === 'processing') {
+                const pendingFn = sessionStorage.getItem('pendingBooking');
+                if (pendingFn) {
+                    try {
+                        const { bookingId } = JSON.parse(pendingFn);
+                        // cleanup abandoned booking
+                        await fetch('/api/checkout/cancel', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ bookingId })
+                        });
+                        sessionStorage.removeItem('pendingBooking');
+                    } catch (e) {
+                        console.error('Cleanup error:', e);
+                    }
+                }
+                // Always reset UI
+                setStep('select');
+                setIsLoading(false);
+            }
+        };
+
+        window.addEventListener('pageshow', handlePageShow);
+        return () => window.removeEventListener('pageshow', handlePageShow);
+    }, [step]);
 
     // Cleanup unpaid booking if user navigates away during processing (e.g., browser back)
     React.useEffect(() => {
@@ -271,8 +302,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
             const checkoutData = await checkoutResponse.json();
             if (checkoutData.url) {
                 // Clear pending booking ref - we're redirecting to Stripe now
-                // If user completes payment, webhook handles it
-                // If user clicks Stripe's cancel, they go to /payment/cancelled which cleans up
+                // We use sessionStorage to track it in case they hit "Back"
+                sessionStorage.setItem('pendingBooking', JSON.stringify({
+                    bookingId: data.bookings[0].id,
+                    recurringId: data.recurringId
+                }));
+
                 pendingBookingRef.current = null;
                 window.location.href = checkoutData.url;
             } else {

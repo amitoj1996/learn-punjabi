@@ -230,7 +230,7 @@ app.http('getStudentBookings', {
             const bookingsContainer = await getContainer("bookings");
             const { resources: bookings } = await bookingsContainer.items
                 .query({
-                    query: "SELECT * FROM c WHERE c.studentEmail = @email ORDER BY c.date DESC",
+                    query: "SELECT * FROM c WHERE c.studentEmail = @email AND (c.paymentStatus = 'paid' OR c.status = 'confirmed-manual') ORDER BY c.date DESC",
                     parameters: [{ name: "@email", value: studentEmail }]
                 })
                 .fetchAll();
@@ -261,7 +261,7 @@ app.http('getTeacherBookings', {
             const bookingsContainer = await getContainer("bookings");
             const { resources: bookings } = await bookingsContainer.items
                 .query({
-                    query: "SELECT * FROM c WHERE c.tutorEmail = @email ORDER BY c.date DESC",
+                    query: "SELECT * FROM c WHERE c.tutorEmail = @email AND (c.paymentStatus = 'paid' OR c.status = 'confirmed-manual') ORDER BY c.date DESC",
                     parameters: [{ name: "@email", value: teacherEmail }]
                 })
                 .fetchAll();
