@@ -141,7 +141,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
     const toggleSlot = (dayName: string, time: string, displayDay: string) => {
         if (isSlotSelected(dayName, time)) {
             setSelectedSlots(selectedSlots.filter(s => !(s.dayName === dayName && s.time === time)));
-        } else if (selectedSlots.length < 5) {
+        } else {
             setSelectedSlots([...selectedSlots, { dayName, time, displayDay }]);
         }
     };

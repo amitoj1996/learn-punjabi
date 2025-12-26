@@ -70,9 +70,9 @@ app.http('createRecurringBookings', {
                 return { status: 400, jsonBody: { error: "Weeks must be 1, 2, 4, or 8" } };
             }
 
-            // Validate slots (1-5)
-            if (processedSlots.length < 1 || processedSlots.length > 5) {
-                return { status: 400, jsonBody: { error: "Must have 1-5 slots per week" } };
+            // Validate slots (at least 1)
+            if (processedSlots.length < 1) {
+                return { status: 400, jsonBody: { error: "Must select at least one time slot" } };
             }
 
             // Get tutor info
