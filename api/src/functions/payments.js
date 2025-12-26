@@ -20,6 +20,12 @@ app.http('createCheckoutSession', {
             const body = await request.json();
             const { bookingId, recurringId, totalLessons, isTrial } = body;
 
+            // Debug: Log what we received from frontend
+            context.log('=== CREATE CHECKOUT SESSION ===');
+            context.log('User:', userEmail);
+            context.log('Received from frontend:', JSON.stringify({ bookingId, recurringId, totalLessons, isTrial }));
+            context.log('isTrial value:', isTrial, 'Type:', typeof isTrial);
+
             if (!bookingId) {
                 return { status: 400, jsonBody: { error: "Booking ID is required" } };
             }
