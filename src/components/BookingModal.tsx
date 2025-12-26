@@ -262,7 +262,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                 {selectedSlots.length > 0 && (
                                     <div className="mb-4">
                                         <label className="block text-sm font-medium text-secondary-700 mb-2">
-                                            Your Schedule ({selectedSlots.length}/5 slots)
+                                            Your Schedule ({selectedSlots.length} slots)
                                         </label>
                                         <div className="flex flex-wrap gap-2">
                                             {selectedSlots.map((slot, idx) => (
@@ -287,7 +287,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                 {/* Day Selection */}
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-secondary-700 mb-2">
-                                        {selectedSlots.length < 5 ? 'Add Time Slots' : 'Maximum 5 slots reached'}
+                                        Add Time Slots
                                     </label>
                                     <div className="grid grid-cols-7 gap-1">
                                         {nextDays.map(day => {
@@ -297,7 +297,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                             return (
                                                 <button
                                                     key={day.date}
-                                                    disabled={!hasSlots || selectedSlots.length >= 5}
+                                                    disabled={!hasSlots}
                                                     onClick={() => setActiveDay(isActive ? null : day.dayName)}
                                                     className={`p-2 rounded-lg text-xs text-center transition-all ${isActive
                                                         ? 'bg-primary-500 text-white'
@@ -331,12 +331,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                                     <button
                                                         key={time}
                                                         onClick={() => toggleSlot(activeDay, time, dayData?.display || '')}
-                                                        disabled={!isSelected && selectedSlots.length >= 5}
                                                         className={`p-2 rounded-lg text-sm transition-all ${isSelected
                                                             ? 'bg-primary-500 text-white'
-                                                            : selectedSlots.length >= 5
-                                                                ? 'bg-secondary-50 text-secondary-300 cursor-not-allowed'
-                                                                : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                            : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
                                                             }`}
                                                     >
                                                         {dayData ? convertUtcToLocal(time, dayData.date) : time}
