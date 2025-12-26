@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
-import { CreditCard, Lock, Sparkles, Calendar, X } from 'lucide-react';
+import { CreditCard, Lock, Calendar, X, Gift } from 'lucide-react';
 
 interface BookingModalProps {
     tutor: {
@@ -34,7 +34,6 @@ const DAY_LABELS: Record<string, string> = {
     thursday: 'Thu', friday: 'Fri', saturday: 'Sat'
 };
 
-// Get short timezone abbreviation (e.g., 'PST', 'IST')
 const getTimezoneAbbr = (): string => {
     const date = new Date();
     const timeString = date.toLocaleTimeString('en-US', { timeZoneName: 'short' });
@@ -42,7 +41,6 @@ const getTimezoneAbbr = (): string => {
     return parts[parts.length - 1];
 };
 
-// Convert UTC time to local time for display
 const convertUtcToLocal = (utcTime: string, dateStr: string): string => {
     const [hours, minutes] = utcTime.split(':').map(Number);
     const date = new Date(dateStr + 'T00:00:00Z');
@@ -56,10 +54,10 @@ const convertUtcToLocal = (utcTime: string, dateStr: string): string => {
 
 // Calculate discount based on total lessons (LAUNCH PRICING)
 const calculateDiscount = (totalLessons: number): number => {
-    if (totalLessons >= 16) return 35;  // 🔥 Max savings
-    if (totalLessons >= 8) return 30;   // ⭐ Best value
-    if (totalLessons >= 4) return 20;   // Popular
-    if (totalLessons >= 2) return 10;   // Save 10%
+    if (totalLessons >= 16) return 35;
+    if (totalLessons >= 8) return 30;
+    if (totalLessons >= 4) return 20;
+    if (totalLessons >= 2) return 10;
     return 0;
 };
 
@@ -80,7 +78,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
     const [trialStatus, setTrialStatus] = useState<TrialStatus | null>(null);
     const [activeDay, setActiveDay] = useState<string | null>(null);
 
-    // Calculate dates for next 7 days
+    // For trial mode: single date/time selection
+    const [selectedDate, setSelectedDate] = useState<string>('');
+    const [selectedTime, setSelectedTime] = useState<string>('');
+
+    // Determine if we're in trial mode
+    const isTrialMode = trialStatus?.eligible === true;
+
     const getNextDays = () => {
         const days = [];
         for (let i = 1; i <= 7; i++) {
@@ -134,6 +138,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
         return availability[dayName] || [];
     };
 
+    // For regular mode - multi-slot selection
     const isSlotSelected = (dayName: string, time: string): boolean => {
         return selectedSlots.some(s => s.dayName === dayName && s.time === time);
     };
@@ -150,18 +155,25 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
         setSelectedSlots(selectedSlots.filter((_, i) => i !== index));
     };
 
-    // Calculate pricing
-    const totalLessons = selectedSlots.length * weeks;
-    const isTrialEligible = trialStatus?.eligible && totalLessons === 1;
-    const discountPercent = isTrialEligible ? 75 : calculateDiscount(totalLessons);
+    // Pricing calculations
+    const trialPrice = Math.round(tutor.hourlyRate * 0.25); // 75% off
+    const totalLessons = isTrialMode ? 1 : selectedSlots.length * weeks;
+    const discountPercent = isTrialMode ? 75 : calculateDiscount(totalLessons);
     const regularTotal = tutor.hourlyRate * totalLessons;
     const discountAmount = regularTotal * (discountPercent / 100);
-    const finalPrice = regularTotal - discountAmount;
+    const finalPrice = isTrialMode ? trialPrice : regularTotal - discountAmount;
 
     const handleProceedToPayment = () => {
-        if (selectedSlots.length === 0) {
-            setError('Please select at least one time slot');
-            return;
+        if (isTrialMode) {
+            if (!selectedDate || !selectedTime) {
+                setError('Please select a date and time');
+                return;
+            }
+        } else {
+            if (selectedSlots.length === 0) {
+                setError('Please select at least one time slot');
+                return;
+            }
         }
         setStep('confirm');
     };
@@ -171,11 +183,24 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
         setError(null);
 
         try {
-            // Create booking(s) via API
-            const response = await fetch('/api/bookings/recurring', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+            let bookingData;
+
+            if (isTrialMode) {
+                // Trial booking - simple single slot
+                const selectedDayData = nextDays.find(d => d.date === selectedDate);
+                bookingData = {
+                    tutorId: tutor.id,
+                    slots: [{
+                        dayOfWeek: selectedDayData?.dayName,
+                        time: selectedTime
+                    }],
+                    weeks: 1,
+                    duration: 60,
+                    isTrial: true
+                };
+            } else {
+                // Regular booking - multi-slot + weeks
+                bookingData = {
                     tutorId: tutor.id,
                     slots: selectedSlots.map(s => ({
                         dayOfWeek: s.dayName,
@@ -183,8 +208,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                     })),
                     weeks: weeks,
                     duration: 60,
-                    isTrial: isTrialEligible
-                })
+                    isTrial: false
+                };
+            }
+
+            const response = await fetch('/api/bookings/recurring', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData)
             });
 
             if (!response.ok) {
@@ -202,7 +233,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                     bookingId: data.bookings[0].id,
                     recurringId: data.recurringId,
                     totalLessons: totalLessons,
-                    isTrial: isTrialEligible
+                    isTrial: isTrialMode
                 })
             });
 
@@ -229,7 +260,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-secondary-900">
-                        {step === 'select' && `Book with ${tutor.name}`}
+                        {step === 'select' && (isTrialMode ? `Try ${tutor.name}` : `Book with ${tutor.name}`)}
                         {step === 'confirm' && 'Confirm & Pay'}
                         {step === 'processing' && 'Redirecting...'}
                     </h2>
@@ -240,24 +271,118 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
 
                 {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
 
-                {/* Step: Select Slots */}
+                {/* Step: Select */}
                 {step === 'select' && (
                     <>
                         {isLoading ? (
                             <div className="text-center py-8 text-secondary-500">Loading availability...</div>
-                        ) : (
+                        ) : isTrialMode ? (
+                            /* ========== TRIAL MODE - Simple single slot selection ========== */
                             <>
                                 {/* Trial Banner */}
-                                {trialStatus?.eligible && selectedSlots.length === 0 && (
-                                    <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-4 mb-4 flex items-center gap-3">
-                                        <Sparkles className="text-amber-500" size={24} />
+                                <div className="bg-gradient-to-r from-amber-100 to-yellow-50 border border-amber-200 rounded-xl p-4 mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-amber-400 text-white p-2 rounded-full">
+                                            <Gift size={24} />
+                                        </div>
                                         <div>
-                                            <p className="font-bold text-amber-800">🎉 First Lesson: 75% Off!</p>
-                                            <p className="text-sm text-amber-700">Try your first lesson for only ${Math.round(tutor.hourlyRate * 0.25)}</p>
+                                            <p className="font-bold text-amber-900 text-lg">Your First Lesson is 75% Off! 🎉</p>
+                                            <p className="text-amber-700 text-sm">Try a lesson with {tutor.name} for just <span className="font-bold">${trialPrice}</span> <span className="line-through opacity-60">${tutor.hourlyRate}</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Date Selection */}
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-secondary-700 mb-2">
+                                        Select a Day
+                                    </label>
+                                    <div className="grid grid-cols-7 gap-1">
+                                        {nextDays.map(day => {
+                                            const hasSlots = getAvailableSlots(day.dayName).length > 0;
+                                            const isSelected = selectedDate === day.date;
+                                            return (
+                                                <button
+                                                    key={day.date}
+                                                    disabled={!hasSlots}
+                                                    onClick={() => {
+                                                        setSelectedDate(day.date);
+                                                        setSelectedTime('');
+                                                    }}
+                                                    className={`p-2 rounded-lg text-xs text-center transition-all ${isSelected
+                                                        ? 'bg-amber-500 text-white'
+                                                        : hasSlots
+                                                            ? 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                            : 'bg-secondary-50 text-secondary-300 cursor-not-allowed'
+                                                        }`}
+                                                >
+                                                    <div className="font-medium">{DAY_LABELS[day.dayName]}</div>
+                                                    <div className="text-[10px] opacity-70">{day.display.split(' ')[1]} {day.display.split(' ')[2]}</div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Time Selection (only if date selected) */}
+                                {selectedDate && (
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-medium text-secondary-700 mb-1">
+                                            Select a Time
+                                        </label>
+                                        <p className="text-xs text-secondary-500 mb-2">🌍 Times in your timezone ({getTimezoneAbbr()})</p>
+                                        <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+                                            {getAvailableSlots(nextDays.find(d => d.date === selectedDate)?.dayName || '').map(time => {
+                                                const isSelected = selectedTime === time;
+                                                return (
+                                                    <button
+                                                        key={time}
+                                                        onClick={() => setSelectedTime(time)}
+                                                        className={`p-2 rounded-lg text-sm transition-all ${isSelected
+                                                            ? 'bg-amber-500 text-white'
+                                                            : 'bg-secondary-100 hover:bg-secondary-200 text-secondary-900'
+                                                            }`}
+                                                    >
+                                                        {convertUtcToLocal(time, selectedDate)}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}
 
+                                {/* Trial Summary */}
+                                {selectedDate && selectedTime && (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <p className="font-medium text-secondary-900">Your Trial Lesson</p>
+                                                <p className="text-sm text-secondary-600">
+                                                    {nextDays.find(d => d.date === selectedDate)?.display} at {convertUtcToLocal(selectedTime, selectedDate)}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-secondary-400 line-through text-sm">${tutor.hourlyRate}</p>
+                                                <p className="text-2xl font-bold text-amber-600">${trialPrice}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3">
+                                    <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+                                    <Button
+                                        onClick={handleProceedToPayment}
+                                        disabled={!selectedDate || !selectedTime}
+                                        className="flex-1 bg-amber-500 hover:bg-amber-600"
+                                    >
+                                        Book Trial - ${trialPrice}
+                                    </Button>
+                                </div>
+                            </>
+                        ) : (
+                            /* ========== REGULAR MODE - Multi-slot + weekly selection ========== */
+                            <>
                                 {/* Selected Slots Display */}
                                 {selectedSlots.length > 0 && (
                                     <div className="mb-4">
@@ -376,7 +501,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                             {discountPercent > 0 && (
                                                 <div className="flex justify-between items-center mt-2">
                                                     <span className="text-green-600 font-medium">
-                                                        {isTrialEligible ? '🎉 First Lesson Discount' : `Save ${discountPercent}%`}
+                                                        Save {discountPercent}%
                                                     </span>
                                                     <span className="text-green-600 font-bold">-${discountAmount.toFixed(0)}</span>
                                                 </div>
@@ -412,19 +537,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                 {/* Step: Confirm & Pay */}
                 {step === 'confirm' && (
                     <>
-                        {/* Trial Banner */}
-                        {isTrialEligible && (
+                        {/* Banner */}
+                        {isTrialMode ? (
                             <div className="bg-gradient-to-r from-amber-100 to-yellow-50 border border-amber-200 rounded-xl p-4 mb-4 flex items-center gap-3">
-                                <Sparkles className="text-amber-500" size={24} />
+                                <Gift className="text-amber-500" size={24} />
                                 <div>
                                     <p className="font-bold text-amber-800">🎉 First Lesson - 75% Off!</p>
                                     <p className="text-sm text-amber-700">Your trial lesson discount is applied</p>
                                 </div>
                             </div>
-                        )}
-
-                        {/* Discount Banner */}
-                        {!isTrialEligible && discountPercent > 0 && (
+                        ) : discountPercent > 0 && (
                             <div className="bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 rounded-xl p-4 mb-4">
                                 <p className="font-bold text-green-800">🎊 Launch Discount: {discountPercent}% Off!</p>
                                 <p className="text-sm text-green-700">You're saving ${discountAmount.toFixed(0)} on {totalLessons} lessons</p>
@@ -439,9 +561,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                     <span className="font-medium text-primary-900">{tutor.name}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-primary-700">Schedule</span>
+                                    <span className="text-primary-700">{isTrialMode ? 'Lesson Time' : 'Schedule'}</span>
                                     <span className="font-medium text-primary-900">
-                                        {selectedSlots.map(s => DAY_LABELS[s.dayName]).join(', ')} for {weeks} week{weeks > 1 ? 's' : ''}
+                                        {isTrialMode
+                                            ? `${nextDays.find(d => d.date === selectedDate)?.display} at ${convertUtcToLocal(selectedTime, selectedDate)}`
+                                            : `${selectedSlots.map(s => DAY_LABELS[s.dayName]).join(', ')} for ${weeks} week${weeks > 1 ? 's' : ''}`
+                                        }
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -454,7 +579,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
                                         {discountPercent > 0 && (
                                             <span className="text-secondary-400 line-through">${regularTotal}</span>
                                         )}
-                                        <span className="font-bold text-green-600 text-lg">${finalPrice.toFixed(0)}</span>
+                                        <span className={`font-bold text-lg ${isTrialMode ? 'text-amber-600' : 'text-green-600'}`}>
+                                            ${isTrialMode ? trialPrice : finalPrice.toFixed(0)}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -473,8 +600,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
 
                         <div className="flex gap-3">
                             <Button variant="outline" onClick={() => setStep('select')} className="flex-1">Back</Button>
-                            <Button onClick={handleConfirmAndPay} className="flex-1 bg-green-600 hover:bg-green-700">
-                                Pay ${finalPrice.toFixed(0)}
+                            <Button
+                                onClick={handleConfirmAndPay}
+                                className={`flex-1 ${isTrialMode ? 'bg-amber-500 hover:bg-amber-600' : 'bg-green-600 hover:bg-green-700'}`}
+                            >
+                                Pay ${isTrialMode ? trialPrice : finalPrice.toFixed(0)}
                             </Button>
                         </div>
                     </>
