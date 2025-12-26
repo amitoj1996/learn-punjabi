@@ -82,6 +82,26 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [selectedTime, setSelectedTime] = useState<string>('');
 
+    // Track pending booking for cleanup on browser-back
+    const pendingBookingRef = React.useRef<{ bookingId?: string; recurringId?: string } | null>(null);
+
+    // Cleanup unpaid booking if user navigates away during processing (e.g., browser back)
+    React.useEffect(() => {
+        return () => {
+            // Only cleanup if we were in processing state with a pending booking
+            if (pendingBookingRef.current) {
+                const { bookingId, recurringId } = pendingBookingRef.current;
+                // Fire and forget - cleanup in background
+                fetch('/api/checkout/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId, recurringId })
+                }).catch(() => { });  // Ignore errors
+                console.log('Cleanup: Deleting unpaid booking on modal close');
+            }
+        };
+    }, []);
+
     // Determine if we're in trial mode
     const isTrialMode = trialStatus?.eligible === true;
 
@@ -225,6 +245,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
 
             const data = await response.json();
 
+            // Track pending booking for cleanup if user navigates away
+            pendingBookingRef.current = {
+                bookingId: data.bookings[0].id,
+                recurringId: data.recurringId
+            };
+
             // Create Stripe checkout session
             const checkoutResponse = await fetch('/api/checkout/create-session', {
                 method: 'POST',
@@ -244,6 +270,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tutor, onClose, onSu
 
             const checkoutData = await checkoutResponse.json();
             if (checkoutData.url) {
+                // Clear pending booking ref - we're redirecting to Stripe now
+                // If user completes payment, webhook handles it
+                // If user clicks Stripe's cancel, they go to /payment/cancelled which cleans up
+                pendingBookingRef.current = null;
                 window.location.href = checkoutData.url;
             } else {
                 throw new Error('No checkout URL received');
