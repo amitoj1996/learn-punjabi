@@ -182,7 +182,7 @@ app.http('resetTrialStatus', {
                 return { status: 404, jsonBody: { error: "User not found" } };
             }
 
-            const user = users[0];
+            context.log(`Found ${users.length} user records for ${userEmail}`);
 
             // Check if user ever actually PAID for a trial
             const bookingsContainer = await getContainer("bookings");
@@ -204,16 +204,26 @@ app.http('resetTrialStatus', {
             }
 
             // Safe to reset - no paid trials found
-            user.hasUsedTrial = false;
-            user.trialResetAt = new Date().toISOString();
-            delete user.trialUsedAt;
-            await usersContainer.item(user.id, user.id).replace(user);
+            // Reset ALL user records for this email (handles duplicates)
+            let resetCount = 0;
+            for (const user of users) {
+                if (user.hasUsedTrial === true) {
+                    user.hasUsedTrial = false;
+                    user.trialResetAt = new Date().toISOString();
+                    delete user.trialUsedAt;
+                    await usersContainer.item(user.id, user.id).replace(user);
+                    resetCount++;
+                    context.log(`Reset trial for user record: ${user.id}`);
+                }
+            }
 
-            context.log(`Reset trial status for user: ${userEmail}`);
+            context.log(`Reset trial on ${resetCount}/${users.length} user records for: ${userEmail}`);
             return {
                 status: 200,
                 jsonBody: {
-                    message: "Trial status reset successfully",
+                    message: `Trial status reset on ${resetCount} of ${users.length} user record(s)`,
+                    totalRecords: users.length,
+                    resetCount,
                     eligible: true,
                     userEmail
                 }
