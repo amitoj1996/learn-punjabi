@@ -203,15 +203,34 @@ app.http('resetTrialStatus', {
                 };
             }
 
+
             // Safe to reset - no paid trials found
-            // Reset ALL user records for this email (handles duplicates)
+
+            // 1. DELETE ANY UNPAID BOOKINGS (Cleanup abandoned attempts)
+            const { resources: unpaidBookings } = await bookingsContainer.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.studentEmail = @email AND c.paymentStatus != 'paid'",
+                    parameters: [{ name: "@email", value: userEmail }]
+                })
+                .fetchAll();
+
+            let deletedBookings = 0;
+            for (const booking of unpaidBookings) {
+                await bookingsContainer.item(booking.id, booking.id).delete();
+                deletedBookings++;
+            }
+            context.log(`Deleted ${deletedBookings} unpaid bookings for user: ${userEmail}`);
+
+            // 2. RESET USER TRIAL STATUS (on all records)
             let resetCount = 0;
             for (const user of users) {
                 if (user.hasUsedTrial === true) {
                     user.hasUsedTrial = false;
                     user.trialResetAt = new Date().toISOString();
                     delete user.trialUsedAt;
-                    await usersContainer.item(user.id, user.id).replace(user);
+                    // Note: partition key for users container is usually 'userId' or 'id' depending on config.
+                    // Assuming 'userId' based on previous code usage
+                    await usersContainer.item(user.id, user.userId).replace(user);
                     resetCount++;
                     context.log(`Reset trial for user record: ${user.id}`);
                 }
@@ -221,9 +240,10 @@ app.http('resetTrialStatus', {
             return {
                 status: 200,
                 jsonBody: {
-                    message: `Trial status reset on ${resetCount} of ${users.length} user record(s)`,
+                    message: `Trial status reset on ${resetCount} records. Deleted ${deletedBookings} unpaid bookings.`,
                     totalRecords: users.length,
                     resetCount,
+                    deletedBookings,
                     eligible: true,
                     userEmail
                 }
