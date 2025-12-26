@@ -16,16 +16,13 @@ app.http('createCheckoutSession', {
             }
 
             const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
-            const userId = clientPrincipal.userId;
             const userEmail = clientPrincipal.userDetails;
             const body = await request.json();
-            const { bookingId, isTrial } = body;  // Accept isTrial flag from frontend
+            const { bookingId, recurringId, totalLessons, isTrial } = body;
 
             if (!bookingId) {
                 return { status: 400, jsonBody: { error: "Booking ID is required" } };
             }
-
-            const TRIAL_PRICE = 500;  // $5 in cents
 
             // Get booking details
             const bookingsContainer = await getContainer("bookings");
@@ -41,6 +38,7 @@ app.http('createCheckoutSession', {
             }
 
             const booking = bookings[0];
+            const hourlyRate = booking.hourlyRate;
 
             // Verify user owns this booking
             if (booking.studentEmail !== userEmail) {
@@ -52,27 +50,43 @@ app.http('createCheckoutSession', {
                 return { status: 400, jsonBody: { error: "This booking is already paid" } };
             }
 
-            // Check trial eligibility if requesting trial price
+            // Calculate total amount based on trial vs regular
+            let amount;
             let applyTrial = false;
-            let amount = Math.round((booking.hourlyRate * booking.duration / 60) * 100);
+            const lessonCount = totalLessons || 1;
 
             if (isTrial) {
+                // Check trial eligibility using EMAIL (not userId which varies by provider)
                 const usersContainer = await getContainer("users");
                 const { resources: users } = await usersContainer.items
                     .query({
-                        query: "SELECT * FROM c WHERE c.userId = @userId",
-                        parameters: [{ name: "@userId", value: userId }]
+                        query: "SELECT * FROM c WHERE c.userDetails = @email",
+                        parameters: [{ name: "@email", value: userEmail }]
                     })
                     .fetchAll();
 
                 const user = users[0];
                 if (user && user.hasUsedTrial !== true) {
                     applyTrial = true;
-                    amount = TRIAL_PRICE;  // Flat $5 for trials
-                    context.log('Applying trial price for user:', userEmail);
+                    // Trial = 75% off the hourly rate (25% of original)
+                    amount = Math.round(hourlyRate * 0.25 * 100);  // Convert to cents
+                    context.log('Applying trial price (75% off) for user:', userEmail, 'Amount:', amount / 100);
                 } else {
                     context.log('User not eligible for trial:', userEmail);
+                    amount = Math.round(hourlyRate * 100);
                 }
+            } else {
+                // Regular booking - calculate discount based on total lessons
+                let discountPercent = 0;
+                if (lessonCount >= 16) discountPercent = 35;
+                else if (lessonCount >= 8) discountPercent = 30;
+                else if (lessonCount >= 4) discountPercent = 20;
+                else if (lessonCount >= 2) discountPercent = 10;
+
+                const regularTotal = hourlyRate * lessonCount;
+                const discountedTotal = regularTotal * (1 - discountPercent / 100);
+                amount = Math.round(discountedTotal * 100);  // Convert to cents
+                context.log(`Regular booking: ${lessonCount} lessons, ${discountPercent}% off, Total: $${discountedTotal}`);
             }
 
             // Get base URL from request
@@ -193,13 +207,13 @@ app.http('stripeWebhook', {
                         }
 
                         // Mark trial as used if this was a trial booking
-                        if (session.metadata?.isTrial === 'true' && session.metadata?.userId) {
+                        if (session.metadata?.isTrial === 'true' && session.metadata?.studentEmail) {
                             try {
                                 const usersContainer = await getContainer("users");
                                 const { resources: users } = await usersContainer.items
                                     .query({
-                                        query: "SELECT * FROM c WHERE c.userId = @userId",
-                                        parameters: [{ name: "@userId", value: session.metadata.userId }]
+                                        query: "SELECT * FROM c WHERE c.userDetails = @email",
+                                        parameters: [{ name: "@email", value: session.metadata.studentEmail }]
                                     })
                                     .fetchAll();
 
@@ -207,8 +221,8 @@ app.http('stripeWebhook', {
                                     const user = users[0];
                                     user.hasUsedTrial = true;
                                     user.trialUsedAt = new Date().toISOString();
-                                    await usersContainer.item(user.id, user.userId).replace(user);
-                                    context.log('Marked trial as used for user:', session.metadata.userId);
+                                    await usersContainer.item(user.id, user.id).replace(user);
+                                    context.log('Marked trial as used for:', session.metadata.studentEmail);
                                 }
                             } catch (trialError) {
                                 context.log.error('Failed to mark trial as used:', trialError.message);
