@@ -85,7 +85,7 @@ app.http('suspendTeacher', {
                 await tutorsContainer.item(tutor.id, tutor.id).replace(tutor);
             }
 
-            // Also update user record role to 'student'
+            // Also update user record to mark as suspended (keep role as-is)
             const usersContainer = await getContainer('users');
             const { resources: users } = await usersContainer.items
                 .query({
@@ -96,8 +96,10 @@ app.http('suspendTeacher', {
 
             if (users.length > 0) {
                 const user = users[0];
-                user.role = 'student';  // Revoke teacher role
+                user.suspended = true;  // Mark as suspended (role stays teacher/student)
                 user.suspendedAt = new Date().toISOString();
+                user.suspendedBy = adminEmail;
+                user.suspendReason = reason || '';
                 user.updatedAt = new Date().toISOString();
                 await usersContainer.item(user.id, user.id).replace(user);
             }
@@ -210,7 +212,7 @@ app.http('reinstateTeacher', {
                 await appsContainer.item(application.id, application.id).replace(application);
             }
 
-            // Also update user record role to 'teacher'
+            // Also update user record - clear suspended flag (keep role)
             const usersContainer = await getContainer('users');
             const { resources: users } = await usersContainer.items
                 .query({
@@ -221,8 +223,9 @@ app.http('reinstateTeacher', {
 
             if (users.length > 0) {
                 const user = users[0];
-                user.role = 'teacher';
+                user.suspended = false;  // Clear suspension
                 user.reinstatedAt = new Date().toISOString();
+                user.reinstatedBy = adminEmail;
                 user.updatedAt = new Date().toISOString();
                 await usersContainer.item(user.id, user.id).replace(user);
             }
