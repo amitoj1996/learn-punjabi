@@ -53,6 +53,7 @@ app.http('createCheckoutSession', {
             // Calculate total amount based on trial vs regular
             let amount;
             let applyTrial = false;
+            let discountPercent = 0;
             const lessonCount = totalLessons || 1;
 
             if (isTrial) {
@@ -68,6 +69,7 @@ app.http('createCheckoutSession', {
                 const user = users[0];
                 if (user && user.hasUsedTrial !== true) {
                     applyTrial = true;
+                    discountPercent = 75;  // 75% trial discount
                     // Trial = 75% off the hourly rate (25% of original)
                     amount = Math.round(hourlyRate * 0.25 * 100);  // Convert to cents
                     context.log('Applying trial price (75% off) for user:', userEmail, 'Amount:', amount / 100);
@@ -77,7 +79,6 @@ app.http('createCheckoutSession', {
                 }
             } else {
                 // Regular booking - calculate discount based on total lessons
-                let discountPercent = 0;
                 if (lessonCount >= 16) discountPercent = 35;
                 else if (lessonCount >= 8) discountPercent = 30;
                 else if (lessonCount >= 4) discountPercent = 20;
@@ -103,10 +104,14 @@ app.http('createCheckoutSession', {
                         product_data: {
                             name: applyTrial
                                 ? `🎉 Trial Lesson with ${booking.tutorName}`
-                                : `Punjabi Lesson with ${booking.tutorName}`,
+                                : lessonCount > 1
+                                    ? `${lessonCount} Punjabi Lessons with ${booking.tutorName}`
+                                    : `Punjabi Lesson with ${booking.tutorName}`,
                             description: applyTrial
-                                ? `First lesson special! ${booking.duration} minute session on ${booking.date} at ${booking.time}`
-                                : `${booking.duration} minute session on ${booking.date} at ${booking.time}`
+                                ? `First lesson special! 75% off - ${booking.duration} min session`
+                                : lessonCount > 1
+                                    ? `${lessonCount} lessons (${discountPercent}% launch discount applied)`
+                                    : `${booking.duration} minute session on ${booking.date} at ${booking.time}`
                         },
                         unit_amount: amount
                     },
@@ -114,10 +119,11 @@ app.http('createCheckoutSession', {
                 }],
                 metadata: {
                     bookingId: booking.id,
+                    recurringId: recurringId || booking.recurringId || null,
+                    totalLessons: lessonCount.toString(),
                     studentEmail: userEmail,
                     tutorEmail: booking.tutorEmail,
-                    isTrial: applyTrial ? 'true' : 'false',
-                    userId: userId  // For marking trial used
+                    isTrial: applyTrial ? 'true' : 'false'
                 },
                 success_url: `${origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&booking_id=${bookingId}`,
                 cancel_url: `${origin}/payment/cancelled?booking_id=${bookingId}`
