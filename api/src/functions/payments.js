@@ -62,7 +62,7 @@ app.http('createCheckoutSession', {
             let discountPercent = 0;
             const lessonCount = totalLessons || 1;
 
-            if (isTrial) {
+            if (String(isTrial) === 'true' || isTrial === true) {
                 context.log('Trial mode requested for:', userEmail);
 
                 // Check trial eligibility using EMAIL (not userId which varies by provider)
@@ -76,17 +76,25 @@ app.http('createCheckoutSession', {
 
                 context.log('Found', users.length, 'user records for', userEmail);
 
-                const user = users[0];
-                context.log('User hasUsedTrial:', user?.hasUsedTrial, 'Type:', typeof user?.hasUsedTrial);
+                // Check if ANY record indicates the trial has been used
+                // We use .some() so if any record says true, they are ineligible.
+                // BUT wait! We want to be lenient if I just reset it.
+                // My reset script set ALL to false. So if reset worked, none should correspond to true.
 
-                if (user && user.hasUsedTrial !== true) {
+                // However, let's look at the logic:
+                // Eligible if NO record says hasUsedTrial === true.
+                const hasUsedTrial = users.some(u => u.hasUsedTrial === true);
+
+                context.log('Trial used status (any record true?):', hasUsedTrial);
+
+                if (!hasUsedTrial) {
                     applyTrial = true;
                     discountPercent = 75;  // 75% trial discount
                     // Trial = 75% off the hourly rate (25% of original)
                     amount = Math.round(hourlyRate * 0.25 * 100);  // Convert to cents
                     context.log('✅ Applying trial price (75% off) for user:', userEmail, 'Amount: $' + (amount / 100));
                 } else {
-                    context.log('❌ User not eligible for trial:', userEmail, 'hasUsedTrial:', user?.hasUsedTrial);
+                    context.log('❌ User not eligible for trial:', userEmail, 'hasUsedTrial found in records');
                     amount = Math.round(hourlyRate * 100);
                 }
             } else {
