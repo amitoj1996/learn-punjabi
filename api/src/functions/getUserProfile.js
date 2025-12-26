@@ -154,3 +154,73 @@ app.http('getTrialStatus', {
         }
     }
 });
+
+// Reset trial status (admin utility - for when trial failed before payment)
+app.http('resetTrialStatus', {
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    route: 'users/reset-trial',
+    handler: async (request, context) => {
+        const clientPrincipalHeader = request.headers.get("x-ms-client-principal");
+        if (!clientPrincipalHeader) {
+            return { status: 401, jsonBody: { error: "Please log in" } };
+        }
+
+        const clientPrincipal = JSON.parse(Buffer.from(clientPrincipalHeader, "base64").toString("ascii"));
+        const userEmail = clientPrincipal.userDetails;
+
+        try {
+            const usersContainer = await getContainer("users");
+            const { resources: users } = await usersContainer.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.userDetails = @email",
+                    parameters: [{ name: "@email", value: userEmail }]
+                })
+                .fetchAll();
+
+            if (users.length === 0) {
+                return { status: 404, jsonBody: { error: "User not found" } };
+            }
+
+            const user = users[0];
+
+            // Check if user ever actually PAID for a trial
+            const bookingsContainer = await getContainer("bookings");
+            const { resources: paidTrials } = await bookingsContainer.items
+                .query({
+                    query: "SELECT * FROM c WHERE c.studentEmail = @email AND c.isTrial = true AND c.paymentStatus = 'paid'",
+                    parameters: [{ name: "@email", value: userEmail }]
+                })
+                .fetchAll();
+
+            if (paidTrials.length > 0) {
+                return {
+                    status: 400,
+                    jsonBody: {
+                        error: "You have a paid trial booking, cannot reset",
+                        paidTrialCount: paidTrials.length
+                    }
+                };
+            }
+
+            // Safe to reset - no paid trials found
+            user.hasUsedTrial = false;
+            user.trialResetAt = new Date().toISOString();
+            delete user.trialUsedAt;
+            await usersContainer.item(user.id, user.id).replace(user);
+
+            context.log(`Reset trial status for user: ${userEmail}`);
+            return {
+                status: 200,
+                jsonBody: {
+                    message: "Trial status reset successfully",
+                    eligible: true,
+                    userEmail
+                }
+            };
+        } catch (error) {
+            context.log.error("Error resetting trial status:", error);
+            return { status: 500, jsonBody: { error: error.message } };
+        }
+    }
+});
