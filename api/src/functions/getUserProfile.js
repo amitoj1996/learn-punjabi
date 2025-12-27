@@ -183,25 +183,50 @@ app.http('resetTrialStatus', {
             }
 
             // SECURITY: Only allow admins to reset trials
-            // Check if any of the user records for this email have 'admin' role
             const isAdmin = users.some(u => u.role === 'admin');
 
-            // Allow self-reset if I am the specific user 'amitojsingh0908' (hardcoded for safety during dev/demo)
-            // or if I truly have admin role.
-            // For now, let's enforce admin role strictness.
             if (!isAdmin) {
                 context.log.warn(`Unauthorized trial reset attempt by ${userEmail}`);
                 return { status: 403, jsonBody: { error: "Unauthorized. Admin privileges required." } };
             }
 
-            context.log(`Found ${users.length} user records for ${userEmail}`);
+            // CHECK FOR TARGET EMAIL (Admin can reset others)
+            let targetEmail = userEmail;
+            let targetUsers = users;
+
+            try {
+                const body = await request.json();
+                if (body && body.email) {
+                    targetEmail = body.email;
+                    context.log(`Admin ${userEmail} requesting trial reset for ${targetEmail}`);
+                }
+            } catch (e) {
+                // No body provided, default to self (which is fine for admin)
+            }
+
+            // If target is different, fetch target user records
+            if (targetEmail !== userEmail) {
+                const { resources: fetchedTargetUsers } = await usersContainer.items
+                    .query({
+                        query: "SELECT * FROM c WHERE c.userDetails = @email",
+                        parameters: [{ name: "@email", value: targetEmail }]
+                    })
+                    .fetchAll();
+
+                if (fetchedTargetUsers.length === 0) {
+                    return { status: 404, jsonBody: { error: `Target user ${targetEmail} not found` } };
+                }
+                targetUsers = fetchedTargetUsers;
+            }
+
+            context.log(`Found ${targetUsers.length} user records for ${targetEmail}`);
 
             // Check if user ever actually PAID for a trial
             const bookingsContainer = await getContainer("bookings");
             const { resources: paidTrials } = await bookingsContainer.items
                 .query({
                     query: "SELECT * FROM c WHERE c.studentEmail = @email AND c.isTrial = true AND c.paymentStatus = 'paid'",
-                    parameters: [{ name: "@email", value: userEmail }]
+                    parameters: [{ name: "@email", value: targetEmail }]
                 })
                 .fetchAll();
 
@@ -209,12 +234,11 @@ app.http('resetTrialStatus', {
                 return {
                     status: 400,
                     jsonBody: {
-                        error: "You have a paid trial booking, cannot reset",
+                        error: "Target user has a paid trial booking, cannot reset",
                         paidTrialCount: paidTrials.length
                     }
                 };
             }
-
 
             // Safe to reset - no paid trials found
 
@@ -222,7 +246,7 @@ app.http('resetTrialStatus', {
             const { resources: unpaidBookings } = await bookingsContainer.items
                 .query({
                     query: "SELECT * FROM c WHERE c.studentEmail = @email AND c.paymentStatus != 'paid'",
-                    parameters: [{ name: "@email", value: userEmail }]
+                    parameters: [{ name: "@email", value: targetEmail }]
                 })
                 .fetchAll();
 
@@ -231,11 +255,11 @@ app.http('resetTrialStatus', {
                 await bookingsContainer.item(booking.id, booking.id).delete();
                 deletedBookings++;
             }
-            context.log(`Deleted ${deletedBookings} unpaid bookings for user: ${userEmail}`);
+            context.log(`Deleted ${deletedBookings} unpaid bookings for user: ${targetEmail}`);
 
             // 2. RESET USER TRIAL STATUS (on all records)
             let resetCount = 0;
-            for (const user of users) {
+            for (const user of targetUsers) {
                 if (user.hasUsedTrial === true) {
                     user.hasUsedTrial = false;
                     user.trialResetAt = new Date().toISOString();
@@ -248,16 +272,16 @@ app.http('resetTrialStatus', {
                 }
             }
 
-            context.log(`Reset trial on ${resetCount}/${users.length} user records for: ${userEmail}`);
+            context.log(`Reset trial on ${resetCount}/${targetUsers.length} user records for: ${targetEmail}`);
             return {
                 status: 200,
                 jsonBody: {
-                    message: `Trial status reset on ${resetCount} records. Deleted ${deletedBookings} unpaid bookings.`,
-                    totalRecords: users.length,
+                    message: `Trial status reset on ${resetCount} records for ${targetEmail}. Deleted ${deletedBookings} unpaid bookings.`,
+                    totalRecords: targetUsers.length,
                     resetCount,
                     deletedBookings,
                     eligible: true,
-                    userEmail
+                    targetEmail
                 }
             };
         } catch (error) {
