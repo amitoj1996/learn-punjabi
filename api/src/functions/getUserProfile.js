@@ -193,15 +193,21 @@ app.http('resetTrialStatus', {
             // CHECK FOR TARGET EMAIL (Admin can reset others)
             let targetEmail = userEmail;
             let targetUsers = users;
+            let forceReset = false;
 
             try {
                 const body = await request.json();
-                if (body && body.email) {
-                    targetEmail = body.email;
-                    context.log(`Admin ${userEmail} requesting trial reset for ${targetEmail}`);
+                if (body) {
+                    if (body.email) {
+                        targetEmail = body.email;
+                        context.log(`Admin ${userEmail} requesting trial reset for ${targetEmail}`);
+                    }
+                    if (body.force) {
+                        forceReset = true;
+                    }
                 }
             } catch (e) {
-                // No body provided, default to self (which is fine for admin)
+                // No body provided, use defaults
             }
 
             // If target is different, fetch target user records
@@ -230,11 +236,7 @@ app.http('resetTrialStatus', {
                 })
                 .fetchAll();
 
-            let forceReset = false;
-            try {
-                const body = await request.json();
-                if (body && body.force) forceReset = true;
-            } catch (e) { /* ignore */ }
+            // forceReset is already determined above
 
             if (paidTrials.length > 0) {
                 if (!forceReset) {
