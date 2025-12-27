@@ -192,62 +192,82 @@ app.http('stripeWebhook', {
             try {
                 const bookingsContainer = await getContainer("bookings");
                 const bookingId = session.metadata?.bookingId;
+                const recurringId = session.metadata?.recurringId;
+                const totalLessons = parseInt(session.metadata?.totalLessons || '1');
 
-                if (bookingId) {
+                // If this is a recurring booking, update ALL bookings in the series
+                let bookingsToUpdate = [];
+                if (recurringId && recurringId !== 'null' && totalLessons > 1) {
+                    const { resources: recurringBookings } = await bookingsContainer.items
+                        .query({
+                            query: "SELECT * FROM c WHERE c.recurringId = @recurringId",
+                            parameters: [{ name: "@recurringId", value: recurringId }]
+                        })
+                        .fetchAll();
+                    bookingsToUpdate = recurringBookings;
+                    context.log(`Found ${recurringBookings.length} bookings in recurring series: ${recurringId}`);
+                } else if (bookingId) {
+                    // Single booking - find by ID
                     const { resources: bookings } = await bookingsContainer.items
                         .query({
                             query: "SELECT * FROM c WHERE c.id = @id",
                             parameters: [{ name: "@id", value: bookingId }]
                         })
                         .fetchAll();
+                    bookingsToUpdate = bookings;
+                }
 
-                    if (bookings.length > 0) {
-                        const booking = bookings[0];
+                if (bookingsToUpdate.length > 0) {
+                    const paidAt = new Date().toISOString();
+                    const pricePerLesson = session.amount_total ? (session.amount_total / 100) / bookingsToUpdate.length : null;
+
+                    // Update all bookings in the series
+                    for (const booking of bookingsToUpdate) {
                         booking.paymentStatus = 'paid';
-                        booking.paidAt = new Date().toISOString();
+                        booking.paidAt = paidAt;
                         booking.stripePaymentIntentId = session.payment_intent;
-                        // Important: Save the ACTUAL amount paid (e.g. trial price)
-                        if (session.amount_total) {
-                            booking.paymentAmount = session.amount_total / 100;
+                        if (pricePerLesson) {
+                            booking.paymentAmount = pricePerLesson;
                         }
                         await bookingsContainer.item(booking.id, booking.id).replace(booking);
-                        context.log('Booking updated to paid:', bookingId);
+                    }
+                    context.log(`Updated ${bookingsToUpdate.length} bookings to paid`);
 
-                        // Send booking confirmation email
+                    // Send booking confirmation email (using first booking for details)
+                    const firstBooking = bookingsToUpdate[0];
+                    try {
+                        await sendBookingConfirmation(firstBooking.studentEmail, {
+                            tutorName: firstBooking.tutorName,
+                            date: firstBooking.date,
+                            time: firstBooking.time,
+                            duration: firstBooking.duration
+                        });
+                        context.log('Booking confirmation email sent to:', firstBooking.studentEmail);
+                    } catch (emailError) {
+                        // Log but don't fail the webhook
+                        context.log.error('Failed to send confirmation email:', emailError.message);
+                    }
+
+                    // Mark trial as used if this was a trial booking
+                    if (session.metadata?.isTrial === 'true' && session.metadata?.studentEmail) {
                         try {
-                            await sendBookingConfirmation(booking.studentEmail, {
-                                tutorName: booking.tutorName,
-                                date: booking.date,
-                                time: booking.time,
-                                duration: booking.duration
-                            });
-                            context.log('Booking confirmation email sent to:', booking.studentEmail);
-                        } catch (emailError) {
-                            // Log but don't fail the webhook
-                            context.log.error('Failed to send confirmation email:', emailError.message);
-                        }
+                            const usersContainer = await getContainer("users");
+                            const { resources: users } = await usersContainer.items
+                                .query({
+                                    query: "SELECT * FROM c WHERE c.userDetails = @email",
+                                    parameters: [{ name: "@email", value: session.metadata.studentEmail }]
+                                })
+                                .fetchAll();
 
-                        // Mark trial as used if this was a trial booking
-                        if (session.metadata?.isTrial === 'true' && session.metadata?.studentEmail) {
-                            try {
-                                const usersContainer = await getContainer("users");
-                                const { resources: users } = await usersContainer.items
-                                    .query({
-                                        query: "SELECT * FROM c WHERE c.userDetails = @email",
-                                        parameters: [{ name: "@email", value: session.metadata.studentEmail }]
-                                    })
-                                    .fetchAll();
-
-                                if (users.length > 0) {
-                                    const user = users[0];
-                                    user.hasUsedTrial = true;
-                                    user.trialUsedAt = new Date().toISOString();
-                                    await usersContainer.item(user.id, user.id).replace(user);
-                                    context.log('Marked trial as used for:', session.metadata.studentEmail);
-                                }
-                            } catch (trialError) {
-                                context.log.error('Failed to mark trial as used:', trialError.message);
+                            if (users.length > 0) {
+                                const user = users[0];
+                                user.hasUsedTrial = true;
+                                user.trialUsedAt = new Date().toISOString();
+                                await usersContainer.item(user.id, user.id).replace(user);
+                                context.log('Marked trial as used for:', session.metadata.studentEmail);
                             }
+                        } catch (trialError) {
+                            context.log.error('Failed to mark trial as used:', trialError.message);
                         }
                     }
                 }
