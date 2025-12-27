@@ -206,6 +206,10 @@ app.http('stripeWebhook', {
                         booking.paymentStatus = 'paid';
                         booking.paidAt = new Date().toISOString();
                         booking.stripePaymentIntentId = session.payment_intent;
+                        // Important: Save the ACTUAL amount paid (e.g. trial price)
+                        if (session.amount_total) {
+                            booking.paymentAmount = session.amount_total / 100;
+                        }
                         await bookingsContainer.item(booking.id, booking.id).replace(booking);
                         context.log('Booking updated to paid:', bookingId);
 

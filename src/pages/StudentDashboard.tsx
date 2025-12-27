@@ -26,6 +26,7 @@ interface Booking {
     time: string;
     duration: number;
     hourlyRate: number;
+    paymentAmount?: number; // Actual amount paid
     status: string;
     reviewed?: boolean;
     meetingLink?: string;
@@ -224,7 +225,15 @@ export const StudentDashboard: React.FC = () => {
     const upcomingCount = bookings.filter(b => new Date(b.date) >= now && b.status !== 'cancelled').length;
     const upcomingListCount = nextLesson ? upcomingCount - 1 : upcomingCount; // Exclude next lesson from tab count
     const completedCount = bookings.filter(b => new Date(b.date) < now && b.status !== 'cancelled').length;
-    const totalSpent = bookings.filter(b => b.status !== 'cancelled').reduce((sum, b) => sum + (b.hourlyRate * b.duration / 60), 0);
+
+    // Calculate total spent using paymentAmount if available, otherwise estimate from hourlyRate
+    const totalSpent = bookings
+        .filter(b => b.status !== 'cancelled')
+        .reduce((sum, b) => {
+            if (b.paymentAmount) return sum + b.paymentAmount;
+            return sum + (b.hourlyRate * b.duration / 60);
+        }, 0);
+
     const cancelledCount = bookings.filter(b => b.status === 'cancelled').length;
 
     const stats = [
