@@ -46,6 +46,12 @@ async function sendEmail(to, subject, htmlBody, textBody = "") {
                 contentType: "HTML",
                 content: htmlBody
             },
+            from: {
+                emailAddress: {
+                    address: "noreply@punjabilearn.com",
+                    name: "PunjabiLearn"
+                }
+            },
             toRecipients: [
                 {
                     emailAddress: {
