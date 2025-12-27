@@ -230,14 +230,28 @@ app.http('resetTrialStatus', {
                 })
                 .fetchAll();
 
+            let forceReset = false;
+            try {
+                const body = await request.json();
+                if (body && body.force) forceReset = true;
+            } catch (e) { /* ignore */ }
+
             if (paidTrials.length > 0) {
-                return {
-                    status: 400,
-                    jsonBody: {
-                        error: "Target user has a paid trial booking, cannot reset",
-                        paidTrialCount: paidTrials.length
+                if (!forceReset) {
+                    return {
+                        status: 400,
+                        jsonBody: {
+                            error: "Target user has a paid trial booking, cannot reset. Use { force: true } to override.",
+                            paidTrialCount: paidTrials.length
+                        }
+                    };
+                } else {
+                    // FORCE RESET: Delete the paid trial bookings too
+                    context.log(`FORCE RESET: Deleting ${paidTrials.length} paid trial bookings for ${targetEmail}`);
+                    for (const booking of paidTrials) {
+                        await bookingsContainer.item(booking.id, booking.id).delete();
                     }
-                };
+                }
             }
 
             // Safe to reset - no paid trials found
