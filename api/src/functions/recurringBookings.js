@@ -152,9 +152,9 @@ app.http('createRecurringBookings', {
                 };
             }
 
-            // Check trial eligibility
-            const user = users[0];
-            const isTrialBooking = isTrial && allBookings.length === 1 && user?.hasUsedTrial !== true;
+            // Check trial eligibility (scan all records for safety)
+            const hasUsedTrial = users.some(u => u.hasUsedTrial === true);
+            const isTrialBooking = isTrial && allBookings.length === 1 && !hasUsedTrial;
 
             // Calculate pricing with tiered discounts
             const totalLessons = allBookings.length;

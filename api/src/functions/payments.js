@@ -77,24 +77,14 @@ app.http('createCheckoutSession', {
                 context.log('Found', users.length, 'user records for', userEmail);
 
                 // Check if ANY record indicates the trial has been used
-                // We use .some() so if any record says true, they are ineligible.
-                // BUT wait! We want to be lenient if I just reset it.
-                // My reset script set ALL to false. So if reset worked, none should correspond to true.
-
-                // However, let's look at the logic:
-                // Eligible if NO record says hasUsedTrial === true.
                 const hasUsedTrial = users.some(u => u.hasUsedTrial === true);
-
-                context.log('Trial used status (any record true?):', hasUsedTrial);
 
                 if (!hasUsedTrial) {
                     applyTrial = true;
                     discountPercent = 75;  // 75% trial discount
                     // Trial = 75% off the hourly rate (25% of original)
                     amount = Math.round(hourlyRate * 0.25 * 100);  // Convert to cents
-                    context.log('✅ Applying trial price (75% off) for user:', userEmail, 'Amount: $' + (amount / 100));
                 } else {
-                    context.log('❌ User not eligible for trial:', userEmail, 'hasUsedTrial found in records');
                     amount = Math.round(hourlyRate * 100);
                 }
             } else {

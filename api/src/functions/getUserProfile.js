@@ -182,6 +182,18 @@ app.http('resetTrialStatus', {
                 return { status: 404, jsonBody: { error: "User not found" } };
             }
 
+            // SECURITY: Only allow admins to reset trials
+            // Check if any of the user records for this email have 'admin' role
+            const isAdmin = users.some(u => u.role === 'admin');
+
+            // Allow self-reset if I am the specific user 'amitojsingh0908' (hardcoded for safety during dev/demo)
+            // or if I truly have admin role.
+            // For now, let's enforce admin role strictness.
+            if (!isAdmin) {
+                context.log.warn(`Unauthorized trial reset attempt by ${userEmail}`);
+                return { status: 403, jsonBody: { error: "Unauthorized. Admin privileges required." } };
+            }
+
             context.log(`Found ${users.length} user records for ${userEmail}`);
 
             // Check if user ever actually PAID for a trial
